@@ -1,0 +1,34 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-family: Inter, ui-rounded, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #263238;
+  background: #f7fafc;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background:
+    linear-gradient(180deg, rgba(28, 176, 246, 0.10), rgba(247, 250, 252, 0) 260px),
+    #f7fafc;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+@layer components {
+  .flaggo-button {
+    @apply rounded-2xl px-5 py-4 font-black shadow-button transition active:translate-y-1 active:shadow-none disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .flaggo-card {
+    @apply rounded-[24px] border border-flaggo-border bg-white shadow-soft;
+  }
+}
