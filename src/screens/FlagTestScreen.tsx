@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import FlagImage from "../components/FlagImage";
+import Icon from "../components/Icon";
 import ProgressBar from "../components/ProgressBar";
 import type { Country } from "../types/country";
 import type { AppProgress } from "../types/progress";
@@ -76,15 +77,27 @@ export default function FlagTestScreen({
     <main className="min-h-screen p-5">
       <header className="mb-5">
         <div className="mb-3 flex items-center gap-3">
-          <button onClick={onDone} className="grid h-10 w-10 place-items-center rounded-full bg-white font-black shadow-[0_4px_0_#e5e7eb]">X</button>
+          <button
+            onClick={onDone}
+            aria-label="Exit test"
+            className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-white text-flaggo-muted shadow-card transition active:translate-y-0.5 active:shadow-none"
+          >
+            <Icon name="close" size={20} />
+          </button>
           <div className="flex-1"><ProgressBar value={((index + (revealed ? 1 : 0)) / questions.length) * 100} /></div>
         </div>
         <div className="flex items-end justify-between">
           <div>
-            <p className="font-black uppercase text-flaggo-blue">{mode === "recall" ? "Recall test" : "Multiple choice"}</p>
-            <h1 className="text-2xl font-black">Flag {index + 1} of {questions.length}</h1>
+            <p className="flex items-center gap-1.5 font-display font-extrabold uppercase text-flaggo-blue">
+              <Icon name={mode === "recall" ? "target" : "library"} size={15} />
+              {mode === "recall" ? "Recall test" : "Multiple choice"}
+            </p>
+            <h1 className="font-display text-2xl font-black">Flag {index + 1} of {questions.length}</h1>
           </div>
-          <div className="rounded-2xl bg-white px-3 py-2 text-sm font-black text-flaggo-green shadow-[0_4px_0_#e5e7eb]">{correctCount} right</div>
+          <div className="flex items-center gap-1 rounded-2xl bg-white px-3 py-2 text-sm font-display font-extrabold text-flaggo-green shadow-card">
+            <Icon name="check" size={15} />
+            {correctCount}
+          </div>
         </div>
       </header>
 
@@ -122,16 +135,16 @@ export default function FlagTestScreen({
               <button
                 disabled={graded !== null}
                 onClick={() => grade(true)}
-                className="rounded-2xl border-b-4 border-flaggo-greenDark bg-flaggo-green px-3 py-3 font-black text-white transition active:translate-y-1 disabled:opacity-60"
+                className="flex items-center justify-center gap-1.5 rounded-2xl border-2 border-b-[5px] border-flaggo-greenDark bg-flaggo-green px-3 py-3 font-display font-extrabold text-white transition active:translate-y-[3px] active:border-b-2 disabled:opacity-60"
               >
-                Got it
+                <Icon name="check" size={18} /> Got it
               </button>
               <button
                 disabled={graded !== null}
                 onClick={() => grade(false)}
-                className="rounded-2xl border-b-4 border-red-700 bg-flaggo-red px-3 py-3 font-black text-white transition active:translate-y-1 disabled:opacity-60"
+                className="flex items-center justify-center gap-1.5 rounded-2xl border-2 border-b-[5px] border-flaggo-redDark bg-flaggo-red px-3 py-3 font-display font-extrabold text-white transition active:translate-y-[3px] active:border-b-2 disabled:opacity-60"
               >
-                Missed it
+                <Icon name="x" size={18} /> Missed it
               </button>
             </div>
           </div>

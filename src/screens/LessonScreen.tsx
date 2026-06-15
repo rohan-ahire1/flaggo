@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import FeedbackPanel from "../components/FeedbackPanel";
+import Icon from "../components/Icon";
 import ProgressBar from "../components/ProgressBar";
 import QuestionCard from "../components/QuestionCard";
 import type { Country } from "../types/country";
@@ -82,13 +83,22 @@ export default function LessonScreen({
 
   return (
     <main className="min-h-screen bg-flaggo-bg">
-      <header className="sticky top-0 z-20 bg-flaggo-bg p-4">
-        <div className="mb-3 flex items-center gap-3">
-          <button onClick={onHome} className="grid h-10 w-10 place-items-center rounded-full bg-white font-black shadow-sm">X</button>
+      <header className="sticky top-0 z-20 bg-flaggo-bg/85 p-4 backdrop-blur-md">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={onHome}
+            aria-label="Close lesson"
+            className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-white text-flaggo-muted shadow-card transition active:translate-y-0.5 active:shadow-none hover:text-flaggo-text"
+          >
+            <Icon name="close" size={20} />
+          </button>
           <div className="flex-1"><ProgressBar value={(index / questions.length) * 100} /></div>
+          <span className="shrink-0 text-sm font-display font-extrabold text-flaggo-muted">
+            {index + 1}/{questions.length}
+          </span>
         </div>
       </header>
-      <section className="p-5">
+      <section key={index} className="animate-fade-in p-5">
         <QuestionCard question={question} disabled={Boolean(feedback)} onAnswer={answer} />
       </section>
       {feedback && <FeedbackPanel correct={feedback.ok} country={feedback.question.correctCountry} xp={10} onContinue={continueNext} />}

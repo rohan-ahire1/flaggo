@@ -1,30 +1,41 @@
+import Icon, { type IconName } from "../components/Icon";
 import type { AppProgress } from "../types/progress";
 
 export default function ProfileScreen({ progress, onReset }: { progress: AppProgress; onReset: () => void }) {
+  const stats: { label: string; value: number; icon: IconName; color: string }[] = [
+    { label: "XP", value: progress.xp, icon: "bolt", color: "text-flaggo-blue" },
+    { label: "Streak", value: progress.streak, icon: "flame", color: "text-flaggo-orange" },
+    { label: "Coins", value: progress.coins, icon: "coin", color: "text-flaggo-yellow" },
+    { label: "Flags seen", value: Object.keys(progress.review).length, icon: "globe", color: "text-flaggo-green" }
+  ];
   return (
     <main className="p-5 pb-24">
-      <section className="rounded-[28px] bg-white p-6 text-center shadow-sm">
-        <div className="mx-auto grid h-24 w-24 place-items-center rounded-full bg-flaggo-green text-4xl font-black text-white">F</div>
-        <h1 className="mt-4 text-3xl font-black">Flaggo learner</h1>
+      <section className="relative overflow-hidden rounded-[28px] bg-white p-6 text-center shadow-card-lg">
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-20 bg-green-grad" />
+        <div className="relative mx-auto grid h-24 w-24 place-items-center rounded-full bg-green-grad text-white shadow-[0_6px_0_#46A302] ring-4 ring-white">
+          <Icon name="profile" size={48} />
+        </div>
+        <h1 className="mt-4 font-display text-3xl font-black">Flaggo learner</h1>
+        <p className="font-bold text-flaggo-muted">Keep your streak alive 🔥</p>
       </section>
+
       <div className="mt-5 grid grid-cols-2 gap-3">
-        {[
-          ["XP", progress.xp],
-          ["Streak", progress.streak],
-          ["Coins", progress.coins],
-          ["Flags seen", Object.keys(progress.review).length]
-        ].map(([label, value]) => (
-          <div key={label} className="rounded-[22px] bg-white p-4 shadow-sm">
-            <div className="text-2xl font-black text-flaggo-blue">{value}</div>
-            <div className="font-bold text-flaggo-muted">{label}</div>
+        {stats.map((stat) => (
+          <div key={stat.label} className="rounded-[22px] border border-flaggo-border bg-white p-4 shadow-card">
+            <div className={`flex items-center gap-1.5 ${stat.color}`}>
+              <Icon name={stat.icon} size={18} />
+              <span className="font-display text-2xl font-black">{stat.value}</span>
+            </div>
+            <div className="mt-0.5 font-bold text-flaggo-muted">{stat.label}</div>
           </div>
         ))}
       </div>
+
       <button
         onClick={() => {
           if (window.confirm("Reset all Flaggo progress?")) onReset();
         }}
-        className="flaggo-button mt-8 w-full bg-flaggo-red text-white"
+        className="flaggo-button mt-8 w-full bg-flaggo-red text-white shadow-button-red"
       >
         Reset progress
       </button>

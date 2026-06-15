@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import FlagCard from "../components/FlagCard";
+import Icon from "../components/Icon";
 import type { Country } from "../types/country";
 import type { AppProgress } from "../types/progress";
 
@@ -29,9 +30,17 @@ export default function FlagsLibraryScreen({ countries, progress, onPractice }: 
 
   return (
     <main className="p-5 pb-24">
-      <h1 className="text-3xl font-black">Flag library</h1>
+      <h1 className="font-display text-3xl font-black">Flag library</h1>
       <div className="mt-4 grid gap-3">
-        <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search flags" className="rounded-2xl border border-flaggo-border bg-white px-4 py-3 font-bold outline-none focus:border-flaggo-blue" />
+        <div className="relative">
+          <Icon name="search" size={18} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-flaggo-muted" />
+          <input
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Search flags"
+            className="w-full rounded-2xl border-2 border-flaggo-border bg-white py-3 pl-10 pr-4 font-bold outline-none transition focus:border-flaggo-blue"
+          />
+        </div>
         <div className="grid grid-cols-2 gap-2">
           <select value={continent} onChange={(event) => setContinent(event.target.value)} className="rounded-2xl border border-flaggo-border bg-white p-3 font-bold">
             {["All", "Africa", "Americas", "Asia", "Europe", "Oceania", "Antarctic"].map((value) => <option key={value}>{value}</option>)}
