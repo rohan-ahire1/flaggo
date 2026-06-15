@@ -2,6 +2,16 @@ import { useEffect } from "react";
 import type { Question } from "../utils/quiz";
 import AnswerOption from "./AnswerOption";
 import FlagImage from "./FlagImage";
+import Icon, { type IconName } from "./Icon";
+
+function Eyebrow({ icon, children }: { icon: IconName; children: string }) {
+  return (
+    <p className="flex items-center gap-1.5 text-sm font-display font-extrabold uppercase tracking-wide text-flaggo-blue">
+      <Icon name={icon} size={15} />
+      {children}
+    </p>
+  );
+}
 
 export default function QuestionCard({
   question,
@@ -39,12 +49,17 @@ export default function QuestionCard({
     return (
       <div className="space-y-5">
         <div>
-          <p className="font-bold text-flaggo-muted">Pick the correct flag</p>
-          <h1 className="text-2xl font-black">Pick the flag of {question.correctCountry.name}.</h1>
+          <Eyebrow icon="target">Pick the correct flag</Eyebrow>
+          <h1 className="font-display text-2xl font-black">Pick the flag of {question.correctCountry.name}.</h1>
         </div>
         <div className="grid grid-cols-2 gap-3">
           {question.options.map((country) => (
-            <button key={country.code} disabled={disabled} onClick={() => onAnswer(country.code === question.correctCountry.code)} className="flaggo-button border-b-4 border-slate-200 bg-white p-3">
+            <button
+              key={country.code}
+              disabled={disabled}
+              onClick={() => onAnswer(country.code === question.correctCountry.code)}
+              className="rounded-2xl border-2 border-b-[5px] border-slate-200 bg-white p-3 transition-all duration-150 hover:border-flaggo-blue/40 active:translate-y-[3px] active:border-b-2"
+            >
               <FlagImage code={country.code} name={country.name} src={country.flagUrl} className="aspect-[4/3] w-full rounded-xl p-2" />
             </button>
           ))}
@@ -58,8 +73,8 @@ export default function QuestionCard({
       <div className="space-y-5">
         <Flag />
         <div>
-          <p className="font-bold text-flaggo-muted">True or false</p>
-          <h1 className="text-2xl font-black">Is this the flag of {question.shownCountry.name}?</h1>
+          <Eyebrow icon="sparkle">True or false</Eyebrow>
+          <h1 className="font-display text-2xl font-black">Is this the flag of {question.shownCountry.name}?</h1>
         </div>
         <div className="grid grid-cols-2 gap-3">
           <AnswerOption label="Yes" disabled={disabled} onClick={() => onAnswer(question.answer)} />
@@ -73,8 +88,10 @@ export default function QuestionCard({
     <div className="space-y-5">
       <Flag />
       <div>
-        <p className="font-bold text-flaggo-muted">{question.type === "memory-review" ? "Memory review" : "Which country is this?"}</p>
-        <h1 className="text-2xl font-black">{question.type === "memory-review" ? "Which country is shown?" : "Which country is this?"}</h1>
+        <Eyebrow icon={question.type === "memory-review" ? "review" : "globe"}>
+          {question.type === "memory-review" ? "Memory review" : "Identify the flag"}
+        </Eyebrow>
+        <h1 className="font-display text-2xl font-black">{question.type === "memory-review" ? "Which country is shown?" : "Which country is this?"}</h1>
       </div>
       <div className="grid gap-3">
         {question.options.map((country) => (

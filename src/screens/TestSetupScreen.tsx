@@ -18,7 +18,7 @@ export default function TestSetupScreen({
 
   return (
     <main className="p-5 pb-24">
-      <h1 className="text-3xl font-black">Custom test</h1>
+      <h1 className="font-display text-3xl font-black">Custom test</h1>
       <p className="mt-1 font-bold text-flaggo-muted">Pick a 50-flag tier, answer in your head, then self-grade after reveal.</p>
 
       <section className="mt-5 rounded-[28px] bg-white p-5 shadow-[0_8px_0_#e5e7eb]">
