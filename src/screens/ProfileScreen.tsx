@@ -1,20 +1,19 @@
 import Icon, { type IconName } from "../components/Icon";
+import { BRAND } from "../config/brand";
 import type { AppProgress } from "../types/progress";
 
 type Props = {
   progress: AppProgress;
   onReset: () => void;
   userEmail: string | null;
-  adsRemoved: boolean;
   syncState: string;
   syncError: string | null;
   onSignIn: () => void;
   onSignOut: () => void;
-  onUpgrade: () => void;
   onDeleteAccount: () => void;
 };
 
-export default function ProfileScreen({ progress, onReset, userEmail, adsRemoved, syncState, syncError, onSignIn, onSignOut, onUpgrade, onDeleteAccount }: Props) {
+export default function ProfileScreen({ progress, onReset, userEmail, syncState, syncError, onSignIn, onSignOut, onDeleteAccount }: Props) {
   const stats: { label: string; value: number; icon: IconName; color: string }[] = [
     { label: "XP", value: progress.xp, icon: "bolt", color: "text-flaggo-blue" },
     { label: "Streak", value: progress.streak, icon: "flame", color: "text-flaggo-orange" },
@@ -28,9 +27,8 @@ export default function ProfileScreen({ progress, onReset, userEmail, adsRemoved
         <div className="relative mx-auto grid h-24 w-24 place-items-center rounded-full bg-green-grad text-white shadow-[0_6px_0_#46A302] ring-4 ring-white">
           <Icon name="profile" size={48} />
         </div>
-        <h1 className="mt-4 font-display text-3xl font-black">Flaggo learner</h1>
+        <h1 className="mt-4 font-display text-3xl font-black">{BRAND.name} learner</h1>
         <p className="font-bold text-flaggo-muted">{userEmail ?? "Sign in to sync progress"}</p>
-        {adsRemoved && <span className="mt-3 inline-flex rounded-full bg-green-50 px-3 py-1 font-display text-sm font-black text-flaggo-green">Flaggo Pro</span>}
       </section>
 
       <section className="mt-5 rounded-[22px] border border-flaggo-border bg-white p-4 shadow-card">
@@ -50,15 +48,7 @@ export default function ProfileScreen({ progress, onReset, userEmail, adsRemoved
       </section>
 
       <section className="mt-5 rounded-[22px] border border-flaggo-border bg-white p-4 shadow-card">
-        <h2 className="font-display text-lg font-black">Flaggo Pro</h2>
-        <p className="mt-1 text-sm font-bold text-flaggo-muted">Remove ads forever for one $1 payment. Signing in restores Pro on any device.</p>
-        <button disabled={adsRemoved} onClick={onUpgrade} className="flaggo-button mt-4 w-full bg-green-grad text-white shadow-button-green">
-          {adsRemoved ? "Ads removed" : "Remove ads - $1"}
-        </button>
-      </section>
-
-      <section className="mt-5 rounded-[22px] border border-flaggo-border bg-white p-4 shadow-card">
-        <h2 className="font-display text-lg font-black">Install Flaggo</h2>
+        <h2 className="font-display text-lg font-black">Install {BRAND.name}</h2>
         <p className="mt-1 text-sm font-bold text-flaggo-muted">Use your browser&apos;s install or add-to-home-screen button for quick offline practice.</p>
       </section>
 
@@ -76,7 +66,7 @@ export default function ProfileScreen({ progress, onReset, userEmail, adsRemoved
 
       <button
         onClick={() => {
-          if (window.confirm("Reset all Flaggo progress?")) onReset();
+          if (window.confirm(`Reset all ${BRAND.name} progress?`)) onReset();
         }}
         className="flaggo-button mt-8 w-full bg-flaggo-red text-white shadow-button-red"
       >

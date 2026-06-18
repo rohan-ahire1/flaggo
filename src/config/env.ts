@@ -1,3 +1,5 @@
+import { BRAND } from "./brand";
+
 type ClientEnv = {
   supabaseUrl: string;
   supabaseAnonKey: string;
@@ -37,7 +39,7 @@ const missing = requiredKeys.filter((key) => !read(key));
 
 export function assertClientEnv(keys: readonly string[], isDev: boolean) {
   if (isDev && keys.length) {
-    throw new Error(`Missing Flaggo env vars: ${keys.join(", ")}`);
+    throw new Error(`Missing ${BRAND.name} env vars: ${keys.join(", ")}`);
   }
 }
 

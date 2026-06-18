@@ -1,7 +1,7 @@
-export type Topic = "flag" | "capital" | "location";
+export type Topic = "flag" | "capital" | "location" | "currency" | "language" | "neighbor";
 
 export const PATH_TOPICS: Topic[] = ["flag", "capital"];
-export const TOPICS: Topic[] = ["flag", "capital", "location"];
+export const TOPICS: Topic[] = ["flag", "capital", "location", "currency", "language", "neighbor"];
 
 export const reviewKey = (code: string, topic: Topic) => `${code}:${topic}`;
 

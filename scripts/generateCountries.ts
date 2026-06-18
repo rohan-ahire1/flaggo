@@ -4,6 +4,7 @@ import { resolve } from "node:path";
 type RawCountry = {
   name?: { common?: string; official?: string };
   cca2?: string;
+  cca3?: string;
   ccn3?: string;
   region?: string;
   subregion?: string;
@@ -13,6 +14,10 @@ type RawCountry = {
   currencies?: Record<string, { name?: string; symbol?: string }>;
   languages?: Record<string, string>;
   population?: number;
+  area?: number;
+  borders?: string[];
+  landlocked?: boolean;
+  demonyms?: { eng?: { f?: string; m?: string } };
 };
 
 const easyCodes = [
@@ -35,6 +40,11 @@ function normalizeContinent(region: string | undefined) {
 
 const rawPath = resolve("countries.raw.json");
 const raw = JSON.parse(readFileSync(rawPath, "utf8")) as RawCountry[];
+const cca3ToCode = new Map(
+  raw
+    .filter((country) => country.cca2 && country.cca3)
+    .map((country) => [country.cca3!, country.cca2!.toUpperCase()])
+);
 
 const countries = raw
   .filter((country) => country.cca2 && country.name?.common && country.region)
@@ -59,7 +69,11 @@ const countries = raw
       currencyName: currency?.[1].name,
       currencySymbol: currency?.[1].symbol,
       languages: Object.values(country.languages ?? {}),
-      population: country.population
+      population: country.population,
+      area: country.area,
+      borders: (country.borders ?? []).map((cca3) => cca3ToCode.get(cca3)).filter((code): code is string => Boolean(code)),
+      landlocked: country.landlocked,
+      demonym: country.demonyms?.eng?.m ?? country.demonyms?.eng?.f
     };
   })
   .filter((country) => country.continent && validContinents.includes(country.continent))

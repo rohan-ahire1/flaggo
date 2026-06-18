@@ -20,7 +20,18 @@ export const countries: Country[] = [
       "Dari",
       "Pashto",
       "Turkmen"
-    ]
+    ],
+    "area": 652230,
+    "borders": [
+      "IR",
+      "PK",
+      "TM",
+      "UZ",
+      "TJ",
+      "CN"
+    ],
+    "landlocked": true,
+    "demonym": "Afghan"
   },
   {
     "code": "AX",
@@ -39,7 +50,11 @@ export const countries: Country[] = [
     "currencySymbol": "€",
     "languages": [
       "Swedish"
-    ]
+    ],
+    "area": 1580,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "Ålandish"
   },
   {
     "code": "AL",
@@ -58,7 +73,16 @@ export const countries: Country[] = [
     "currencySymbol": "L",
     "languages": [
       "Albanian"
-    ]
+    ],
+    "area": 28748,
+    "borders": [
+      "ME",
+      "GR",
+      "MK",
+      "XK"
+    ],
+    "landlocked": false,
+    "demonym": "Albanian"
   },
   {
     "code": "DZ",
@@ -77,7 +101,19 @@ export const countries: Country[] = [
     "currencySymbol": "د.ج",
     "languages": [
       "Arabic"
-    ]
+    ],
+    "area": 2381741,
+    "borders": [
+      "TN",
+      "LY",
+      "NE",
+      "EH",
+      "MR",
+      "ML",
+      "MA"
+    ],
+    "landlocked": false,
+    "demonym": "Algerian"
   },
   {
     "code": "AS",
@@ -97,7 +133,11 @@ export const countries: Country[] = [
     "languages": [
       "English",
       "Samoan"
-    ]
+    ],
+    "area": 199,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "American Samoan"
   },
   {
     "code": "AD",
@@ -116,7 +156,14 @@ export const countries: Country[] = [
     "currencySymbol": "€",
     "languages": [
       "Catalan"
-    ]
+    ],
+    "area": 468,
+    "borders": [
+      "FR",
+      "ES"
+    ],
+    "landlocked": true,
+    "demonym": "Andorran"
   },
   {
     "code": "AO",
@@ -135,7 +182,16 @@ export const countries: Country[] = [
     "currencySymbol": "Kz",
     "languages": [
       "Portuguese"
-    ]
+    ],
+    "area": 1246700,
+    "borders": [
+      "CG",
+      "CD",
+      "ZM",
+      "NA"
+    ],
+    "landlocked": false,
+    "demonym": "Angolan"
   },
   {
     "code": "AI",
@@ -154,7 +210,11 @@ export const countries: Country[] = [
     "currencySymbol": "$",
     "languages": [
       "English"
-    ]
+    ],
+    "area": 91,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "Anguillian"
   },
   {
     "code": "AQ",
@@ -167,7 +227,11 @@ export const countries: Country[] = [
     "isUNMember": false,
     "isIndependent": false,
     "flagUrl": "https://flagcdn.com/aq.svg",
-    "languages": []
+    "languages": [],
+    "area": 14000000,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "Antarctican"
   },
   {
     "code": "AG",
@@ -186,7 +250,11 @@ export const countries: Country[] = [
     "currencySymbol": "$",
     "languages": [
       "English"
-    ]
+    ],
+    "area": 442,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "Antiguan, Barbudan"
   },
   {
     "code": "AR",
@@ -206,7 +274,17 @@ export const countries: Country[] = [
     "languages": [
       "Guaraní",
       "Spanish"
-    ]
+    ],
+    "area": 2780400,
+    "borders": [
+      "BO",
+      "BR",
+      "CL",
+      "PY",
+      "UY"
+    ],
+    "landlocked": false,
+    "demonym": "Argentine"
   },
   {
     "code": "AM",
@@ -225,7 +303,16 @@ export const countries: Country[] = [
     "currencySymbol": "֏",
     "languages": [
       "Armenian"
-    ]
+    ],
+    "area": 29743,
+    "borders": [
+      "AZ",
+      "GE",
+      "IR",
+      "TR"
+    ],
+    "landlocked": true,
+    "demonym": "Armenian"
   },
   {
     "code": "AW",
@@ -245,7 +332,11 @@ export const countries: Country[] = [
     "languages": [
       "Dutch",
       "Papiamento"
-    ]
+    ],
+    "area": 180,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "Aruban"
   },
   {
     "code": "AU",
@@ -264,7 +355,11 @@ export const countries: Country[] = [
     "currencySymbol": "$",
     "languages": [
       "English"
-    ]
+    ],
+    "area": 7692024,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "Australian"
   },
   {
     "code": "AT",
@@ -283,7 +378,20 @@ export const countries: Country[] = [
     "currencySymbol": "€",
     "languages": [
       "Austro-Bavarian German"
-    ]
+    ],
+    "area": 83871,
+    "borders": [
+      "CZ",
+      "DE",
+      "HU",
+      "IT",
+      "LI",
+      "SK",
+      "SI",
+      "CH"
+    ],
+    "landlocked": true,
+    "demonym": "Austrian"
   },
   {
     "code": "AZ",
@@ -303,7 +411,17 @@ export const countries: Country[] = [
     "languages": [
       "Azerbaijani",
       "Russian"
-    ]
+    ],
+    "area": 86600,
+    "borders": [
+      "AM",
+      "GE",
+      "IR",
+      "RU",
+      "TR"
+    ],
+    "landlocked": true,
+    "demonym": "Azerbaijani"
   },
   {
     "code": "BS",
@@ -322,7 +440,11 @@ export const countries: Country[] = [
     "currencySymbol": "$",
     "languages": [
       "English"
-    ]
+    ],
+    "area": 13943,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "Bahamian"
   },
   {
     "code": "BH",
@@ -341,7 +463,11 @@ export const countries: Country[] = [
     "currencySymbol": ".د.ب",
     "languages": [
       "Arabic"
-    ]
+    ],
+    "area": 765,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "Bahraini"
   },
   {
     "code": "BD",
@@ -360,7 +486,14 @@ export const countries: Country[] = [
     "currencySymbol": "৳",
     "languages": [
       "Bengali"
-    ]
+    ],
+    "area": 147570,
+    "borders": [
+      "MM",
+      "IN"
+    ],
+    "landlocked": false,
+    "demonym": "Bangladeshi"
   },
   {
     "code": "BB",
@@ -379,7 +512,11 @@ export const countries: Country[] = [
     "currencySymbol": "$",
     "languages": [
       "English"
-    ]
+    ],
+    "area": 430,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "Barbadian"
   },
   {
     "code": "BY",
@@ -399,7 +536,17 @@ export const countries: Country[] = [
     "languages": [
       "Belarusian",
       "Russian"
-    ]
+    ],
+    "area": 207600,
+    "borders": [
+      "LV",
+      "LT",
+      "PL",
+      "RU",
+      "UA"
+    ],
+    "landlocked": true,
+    "demonym": "Belarusian"
   },
   {
     "code": "BE",
@@ -420,7 +567,16 @@ export const countries: Country[] = [
       "German",
       "French",
       "Dutch"
-    ]
+    ],
+    "area": 30528,
+    "borders": [
+      "FR",
+      "DE",
+      "LU",
+      "NL"
+    ],
+    "landlocked": false,
+    "demonym": "Belgian"
   },
   {
     "code": "BZ",
@@ -441,7 +597,14 @@ export const countries: Country[] = [
       "Belizean Creole",
       "English",
       "Spanish"
-    ]
+    ],
+    "area": 22966,
+    "borders": [
+      "GT",
+      "MX"
+    ],
+    "landlocked": false,
+    "demonym": "Belizean"
   },
   {
     "code": "BJ",
@@ -460,7 +623,16 @@ export const countries: Country[] = [
     "currencySymbol": "Fr",
     "languages": [
       "French"
-    ]
+    ],
+    "area": 112622,
+    "borders": [
+      "BF",
+      "NE",
+      "NG",
+      "TG"
+    ],
+    "landlocked": false,
+    "demonym": "Beninese"
   },
   {
     "code": "BM",
@@ -479,7 +651,11 @@ export const countries: Country[] = [
     "currencySymbol": "$",
     "languages": [
       "English"
-    ]
+    ],
+    "area": 54,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "Bermudian"
   },
   {
     "code": "BT",
@@ -498,7 +674,14 @@ export const countries: Country[] = [
     "currencySymbol": "Nu.",
     "languages": [
       "Dzongkha"
-    ]
+    ],
+    "area": 38394,
+    "borders": [
+      "CN",
+      "IN"
+    ],
+    "landlocked": true,
+    "demonym": "Bhutanese"
   },
   {
     "code": "BO",
@@ -520,7 +703,17 @@ export const countries: Country[] = [
       "Guaraní",
       "Quechua",
       "Spanish"
-    ]
+    ],
+    "area": 1098581,
+    "borders": [
+      "AR",
+      "BR",
+      "CL",
+      "PY",
+      "PE"
+    ],
+    "landlocked": true,
+    "demonym": "Bolivian"
   },
   {
     "code": "BA",
@@ -541,7 +734,15 @@ export const countries: Country[] = [
       "Bosnian",
       "Croatian",
       "Serbian"
-    ]
+    ],
+    "area": 51209,
+    "borders": [
+      "HR",
+      "ME",
+      "RS"
+    ],
+    "landlocked": false,
+    "demonym": "Bosnian, Herzegovinian"
   },
   {
     "code": "BW",
@@ -561,7 +762,16 @@ export const countries: Country[] = [
     "languages": [
       "English",
       "Tswana"
-    ]
+    ],
+    "area": 582000,
+    "borders": [
+      "NA",
+      "ZA",
+      "ZM",
+      "ZW"
+    ],
+    "landlocked": true,
+    "demonym": "Motswana"
   },
   {
     "code": "BV",
@@ -576,7 +786,11 @@ export const countries: Country[] = [
     "flagUrl": "https://flagcdn.com/bv.svg",
     "languages": [
       "Norwegian"
-    ]
+    ],
+    "area": 49,
+    "borders": [],
+    "landlocked": false,
+    "demonym": ""
   },
   {
     "code": "BR",
@@ -595,7 +809,22 @@ export const countries: Country[] = [
     "currencySymbol": "R$",
     "languages": [
       "Portuguese"
-    ]
+    ],
+    "area": 8515767,
+    "borders": [
+      "AR",
+      "BO",
+      "CO",
+      "GF",
+      "GY",
+      "PY",
+      "PE",
+      "SR",
+      "UY",
+      "VE"
+    ],
+    "landlocked": false,
+    "demonym": "Brazilian"
   },
   {
     "code": "IO",
@@ -614,7 +843,11 @@ export const countries: Country[] = [
     "currencySymbol": "$",
     "languages": [
       "English"
-    ]
+    ],
+    "area": 60,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "Indian"
   },
   {
     "code": "VG",
@@ -633,7 +866,11 @@ export const countries: Country[] = [
     "currencySymbol": "$",
     "languages": [
       "English"
-    ]
+    ],
+    "area": 151,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "Virgin Islander"
   },
   {
     "code": "BN",
@@ -652,7 +889,13 @@ export const countries: Country[] = [
     "currencySymbol": "$",
     "languages": [
       "Malay"
-    ]
+    ],
+    "area": 5765,
+    "borders": [
+      "MY"
+    ],
+    "landlocked": false,
+    "demonym": "Bruneian"
   },
   {
     "code": "BG",
@@ -671,7 +914,17 @@ export const countries: Country[] = [
     "currencySymbol": "€",
     "languages": [
       "Bulgarian"
-    ]
+    ],
+    "area": 110879,
+    "borders": [
+      "GR",
+      "MK",
+      "RO",
+      "RS",
+      "TR"
+    ],
+    "landlocked": false,
+    "demonym": "Bulgarian"
   },
   {
     "code": "BF",
@@ -690,7 +943,18 @@ export const countries: Country[] = [
     "currencySymbol": "Fr",
     "languages": [
       "French"
-    ]
+    ],
+    "area": 272967,
+    "borders": [
+      "BJ",
+      "CI",
+      "GH",
+      "ML",
+      "NE",
+      "TG"
+    ],
+    "landlocked": true,
+    "demonym": "Burkinabe"
   },
   {
     "code": "BI",
@@ -710,7 +974,15 @@ export const countries: Country[] = [
     "languages": [
       "French",
       "Kirundi"
-    ]
+    ],
+    "area": 27834,
+    "borders": [
+      "CD",
+      "RW",
+      "TZ"
+    ],
+    "landlocked": true,
+    "demonym": "Burundian"
   },
   {
     "code": "KH",
@@ -729,7 +1001,15 @@ export const countries: Country[] = [
     "currencySymbol": "៛",
     "languages": [
       "Khmer"
-    ]
+    ],
+    "area": 181035,
+    "borders": [
+      "LA",
+      "TH",
+      "VN"
+    ],
+    "landlocked": false,
+    "demonym": "Cambodian"
   },
   {
     "code": "CM",
@@ -749,7 +1029,18 @@ export const countries: Country[] = [
     "languages": [
       "English",
       "French"
-    ]
+    ],
+    "area": 475442,
+    "borders": [
+      "CF",
+      "TD",
+      "CG",
+      "GQ",
+      "GA",
+      "NG"
+    ],
+    "landlocked": false,
+    "demonym": "Cameroonian"
   },
   {
     "code": "CA",
@@ -769,7 +1060,13 @@ export const countries: Country[] = [
     "languages": [
       "English",
       "French"
-    ]
+    ],
+    "area": 9984670,
+    "borders": [
+      "US"
+    ],
+    "landlocked": false,
+    "demonym": "Canadian"
   },
   {
     "code": "CV",
@@ -788,7 +1085,11 @@ export const countries: Country[] = [
     "currencySymbol": "Esc",
     "languages": [
       "Portuguese"
-    ]
+    ],
+    "area": 4033,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "Cape Verdian"
   },
   {
     "code": "BQ",
@@ -809,7 +1110,11 @@ export const countries: Country[] = [
       "English",
       "Dutch",
       "Papiamento"
-    ]
+    ],
+    "area": 328,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "Dutch"
   },
   {
     "code": "KY",
@@ -828,7 +1133,11 @@ export const countries: Country[] = [
     "currencySymbol": "$",
     "languages": [
       "English"
-    ]
+    ],
+    "area": 264,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "Caymanian"
   },
   {
     "code": "CF",
@@ -848,7 +1157,18 @@ export const countries: Country[] = [
     "languages": [
       "French",
       "Sango"
-    ]
+    ],
+    "area": 622984,
+    "borders": [
+      "CM",
+      "TD",
+      "CD",
+      "CG",
+      "SS",
+      "SD"
+    ],
+    "landlocked": true,
+    "demonym": "Central African"
   },
   {
     "code": "TD",
@@ -868,7 +1188,18 @@ export const countries: Country[] = [
     "languages": [
       "Arabic",
       "French"
-    ]
+    ],
+    "area": 1284000,
+    "borders": [
+      "CM",
+      "CF",
+      "LY",
+      "NE",
+      "NG",
+      "SD"
+    ],
+    "landlocked": true,
+    "demonym": "Chadian"
   },
   {
     "code": "CL",
@@ -887,7 +1218,15 @@ export const countries: Country[] = [
     "currencySymbol": "$",
     "languages": [
       "Spanish"
-    ]
+    ],
+    "area": 756102,
+    "borders": [
+      "AR",
+      "BO",
+      "PE"
+    ],
+    "landlocked": false,
+    "demonym": "Chilean"
   },
   {
     "code": "CN",
@@ -906,7 +1245,28 @@ export const countries: Country[] = [
     "currencySymbol": "¥",
     "languages": [
       "Chinese"
-    ]
+    ],
+    "area": 9706961,
+    "borders": [
+      "AF",
+      "BT",
+      "MM",
+      "HK",
+      "IN",
+      "KZ",
+      "NP",
+      "KP",
+      "KG",
+      "LA",
+      "MO",
+      "MN",
+      "PK",
+      "RU",
+      "TJ",
+      "VN"
+    ],
+    "landlocked": false,
+    "demonym": "Chinese"
   },
   {
     "code": "CX",
@@ -925,7 +1285,11 @@ export const countries: Country[] = [
     "currencySymbol": "$",
     "languages": [
       "English"
-    ]
+    ],
+    "area": 135,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "Christmas Islander"
   },
   {
     "code": "CC",
@@ -944,7 +1308,11 @@ export const countries: Country[] = [
     "currencySymbol": "$",
     "languages": [
       "English"
-    ]
+    ],
+    "area": 14,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "Cocos Islander"
   },
   {
     "code": "CO",
@@ -963,7 +1331,17 @@ export const countries: Country[] = [
     "currencySymbol": "$",
     "languages": [
       "Spanish"
-    ]
+    ],
+    "area": 1141748,
+    "borders": [
+      "BR",
+      "EC",
+      "PA",
+      "PE",
+      "VE"
+    ],
+    "landlocked": false,
+    "demonym": "Colombian"
   },
   {
     "code": "KM",
@@ -984,7 +1362,11 @@ export const countries: Country[] = [
       "Arabic",
       "French",
       "Comorian"
-    ]
+    ],
+    "area": 1862,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "Comoran"
   },
   {
     "code": "CG",
@@ -1005,7 +1387,17 @@ export const countries: Country[] = [
       "French",
       "Kikongo",
       "Lingala"
-    ]
+    ],
+    "area": 342000,
+    "borders": [
+      "AO",
+      "CM",
+      "CF",
+      "CD",
+      "GA"
+    ],
+    "landlocked": false,
+    "demonym": "Congolese"
   },
   {
     "code": "CK",
@@ -1025,7 +1417,11 @@ export const countries: Country[] = [
     "languages": [
       "English",
       "Cook Islands Māori"
-    ]
+    ],
+    "area": 236,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "Cook Islander"
   },
   {
     "code": "CR",
@@ -1044,7 +1440,14 @@ export const countries: Country[] = [
     "currencySymbol": "₡",
     "languages": [
       "Spanish"
-    ]
+    ],
+    "area": 51100,
+    "borders": [
+      "NI",
+      "PA"
+    ],
+    "landlocked": false,
+    "demonym": "Costa Rican"
   },
   {
     "code": "HR",
@@ -1063,7 +1466,17 @@ export const countries: Country[] = [
     "currencySymbol": "€",
     "languages": [
       "Croatian"
-    ]
+    ],
+    "area": 56594,
+    "borders": [
+      "BA",
+      "HU",
+      "ME",
+      "RS",
+      "SI"
+    ],
+    "landlocked": false,
+    "demonym": "Croatian"
   },
   {
     "code": "CU",
@@ -1082,7 +1495,11 @@ export const countries: Country[] = [
     "currencySymbol": "$",
     "languages": [
       "Spanish"
-    ]
+    ],
+    "area": 109884,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "Cuban"
   },
   {
     "code": "CW",
@@ -1103,7 +1520,11 @@ export const countries: Country[] = [
       "English",
       "Dutch",
       "Papiamento"
-    ]
+    ],
+    "area": 444,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "Curaçaoan"
   },
   {
     "code": "CY",
@@ -1123,7 +1544,11 @@ export const countries: Country[] = [
     "languages": [
       "Greek",
       "Turkish"
-    ]
+    ],
+    "area": 9251,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "Cypriot"
   },
   {
     "code": "CZ",
@@ -1143,7 +1568,16 @@ export const countries: Country[] = [
     "languages": [
       "Czech",
       "Slovak"
-    ]
+    ],
+    "area": 78865,
+    "borders": [
+      "AT",
+      "DE",
+      "PL",
+      "SK"
+    ],
+    "landlocked": true,
+    "demonym": "Czech"
   },
   {
     "code": "DK",
@@ -1162,7 +1596,13 @@ export const countries: Country[] = [
     "currencySymbol": "kr",
     "languages": [
       "Danish"
-    ]
+    ],
+    "area": 43094,
+    "borders": [
+      "DE"
+    ],
+    "landlocked": false,
+    "demonym": "Danish"
   },
   {
     "code": "DJ",
@@ -1182,7 +1622,15 @@ export const countries: Country[] = [
     "languages": [
       "Arabic",
       "French"
-    ]
+    ],
+    "area": 23200,
+    "borders": [
+      "ER",
+      "ET",
+      "SO"
+    ],
+    "landlocked": false,
+    "demonym": "Djibouti"
   },
   {
     "code": "DM",
@@ -1201,7 +1649,11 @@ export const countries: Country[] = [
     "currencySymbol": "$",
     "languages": [
       "English"
-    ]
+    ],
+    "area": 751,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "Dominican"
   },
   {
     "code": "DO",
@@ -1220,7 +1672,13 @@ export const countries: Country[] = [
     "currencySymbol": "$",
     "languages": [
       "Spanish"
-    ]
+    ],
+    "area": 48671,
+    "borders": [
+      "HT"
+    ],
+    "landlocked": false,
+    "demonym": "Dominican"
   },
   {
     "code": "CD",
@@ -1243,7 +1701,21 @@ export const countries: Country[] = [
       "Lingala",
       "Tshiluba",
       "Swahili"
-    ]
+    ],
+    "area": 2344858,
+    "borders": [
+      "AO",
+      "BI",
+      "CF",
+      "CG",
+      "RW",
+      "SS",
+      "TZ",
+      "UG",
+      "ZM"
+    ],
+    "landlocked": false,
+    "demonym": "Congolese"
   },
   {
     "code": "EC",
@@ -1262,7 +1734,14 @@ export const countries: Country[] = [
     "currencySymbol": "$",
     "languages": [
       "Spanish"
-    ]
+    ],
+    "area": 276841,
+    "borders": [
+      "CO",
+      "PE"
+    ],
+    "landlocked": false,
+    "demonym": "Ecuadorean"
   },
   {
     "code": "EG",
@@ -1281,7 +1760,16 @@ export const countries: Country[] = [
     "currencySymbol": "£",
     "languages": [
       "Arabic"
-    ]
+    ],
+    "area": 1002450,
+    "borders": [
+      "IL",
+      "LY",
+      "PS",
+      "SD"
+    ],
+    "landlocked": false,
+    "demonym": "Egyptian"
   },
   {
     "code": "SV",
@@ -1300,7 +1788,14 @@ export const countries: Country[] = [
     "currencySymbol": "$",
     "languages": [
       "Spanish"
-    ]
+    ],
+    "area": 21041,
+    "borders": [
+      "GT",
+      "HN"
+    ],
+    "landlocked": false,
+    "demonym": "Salvadoran"
   },
   {
     "code": "GQ",
@@ -1321,7 +1816,14 @@ export const countries: Country[] = [
       "French",
       "Portuguese",
       "Spanish"
-    ]
+    ],
+    "area": 28051,
+    "borders": [
+      "CM",
+      "GA"
+    ],
+    "landlocked": false,
+    "demonym": "Equatorial Guinean"
   },
   {
     "code": "ER",
@@ -1342,7 +1844,15 @@ export const countries: Country[] = [
       "Arabic",
       "English",
       "Tigrinya"
-    ]
+    ],
+    "area": 117600,
+    "borders": [
+      "DJ",
+      "ET",
+      "SD"
+    ],
+    "landlocked": false,
+    "demonym": "Eritrean"
   },
   {
     "code": "EE",
@@ -1361,7 +1871,14 @@ export const countries: Country[] = [
     "currencySymbol": "€",
     "languages": [
       "Estonian"
-    ]
+    ],
+    "area": 45227,
+    "borders": [
+      "LV",
+      "RU"
+    ],
+    "landlocked": false,
+    "demonym": "Estonian"
   },
   {
     "code": "SZ",
@@ -1381,7 +1898,14 @@ export const countries: Country[] = [
     "languages": [
       "English",
       "Swazi"
-    ]
+    ],
+    "area": 17364,
+    "borders": [
+      "MZ",
+      "ZA"
+    ],
+    "landlocked": true,
+    "demonym": "Swazi"
   },
   {
     "code": "ET",
@@ -1400,7 +1924,18 @@ export const countries: Country[] = [
     "currencySymbol": "Br",
     "languages": [
       "Amharic"
-    ]
+    ],
+    "area": 1104300,
+    "borders": [
+      "DJ",
+      "ER",
+      "KE",
+      "SO",
+      "SS",
+      "SD"
+    ],
+    "landlocked": true,
+    "demonym": "Ethiopian"
   },
   {
     "code": "FK",
@@ -1419,7 +1954,11 @@ export const countries: Country[] = [
     "currencySymbol": "£",
     "languages": [
       "English"
-    ]
+    ],
+    "area": 12173,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "Falkland Islander"
   },
   {
     "code": "FO",
@@ -1439,7 +1978,11 @@ export const countries: Country[] = [
     "languages": [
       "Danish",
       "Faroese"
-    ]
+    ],
+    "area": 1393,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "Faroese"
   },
   {
     "code": "FJ",
@@ -1460,7 +2003,11 @@ export const countries: Country[] = [
       "English",
       "Fijian",
       "Fiji Hindi"
-    ]
+    ],
+    "area": 18272,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "Fijian"
   },
   {
     "code": "FI",
@@ -1480,7 +2027,15 @@ export const countries: Country[] = [
     "languages": [
       "Finnish",
       "Swedish"
-    ]
+    ],
+    "area": 338424,
+    "borders": [
+      "NO",
+      "SE",
+      "RU"
+    ],
+    "landlocked": false,
+    "demonym": "Finnish"
   },
   {
     "code": "FR",
@@ -1499,7 +2054,20 @@ export const countries: Country[] = [
     "currencySymbol": "€",
     "languages": [
       "French"
-    ]
+    ],
+    "area": 551695,
+    "borders": [
+      "AD",
+      "BE",
+      "DE",
+      "IT",
+      "LU",
+      "MC",
+      "ES",
+      "CH"
+    ],
+    "landlocked": false,
+    "demonym": "French"
   },
   {
     "code": "GF",
@@ -1518,7 +2086,14 @@ export const countries: Country[] = [
     "currencySymbol": "€",
     "languages": [
       "French"
-    ]
+    ],
+    "area": 83534,
+    "borders": [
+      "BR",
+      "SR"
+    ],
+    "landlocked": false,
+    "demonym": "Guianan"
   },
   {
     "code": "PF",
@@ -1537,7 +2112,11 @@ export const countries: Country[] = [
     "currencySymbol": "₣",
     "languages": [
       "French"
-    ]
+    ],
+    "area": 4167,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "French Polynesian"
   },
   {
     "code": "TF",
@@ -1556,7 +2135,11 @@ export const countries: Country[] = [
     "currencySymbol": "€",
     "languages": [
       "French"
-    ]
+    ],
+    "area": 7747,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "French"
   },
   {
     "code": "GA",
@@ -1575,7 +2158,15 @@ export const countries: Country[] = [
     "currencySymbol": "Fr",
     "languages": [
       "French"
-    ]
+    ],
+    "area": 267668,
+    "borders": [
+      "CM",
+      "CG",
+      "GQ"
+    ],
+    "landlocked": false,
+    "demonym": "Gabonese"
   },
   {
     "code": "GM",
@@ -1594,7 +2185,13 @@ export const countries: Country[] = [
     "currencySymbol": "D",
     "languages": [
       "English"
-    ]
+    ],
+    "area": 10689,
+    "borders": [
+      "SN"
+    ],
+    "landlocked": false,
+    "demonym": "Gambian"
   },
   {
     "code": "GE",
@@ -1613,7 +2210,16 @@ export const countries: Country[] = [
     "currencySymbol": "₾",
     "languages": [
       "Georgian"
-    ]
+    ],
+    "area": 69700,
+    "borders": [
+      "AM",
+      "AZ",
+      "RU",
+      "TR"
+    ],
+    "landlocked": false,
+    "demonym": "Georgian"
   },
   {
     "code": "DE",
@@ -1632,7 +2238,21 @@ export const countries: Country[] = [
     "currencySymbol": "€",
     "languages": [
       "German"
-    ]
+    ],
+    "area": 357114,
+    "borders": [
+      "AT",
+      "BE",
+      "CZ",
+      "DK",
+      "FR",
+      "LU",
+      "NL",
+      "PL",
+      "CH"
+    ],
+    "landlocked": false,
+    "demonym": "German"
   },
   {
     "code": "GH",
@@ -1651,7 +2271,15 @@ export const countries: Country[] = [
     "currencySymbol": "₵",
     "languages": [
       "English"
-    ]
+    ],
+    "area": 238533,
+    "borders": [
+      "BF",
+      "CI",
+      "TG"
+    ],
+    "landlocked": false,
+    "demonym": "Ghanaian"
   },
   {
     "code": "GI",
@@ -1670,7 +2298,13 @@ export const countries: Country[] = [
     "currencySymbol": "£",
     "languages": [
       "English"
-    ]
+    ],
+    "area": 6,
+    "borders": [
+      "ES"
+    ],
+    "landlocked": false,
+    "demonym": "Gibraltar"
   },
   {
     "code": "GR",
@@ -1689,7 +2323,16 @@ export const countries: Country[] = [
     "currencySymbol": "€",
     "languages": [
       "Greek"
-    ]
+    ],
+    "area": 131990,
+    "borders": [
+      "AL",
+      "BG",
+      "TR",
+      "MK"
+    ],
+    "landlocked": false,
+    "demonym": "Greek"
   },
   {
     "code": "GL",
@@ -1708,7 +2351,11 @@ export const countries: Country[] = [
     "currencySymbol": "kr.",
     "languages": [
       "Greenlandic"
-    ]
+    ],
+    "area": 2166086,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "Greenlandic"
   },
   {
     "code": "GD",
@@ -1727,7 +2374,11 @@ export const countries: Country[] = [
     "currencySymbol": "$",
     "languages": [
       "English"
-    ]
+    ],
+    "area": 344,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "Grenadian"
   },
   {
     "code": "GP",
@@ -1746,7 +2397,11 @@ export const countries: Country[] = [
     "currencySymbol": "€",
     "languages": [
       "French"
-    ]
+    ],
+    "area": 1628,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "Guadeloupian"
   },
   {
     "code": "GU",
@@ -1767,7 +2422,11 @@ export const countries: Country[] = [
       "Chamorro",
       "English",
       "Spanish"
-    ]
+    ],
+    "area": 549,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "Guamanian"
   },
   {
     "code": "GT",
@@ -1786,7 +2445,16 @@ export const countries: Country[] = [
     "currencySymbol": "Q",
     "languages": [
       "Spanish"
-    ]
+    ],
+    "area": 108889,
+    "borders": [
+      "BZ",
+      "SV",
+      "HN",
+      "MX"
+    ],
+    "landlocked": false,
+    "demonym": "Guatemalan"
   },
   {
     "code": "GG",
@@ -1807,7 +2475,11 @@ export const countries: Country[] = [
       "English",
       "French",
       "Guernésiais"
-    ]
+    ],
+    "area": 78,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "Channel Islander"
   },
   {
     "code": "GN",
@@ -1826,7 +2498,18 @@ export const countries: Country[] = [
     "currencySymbol": "Fr",
     "languages": [
       "French"
-    ]
+    ],
+    "area": 245857,
+    "borders": [
+      "CI",
+      "GW",
+      "LR",
+      "ML",
+      "SN",
+      "SL"
+    ],
+    "landlocked": false,
+    "demonym": "Guinean"
   },
   {
     "code": "GW",
@@ -1846,7 +2529,14 @@ export const countries: Country[] = [
     "languages": [
       "Portuguese",
       "Upper Guinea Creole"
-    ]
+    ],
+    "area": 36125,
+    "borders": [
+      "GN",
+      "SN"
+    ],
+    "landlocked": false,
+    "demonym": "Guinea-Bissauan"
   },
   {
     "code": "GY",
@@ -1865,7 +2555,15 @@ export const countries: Country[] = [
     "currencySymbol": "$",
     "languages": [
       "English"
-    ]
+    ],
+    "area": 214969,
+    "borders": [
+      "BR",
+      "SR",
+      "VE"
+    ],
+    "landlocked": false,
+    "demonym": "Guyanese"
   },
   {
     "code": "HT",
@@ -1885,7 +2583,13 @@ export const countries: Country[] = [
     "languages": [
       "French",
       "Haitian Creole"
-    ]
+    ],
+    "area": 27750,
+    "borders": [
+      "DO"
+    ],
+    "landlocked": false,
+    "demonym": "Haitian"
   },
   {
     "code": "HM",
@@ -1900,7 +2604,11 @@ export const countries: Country[] = [
     "flagUrl": "https://flagcdn.com/hm.svg",
     "languages": [
       "English"
-    ]
+    ],
+    "area": 412,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "Heard and McDonald Islander"
   },
   {
     "code": "HN",
@@ -1919,7 +2627,15 @@ export const countries: Country[] = [
     "currencySymbol": "L",
     "languages": [
       "Spanish"
-    ]
+    ],
+    "area": 112492,
+    "borders": [
+      "GT",
+      "SV",
+      "NI"
+    ],
+    "landlocked": false,
+    "demonym": "Honduran"
   },
   {
     "code": "HK",
@@ -1939,7 +2655,13 @@ export const countries: Country[] = [
     "languages": [
       "English",
       "Chinese"
-    ]
+    ],
+    "area": 1104,
+    "borders": [
+      "CN"
+    ],
+    "landlocked": false,
+    "demonym": "Hong Konger"
   },
   {
     "code": "HU",
@@ -1958,7 +2680,19 @@ export const countries: Country[] = [
     "currencySymbol": "Ft",
     "languages": [
       "Hungarian"
-    ]
+    ],
+    "area": 93028,
+    "borders": [
+      "AT",
+      "HR",
+      "RO",
+      "RS",
+      "SK",
+      "SI",
+      "UA"
+    ],
+    "landlocked": true,
+    "demonym": "Hungarian"
   },
   {
     "code": "IS",
@@ -1977,7 +2711,11 @@ export const countries: Country[] = [
     "currencySymbol": "kr",
     "languages": [
       "Icelandic"
-    ]
+    ],
+    "area": 103000,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "Icelander"
   },
   {
     "code": "IN",
@@ -1998,7 +2736,18 @@ export const countries: Country[] = [
       "English",
       "Hindi",
       "Tamil"
-    ]
+    ],
+    "area": 3287590,
+    "borders": [
+      "BD",
+      "BT",
+      "MM",
+      "CN",
+      "NP",
+      "PK"
+    ],
+    "landlocked": false,
+    "demonym": "Indian"
   },
   {
     "code": "ID",
@@ -2017,7 +2766,15 @@ export const countries: Country[] = [
     "currencySymbol": "Rp",
     "languages": [
       "Indonesian"
-    ]
+    ],
+    "area": 1904569,
+    "borders": [
+      "TL",
+      "MY",
+      "PG"
+    ],
+    "landlocked": false,
+    "demonym": "Indonesian"
   },
   {
     "code": "IR",
@@ -2036,7 +2793,19 @@ export const countries: Country[] = [
     "currencySymbol": "﷼",
     "languages": [
       "Persian (Farsi)"
-    ]
+    ],
+    "area": 1648195,
+    "borders": [
+      "AF",
+      "AM",
+      "AZ",
+      "IQ",
+      "PK",
+      "TR",
+      "TM"
+    ],
+    "landlocked": false,
+    "demonym": "Iranian"
   },
   {
     "code": "IQ",
@@ -2057,7 +2826,18 @@ export const countries: Country[] = [
       "Arabic",
       "Aramaic",
       "Sorani"
-    ]
+    ],
+    "area": 438317,
+    "borders": [
+      "IR",
+      "JO",
+      "KW",
+      "SA",
+      "SY",
+      "TR"
+    ],
+    "landlocked": false,
+    "demonym": "Iraqi"
   },
   {
     "code": "IE",
@@ -2077,7 +2857,13 @@ export const countries: Country[] = [
     "languages": [
       "English",
       "Irish"
-    ]
+    ],
+    "area": 70273,
+    "borders": [
+      "GB"
+    ],
+    "landlocked": false,
+    "demonym": "Irish"
   },
   {
     "code": "IM",
@@ -2097,7 +2883,11 @@ export const countries: Country[] = [
     "languages": [
       "English",
       "Manx"
-    ]
+    ],
+    "area": 572,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "Manx"
   },
   {
     "code": "IL",
@@ -2117,7 +2907,17 @@ export const countries: Country[] = [
     "languages": [
       "Arabic",
       "Hebrew"
-    ]
+    ],
+    "area": 20770,
+    "borders": [
+      "EG",
+      "JO",
+      "LB",
+      "PS",
+      "SY"
+    ],
+    "landlocked": false,
+    "demonym": "Israeli"
   },
   {
     "code": "IT",
@@ -2136,7 +2936,18 @@ export const countries: Country[] = [
     "currencySymbol": "€",
     "languages": [
       "Italian"
-    ]
+    ],
+    "area": 301336,
+    "borders": [
+      "AT",
+      "FR",
+      "SM",
+      "SI",
+      "CH",
+      "VA"
+    ],
+    "landlocked": false,
+    "demonym": "Italian"
   },
   {
     "code": "CI",
@@ -2155,7 +2966,17 @@ export const countries: Country[] = [
     "currencySymbol": "Fr",
     "languages": [
       "French"
-    ]
+    ],
+    "area": 322463,
+    "borders": [
+      "BF",
+      "GH",
+      "GN",
+      "LR",
+      "ML"
+    ],
+    "landlocked": false,
+    "demonym": "Ivorian"
   },
   {
     "code": "JM",
@@ -2175,7 +2996,11 @@ export const countries: Country[] = [
     "languages": [
       "English",
       "Jamaican Patois"
-    ]
+    ],
+    "area": 10991,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "Jamaican"
   },
   {
     "code": "JP",
@@ -2194,7 +3019,11 @@ export const countries: Country[] = [
     "currencySymbol": "¥",
     "languages": [
       "Japanese"
-    ]
+    ],
+    "area": 377930,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "Japanese"
   },
   {
     "code": "JE",
@@ -2215,7 +3044,11 @@ export const countries: Country[] = [
       "English",
       "French",
       "Jèrriais"
-    ]
+    ],
+    "area": 116,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "Channel Islander"
   },
   {
     "code": "JO",
@@ -2234,7 +3067,17 @@ export const countries: Country[] = [
     "currencySymbol": "د.ا",
     "languages": [
       "Arabic"
-    ]
+    ],
+    "area": 89342,
+    "borders": [
+      "IQ",
+      "IL",
+      "PS",
+      "SA",
+      "SY"
+    ],
+    "landlocked": false,
+    "demonym": "Jordanian"
   },
   {
     "code": "KZ",
@@ -2254,7 +3097,17 @@ export const countries: Country[] = [
     "languages": [
       "Kazakh",
       "Russian"
-    ]
+    ],
+    "area": 2724900,
+    "borders": [
+      "CN",
+      "KG",
+      "RU",
+      "TM",
+      "UZ"
+    ],
+    "landlocked": true,
+    "demonym": "Kazakhstani"
   },
   {
     "code": "KE",
@@ -2274,7 +3127,17 @@ export const countries: Country[] = [
     "languages": [
       "English",
       "Swahili"
-    ]
+    ],
+    "area": 580367,
+    "borders": [
+      "ET",
+      "SO",
+      "SS",
+      "TZ",
+      "UG"
+    ],
+    "landlocked": false,
+    "demonym": "Kenyan"
   },
   {
     "code": "KI",
@@ -2294,7 +3157,11 @@ export const countries: Country[] = [
     "languages": [
       "English",
       "Gilbertese"
-    ]
+    ],
+    "area": 811,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "I-Kiribati"
   },
   {
     "code": "XK",
@@ -2313,7 +3180,16 @@ export const countries: Country[] = [
     "languages": [
       "Albanian",
       "Serbian"
-    ]
+    ],
+    "area": 10908,
+    "borders": [
+      "AL",
+      "MK",
+      "ME",
+      "RS"
+    ],
+    "landlocked": true,
+    "demonym": "Kosovar"
   },
   {
     "code": "KW",
@@ -2332,7 +3208,14 @@ export const countries: Country[] = [
     "currencySymbol": "د.ك",
     "languages": [
       "Arabic"
-    ]
+    ],
+    "area": 17818,
+    "borders": [
+      "IQ",
+      "SA"
+    ],
+    "landlocked": false,
+    "demonym": "Kuwaiti"
   },
   {
     "code": "KG",
@@ -2352,7 +3235,16 @@ export const countries: Country[] = [
     "languages": [
       "Kyrgyz",
       "Russian"
-    ]
+    ],
+    "area": 199951,
+    "borders": [
+      "CN",
+      "KZ",
+      "TJ",
+      "UZ"
+    ],
+    "landlocked": true,
+    "demonym": "Kirghiz"
   },
   {
     "code": "LA",
@@ -2371,7 +3263,17 @@ export const countries: Country[] = [
     "currencySymbol": "₭",
     "languages": [
       "Lao"
-    ]
+    ],
+    "area": 236800,
+    "borders": [
+      "MM",
+      "KH",
+      "CN",
+      "TH",
+      "VN"
+    ],
+    "landlocked": true,
+    "demonym": "Laotian"
   },
   {
     "code": "LV",
@@ -2390,7 +3292,16 @@ export const countries: Country[] = [
     "currencySymbol": "€",
     "languages": [
       "Latvian"
-    ]
+    ],
+    "area": 64559,
+    "borders": [
+      "BY",
+      "EE",
+      "LT",
+      "RU"
+    ],
+    "landlocked": false,
+    "demonym": "Latvian"
   },
   {
     "code": "LB",
@@ -2410,7 +3321,14 @@ export const countries: Country[] = [
     "languages": [
       "Arabic",
       "French"
-    ]
+    ],
+    "area": 10452,
+    "borders": [
+      "IL",
+      "SY"
+    ],
+    "landlocked": false,
+    "demonym": "Lebanese"
   },
   {
     "code": "LS",
@@ -2430,7 +3348,13 @@ export const countries: Country[] = [
     "languages": [
       "English",
       "Sotho"
-    ]
+    ],
+    "area": 30355,
+    "borders": [
+      "ZA"
+    ],
+    "landlocked": true,
+    "demonym": "Mosotho"
   },
   {
     "code": "LR",
@@ -2449,7 +3373,15 @@ export const countries: Country[] = [
     "currencySymbol": "$",
     "languages": [
       "English"
-    ]
+    ],
+    "area": 111369,
+    "borders": [
+      "GN",
+      "CI",
+      "SL"
+    ],
+    "landlocked": false,
+    "demonym": "Liberian"
   },
   {
     "code": "LY",
@@ -2468,7 +3400,18 @@ export const countries: Country[] = [
     "currencySymbol": "ل.د",
     "languages": [
       "Arabic"
-    ]
+    ],
+    "area": 1759540,
+    "borders": [
+      "DZ",
+      "TD",
+      "EG",
+      "NE",
+      "SD",
+      "TN"
+    ],
+    "landlocked": false,
+    "demonym": "Libyan"
   },
   {
     "code": "LI",
@@ -2487,7 +3430,14 @@ export const countries: Country[] = [
     "currencySymbol": "Fr",
     "languages": [
       "German"
-    ]
+    ],
+    "area": 160,
+    "borders": [
+      "AT",
+      "CH"
+    ],
+    "landlocked": true,
+    "demonym": "Liechtensteiner"
   },
   {
     "code": "LT",
@@ -2506,7 +3456,16 @@ export const countries: Country[] = [
     "currencySymbol": "€",
     "languages": [
       "Lithuanian"
-    ]
+    ],
+    "area": 65300,
+    "borders": [
+      "BY",
+      "LV",
+      "PL",
+      "RU"
+    ],
+    "landlocked": false,
+    "demonym": "Lithuanian"
   },
   {
     "code": "LU",
@@ -2527,7 +3486,15 @@ export const countries: Country[] = [
       "German",
       "French",
       "Luxembourgish"
-    ]
+    ],
+    "area": 2586,
+    "borders": [
+      "BE",
+      "FR",
+      "DE"
+    ],
+    "landlocked": true,
+    "demonym": "Luxembourger"
   },
   {
     "code": "MO",
@@ -2546,7 +3513,13 @@ export const countries: Country[] = [
     "languages": [
       "Portuguese",
       "Chinese"
-    ]
+    ],
+    "area": 30,
+    "borders": [
+      "CN"
+    ],
+    "landlocked": false,
+    "demonym": "Macanese"
   },
   {
     "code": "MG",
@@ -2566,7 +3539,11 @@ export const countries: Country[] = [
     "languages": [
       "French",
       "Malagasy"
-    ]
+    ],
+    "area": 587041,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "Malagasy"
   },
   {
     "code": "MW",
@@ -2586,7 +3563,15 @@ export const countries: Country[] = [
     "languages": [
       "English",
       "Chewa"
-    ]
+    ],
+    "area": 118484,
+    "borders": [
+      "MZ",
+      "TZ",
+      "ZM"
+    ],
+    "landlocked": true,
+    "demonym": "Malawian"
   },
   {
     "code": "MY",
@@ -2606,7 +3591,15 @@ export const countries: Country[] = [
     "languages": [
       "English",
       "Malay"
-    ]
+    ],
+    "area": 330803,
+    "borders": [
+      "BN",
+      "ID",
+      "TH"
+    ],
+    "landlocked": false,
+    "demonym": "Malaysian"
   },
   {
     "code": "MV",
@@ -2625,7 +3618,11 @@ export const countries: Country[] = [
     "currencySymbol": ".ރ",
     "languages": [
       "Maldivian"
-    ]
+    ],
+    "area": 300,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "Maldivan"
   },
   {
     "code": "ML",
@@ -2644,7 +3641,19 @@ export const countries: Country[] = [
     "currencySymbol": "Fr",
     "languages": [
       "French"
-    ]
+    ],
+    "area": 1240192,
+    "borders": [
+      "DZ",
+      "BF",
+      "GN",
+      "CI",
+      "MR",
+      "NE",
+      "SN"
+    ],
+    "landlocked": true,
+    "demonym": "Malian"
   },
   {
     "code": "MT",
@@ -2664,7 +3673,11 @@ export const countries: Country[] = [
     "languages": [
       "English",
       "Maltese"
-    ]
+    ],
+    "area": 316,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "Maltese"
   },
   {
     "code": "MH",
@@ -2684,7 +3697,11 @@ export const countries: Country[] = [
     "languages": [
       "English",
       "Marshallese"
-    ]
+    ],
+    "area": 181,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "Marshallese"
   },
   {
     "code": "MQ",
@@ -2703,7 +3720,11 @@ export const countries: Country[] = [
     "currencySymbol": "€",
     "languages": [
       "French"
-    ]
+    ],
+    "area": 1128,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "Martinican"
   },
   {
     "code": "MR",
@@ -2722,7 +3743,16 @@ export const countries: Country[] = [
     "currencySymbol": "UM",
     "languages": [
       "Arabic"
-    ]
+    ],
+    "area": 1030700,
+    "borders": [
+      "DZ",
+      "ML",
+      "SN",
+      "EH"
+    ],
+    "landlocked": false,
+    "demonym": "Mauritanian"
   },
   {
     "code": "MU",
@@ -2743,7 +3773,11 @@ export const countries: Country[] = [
       "English",
       "French",
       "Mauritian Creole"
-    ]
+    ],
+    "area": 2040,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "Mauritian"
   },
   {
     "code": "YT",
@@ -2762,7 +3796,11 @@ export const countries: Country[] = [
     "currencySymbol": "€",
     "languages": [
       "French"
-    ]
+    ],
+    "area": 374,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "Mahoran"
   },
   {
     "code": "MX",
@@ -2781,7 +3819,15 @@ export const countries: Country[] = [
     "currencySymbol": "$",
     "languages": [
       "Spanish"
-    ]
+    ],
+    "area": 1964375,
+    "borders": [
+      "BZ",
+      "GT",
+      "US"
+    ],
+    "landlocked": false,
+    "demonym": "Mexican"
   },
   {
     "code": "FM",
@@ -2797,7 +3843,11 @@ export const countries: Country[] = [
     "capital": "Palikir",
     "languages": [
       "English"
-    ]
+    ],
+    "area": 702,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "Micronesian"
   },
   {
     "code": "MD",
@@ -2816,7 +3866,14 @@ export const countries: Country[] = [
     "currencySymbol": "L",
     "languages": [
       "Moldavian"
-    ]
+    ],
+    "area": 33846,
+    "borders": [
+      "RO",
+      "UA"
+    ],
+    "landlocked": true,
+    "demonym": "Moldovan"
   },
   {
     "code": "MC",
@@ -2835,7 +3892,13 @@ export const countries: Country[] = [
     "currencySymbol": "€",
     "languages": [
       "French"
-    ]
+    ],
+    "area": 2.02,
+    "borders": [
+      "FR"
+    ],
+    "landlocked": false,
+    "demonym": "Monegasque"
   },
   {
     "code": "MN",
@@ -2854,7 +3917,14 @@ export const countries: Country[] = [
     "currencySymbol": "₮",
     "languages": [
       "Mongolian"
-    ]
+    ],
+    "area": 1564110,
+    "borders": [
+      "CN",
+      "RU"
+    ],
+    "landlocked": true,
+    "demonym": "Mongolian"
   },
   {
     "code": "ME",
@@ -2873,7 +3943,17 @@ export const countries: Country[] = [
     "currencySymbol": "€",
     "languages": [
       "Montenegrin"
-    ]
+    ],
+    "area": 13812,
+    "borders": [
+      "AL",
+      "BA",
+      "HR",
+      "XK",
+      "RS"
+    ],
+    "landlocked": false,
+    "demonym": "Montenegrin"
   },
   {
     "code": "MS",
@@ -2892,7 +3972,11 @@ export const countries: Country[] = [
     "currencySymbol": "$",
     "languages": [
       "English"
-    ]
+    ],
+    "area": 102,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "Montserratian"
   },
   {
     "code": "MA",
@@ -2912,7 +3996,15 @@ export const countries: Country[] = [
     "languages": [
       "Arabic",
       "Berber"
-    ]
+    ],
+    "area": 446550,
+    "borders": [
+      "DZ",
+      "EH",
+      "ES"
+    ],
+    "landlocked": false,
+    "demonym": "Moroccan"
   },
   {
     "code": "MZ",
@@ -2931,7 +4023,18 @@ export const countries: Country[] = [
     "currencySymbol": "MT",
     "languages": [
       "Portuguese"
-    ]
+    ],
+    "area": 801590,
+    "borders": [
+      "MW",
+      "ZA",
+      "SZ",
+      "TZ",
+      "ZM",
+      "ZW"
+    ],
+    "landlocked": false,
+    "demonym": "Mozambican"
   },
   {
     "code": "MM",
@@ -2950,7 +4053,17 @@ export const countries: Country[] = [
     "currencySymbol": "Ks",
     "languages": [
       "Burmese"
-    ]
+    ],
+    "area": 676578,
+    "borders": [
+      "BD",
+      "CN",
+      "IN",
+      "LA",
+      "TH"
+    ],
+    "landlocked": false,
+    "demonym": "Burmese"
   },
   {
     "code": "NA",
@@ -2977,7 +4090,16 @@ export const countries: Country[] = [
       "Lozi",
       "Ndonga",
       "Tswana"
-    ]
+    ],
+    "area": 825615,
+    "borders": [
+      "AO",
+      "BW",
+      "ZA",
+      "ZM"
+    ],
+    "landlocked": false,
+    "demonym": "Namibian"
   },
   {
     "code": "NR",
@@ -2997,7 +4119,11 @@ export const countries: Country[] = [
     "languages": [
       "English",
       "Nauru"
-    ]
+    ],
+    "area": 21,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "Nauruan"
   },
   {
     "code": "NP",
@@ -3016,7 +4142,14 @@ export const countries: Country[] = [
     "currencySymbol": "₨",
     "languages": [
       "Nepali"
-    ]
+    ],
+    "area": 147181,
+    "borders": [
+      "CN",
+      "IN"
+    ],
+    "landlocked": true,
+    "demonym": "Nepalese"
   },
   {
     "code": "NL",
@@ -3035,7 +4168,14 @@ export const countries: Country[] = [
     "currencySymbol": "€",
     "languages": [
       "Dutch"
-    ]
+    ],
+    "area": 41850,
+    "borders": [
+      "BE",
+      "DE"
+    ],
+    "landlocked": false,
+    "demonym": "Dutch"
   },
   {
     "code": "NC",
@@ -3054,7 +4194,11 @@ export const countries: Country[] = [
     "currencySymbol": "₣",
     "languages": [
       "French"
-    ]
+    ],
+    "area": 18575,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "New Caledonian"
   },
   {
     "code": "NZ",
@@ -3075,7 +4219,11 @@ export const countries: Country[] = [
       "English",
       "Māori",
       "New Zealand Sign Language"
-    ]
+    ],
+    "area": 270467,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "New Zealander"
   },
   {
     "code": "NI",
@@ -3094,7 +4242,14 @@ export const countries: Country[] = [
     "currencySymbol": "C$",
     "languages": [
       "Spanish"
-    ]
+    ],
+    "area": 130373,
+    "borders": [
+      "CR",
+      "HN"
+    ],
+    "landlocked": false,
+    "demonym": "Nicaraguan"
   },
   {
     "code": "NE",
@@ -3113,7 +4268,19 @@ export const countries: Country[] = [
     "currencySymbol": "Fr",
     "languages": [
       "French"
-    ]
+    ],
+    "area": 1267000,
+    "borders": [
+      "DZ",
+      "BJ",
+      "BF",
+      "TD",
+      "LY",
+      "ML",
+      "NG"
+    ],
+    "landlocked": true,
+    "demonym": "Nigerien"
   },
   {
     "code": "NG",
@@ -3132,7 +4299,16 @@ export const countries: Country[] = [
     "currencySymbol": "₦",
     "languages": [
       "English"
-    ]
+    ],
+    "area": 923768,
+    "borders": [
+      "BJ",
+      "CM",
+      "TD",
+      "NE"
+    ],
+    "landlocked": false,
+    "demonym": "Nigerian"
   },
   {
     "code": "NU",
@@ -3152,7 +4328,11 @@ export const countries: Country[] = [
     "languages": [
       "English",
       "Niuean"
-    ]
+    ],
+    "area": 260,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "Niuean"
   },
   {
     "code": "NF",
@@ -3172,7 +4352,11 @@ export const countries: Country[] = [
     "languages": [
       "English",
       "Norfuk"
-    ]
+    ],
+    "area": 36,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "Norfolk Islander"
   },
   {
     "code": "KP",
@@ -3191,7 +4375,15 @@ export const countries: Country[] = [
     "currencySymbol": "₩",
     "languages": [
       "Korean"
-    ]
+    ],
+    "area": 120538,
+    "borders": [
+      "CN",
+      "KR",
+      "RU"
+    ],
+    "landlocked": false,
+    "demonym": "North Korean"
   },
   {
     "code": "MK",
@@ -3210,7 +4402,17 @@ export const countries: Country[] = [
     "currencySymbol": "den",
     "languages": [
       "Macedonian"
-    ]
+    ],
+    "area": 25713,
+    "borders": [
+      "AL",
+      "BG",
+      "GR",
+      "XK",
+      "RS"
+    ],
+    "landlocked": true,
+    "demonym": "Macedonian"
   },
   {
     "code": "MP",
@@ -3231,7 +4433,11 @@ export const countries: Country[] = [
       "Carolinian",
       "Chamorro",
       "English"
-    ]
+    ],
+    "area": 464,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "American"
   },
   {
     "code": "NO",
@@ -3252,7 +4458,15 @@ export const countries: Country[] = [
       "Norwegian Nynorsk",
       "Norwegian Bokmål",
       "Sami"
-    ]
+    ],
+    "area": 323802,
+    "borders": [
+      "FI",
+      "SE",
+      "RU"
+    ],
+    "landlocked": false,
+    "demonym": "Norwegian"
   },
   {
     "code": "OM",
@@ -3271,7 +4485,15 @@ export const countries: Country[] = [
     "currencySymbol": "ر.ع.",
     "languages": [
       "Arabic"
-    ]
+    ],
+    "area": 309500,
+    "borders": [
+      "SA",
+      "AE",
+      "YE"
+    ],
+    "landlocked": false,
+    "demonym": "Omani"
   },
   {
     "code": "PK",
@@ -3291,7 +4513,16 @@ export const countries: Country[] = [
     "languages": [
       "English",
       "Urdu"
-    ]
+    ],
+    "area": 881912,
+    "borders": [
+      "AF",
+      "CN",
+      "IN",
+      "IR"
+    ],
+    "landlocked": false,
+    "demonym": "Pakistani"
   },
   {
     "code": "PW",
@@ -3311,7 +4542,11 @@ export const countries: Country[] = [
     "languages": [
       "English",
       "Palauan"
-    ]
+    ],
+    "area": 459,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "Palauan"
   },
   {
     "code": "PS",
@@ -3330,7 +4565,15 @@ export const countries: Country[] = [
     "currencySymbol": "E£",
     "languages": [
       "Arabic"
-    ]
+    ],
+    "area": 6220,
+    "borders": [
+      "IL",
+      "EG",
+      "JO"
+    ],
+    "landlocked": false,
+    "demonym": "Palestinian"
   },
   {
     "code": "PA",
@@ -3349,7 +4592,14 @@ export const countries: Country[] = [
     "currencySymbol": "B/.",
     "languages": [
       "Spanish"
-    ]
+    ],
+    "area": 75417,
+    "borders": [
+      "CO",
+      "CR"
+    ],
+    "landlocked": false,
+    "demonym": "Panamanian"
   },
   {
     "code": "PG",
@@ -3370,7 +4620,13 @@ export const countries: Country[] = [
       "English",
       "Hiri Motu",
       "Tok Pisin"
-    ]
+    ],
+    "area": 462840,
+    "borders": [
+      "ID"
+    ],
+    "landlocked": false,
+    "demonym": "Papua New Guinean"
   },
   {
     "code": "PY",
@@ -3390,7 +4646,15 @@ export const countries: Country[] = [
     "languages": [
       "Guaraní",
       "Spanish"
-    ]
+    ],
+    "area": 406752,
+    "borders": [
+      "AR",
+      "BO",
+      "BR"
+    ],
+    "landlocked": true,
+    "demonym": "Paraguayan"
   },
   {
     "code": "PE",
@@ -3411,7 +4675,17 @@ export const countries: Country[] = [
       "Aymara",
       "Quechua",
       "Spanish"
-    ]
+    ],
+    "area": 1285216,
+    "borders": [
+      "BO",
+      "BR",
+      "CL",
+      "CO",
+      "EC"
+    ],
+    "landlocked": false,
+    "demonym": "Peruvian"
   },
   {
     "code": "PH",
@@ -3431,7 +4705,11 @@ export const countries: Country[] = [
     "languages": [
       "English",
       "Filipino"
-    ]
+    ],
+    "area": 342353,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "Filipino"
   },
   {
     "code": "PN",
@@ -3450,7 +4728,11 @@ export const countries: Country[] = [
     "currencySymbol": "$",
     "languages": [
       "English"
-    ]
+    ],
+    "area": 47,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "Pitcairn Islander"
   },
   {
     "code": "PL",
@@ -3469,7 +4751,19 @@ export const countries: Country[] = [
     "currencySymbol": "zł",
     "languages": [
       "Polish"
-    ]
+    ],
+    "area": 312679,
+    "borders": [
+      "BY",
+      "CZ",
+      "DE",
+      "LT",
+      "RU",
+      "SK",
+      "UA"
+    ],
+    "landlocked": false,
+    "demonym": "Polish"
   },
   {
     "code": "PT",
@@ -3488,7 +4782,13 @@ export const countries: Country[] = [
     "currencySymbol": "€",
     "languages": [
       "Portuguese"
-    ]
+    ],
+    "area": 92090,
+    "borders": [
+      "ES"
+    ],
+    "landlocked": false,
+    "demonym": "Portuguese"
   },
   {
     "code": "PR",
@@ -3508,7 +4808,11 @@ export const countries: Country[] = [
     "languages": [
       "English",
       "Spanish"
-    ]
+    ],
+    "area": 8870,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "Puerto Rican"
   },
   {
     "code": "QA",
@@ -3527,7 +4831,13 @@ export const countries: Country[] = [
     "currencySymbol": "ر.ق",
     "languages": [
       "Arabic"
-    ]
+    ],
+    "area": 11586,
+    "borders": [
+      "SA"
+    ],
+    "landlocked": false,
+    "demonym": "Qatari"
   },
   {
     "code": "RE",
@@ -3546,7 +4856,11 @@ export const countries: Country[] = [
     "currencySymbol": "€",
     "languages": [
       "French"
-    ]
+    ],
+    "area": 2511,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "Réunionese"
   },
   {
     "code": "RO",
@@ -3565,7 +4879,17 @@ export const countries: Country[] = [
     "currencySymbol": "lei",
     "languages": [
       "Romanian"
-    ]
+    ],
+    "area": 238391,
+    "borders": [
+      "BG",
+      "HU",
+      "MD",
+      "RS",
+      "UA"
+    ],
+    "landlocked": false,
+    "demonym": "Romanian"
   },
   {
     "code": "RU",
@@ -3584,7 +4908,26 @@ export const countries: Country[] = [
     "currencySymbol": "₽",
     "languages": [
       "Russian"
-    ]
+    ],
+    "area": 17098242,
+    "borders": [
+      "AZ",
+      "BY",
+      "CN",
+      "EE",
+      "FI",
+      "GE",
+      "KZ",
+      "KP",
+      "LV",
+      "LT",
+      "MN",
+      "NO",
+      "PL",
+      "UA"
+    ],
+    "landlocked": false,
+    "demonym": "Russian"
   },
   {
     "code": "RW",
@@ -3605,7 +4948,16 @@ export const countries: Country[] = [
       "English",
       "French",
       "Kinyarwanda"
-    ]
+    ],
+    "area": 26338,
+    "borders": [
+      "BI",
+      "CD",
+      "TZ",
+      "UG"
+    ],
+    "landlocked": true,
+    "demonym": "Rwandan"
   },
   {
     "code": "BL",
@@ -3624,7 +4976,11 @@ export const countries: Country[] = [
     "currencySymbol": "€",
     "languages": [
       "French"
-    ]
+    ],
+    "area": 21,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "Saint Barthélemy Islander"
   },
   {
     "code": "SH",
@@ -3643,7 +4999,11 @@ export const countries: Country[] = [
     "currencySymbol": "£",
     "languages": [
       "English"
-    ]
+    ],
+    "area": 394,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "Saint Helenian"
   },
   {
     "code": "KN",
@@ -3662,7 +5022,11 @@ export const countries: Country[] = [
     "currencySymbol": "$",
     "languages": [
       "English"
-    ]
+    ],
+    "area": 261,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "Kittitian or Nevisian"
   },
   {
     "code": "LC",
@@ -3681,7 +5045,11 @@ export const countries: Country[] = [
     "currencySymbol": "$",
     "languages": [
       "English"
-    ]
+    ],
+    "area": 616,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "Saint Lucian"
   },
   {
     "code": "MF",
@@ -3700,7 +5068,13 @@ export const countries: Country[] = [
     "currencySymbol": "€",
     "languages": [
       "French"
-    ]
+    ],
+    "area": 53,
+    "borders": [
+      "SX"
+    ],
+    "landlocked": false,
+    "demonym": "Saint Martin Islander"
   },
   {
     "code": "PM",
@@ -3719,7 +5093,11 @@ export const countries: Country[] = [
     "currencySymbol": "€",
     "languages": [
       "French"
-    ]
+    ],
+    "area": 242,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "Saint-Pierrais, Miquelonnais"
   },
   {
     "code": "VC",
@@ -3738,7 +5116,11 @@ export const countries: Country[] = [
     "currencySymbol": "$",
     "languages": [
       "English"
-    ]
+    ],
+    "area": 389,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "Saint Vincentian"
   },
   {
     "code": "WS",
@@ -3758,7 +5140,11 @@ export const countries: Country[] = [
     "languages": [
       "English",
       "Samoan"
-    ]
+    ],
+    "area": 2842,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "Samoan"
   },
   {
     "code": "SM",
@@ -3777,7 +5163,13 @@ export const countries: Country[] = [
     "currencySymbol": "€",
     "languages": [
       "Italian"
-    ]
+    ],
+    "area": 61,
+    "borders": [
+      "IT"
+    ],
+    "landlocked": true,
+    "demonym": "Sammarinese"
   },
   {
     "code": "ST",
@@ -3796,7 +5188,11 @@ export const countries: Country[] = [
     "currencySymbol": "Db",
     "languages": [
       "Portuguese"
-    ]
+    ],
+    "area": 964,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "Sao Tomean"
   },
   {
     "code": "SA",
@@ -3815,7 +5211,19 @@ export const countries: Country[] = [
     "currencySymbol": "ر.س",
     "languages": [
       "Arabic"
-    ]
+    ],
+    "area": 2149690,
+    "borders": [
+      "IQ",
+      "JO",
+      "KW",
+      "OM",
+      "QA",
+      "AE",
+      "YE"
+    ],
+    "landlocked": false,
+    "demonym": "Saudi Arabian"
   },
   {
     "code": "SN",
@@ -3834,7 +5242,17 @@ export const countries: Country[] = [
     "currencySymbol": "Fr",
     "languages": [
       "French"
-    ]
+    ],
+    "area": 196722,
+    "borders": [
+      "GM",
+      "GN",
+      "GW",
+      "ML",
+      "MR"
+    ],
+    "landlocked": false,
+    "demonym": "Senegalese"
   },
   {
     "code": "RS",
@@ -3853,7 +5271,20 @@ export const countries: Country[] = [
     "currencySymbol": "дин.",
     "languages": [
       "Serbian"
-    ]
+    ],
+    "area": 88361,
+    "borders": [
+      "BA",
+      "BG",
+      "HR",
+      "HU",
+      "XK",
+      "MK",
+      "ME",
+      "RO"
+    ],
+    "landlocked": true,
+    "demonym": "Serbian"
   },
   {
     "code": "SC",
@@ -3874,7 +5305,11 @@ export const countries: Country[] = [
       "Seychellois Creole",
       "English",
       "French"
-    ]
+    ],
+    "area": 452,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "Seychellois"
   },
   {
     "code": "SL",
@@ -3893,7 +5328,14 @@ export const countries: Country[] = [
     "currencySymbol": "Le",
     "languages": [
       "English"
-    ]
+    ],
+    "area": 71740,
+    "borders": [
+      "GN",
+      "LR"
+    ],
+    "landlocked": false,
+    "demonym": "Sierra Leonean"
   },
   {
     "code": "SG",
@@ -3915,7 +5357,11 @@ export const countries: Country[] = [
       "Malay",
       "Tamil",
       "Chinese"
-    ]
+    ],
+    "area": 710,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "Singaporean"
   },
   {
     "code": "SX",
@@ -3936,7 +5382,13 @@ export const countries: Country[] = [
       "English",
       "French",
       "Dutch"
-    ]
+    ],
+    "area": 34,
+    "borders": [
+      "MF"
+    ],
+    "landlocked": false,
+    "demonym": "St. Maartener"
   },
   {
     "code": "SK",
@@ -3955,7 +5407,17 @@ export const countries: Country[] = [
     "currencySymbol": "€",
     "languages": [
       "Slovak"
-    ]
+    ],
+    "area": 49037,
+    "borders": [
+      "AT",
+      "CZ",
+      "HU",
+      "PL",
+      "UA"
+    ],
+    "landlocked": true,
+    "demonym": "Slovak"
   },
   {
     "code": "SI",
@@ -3974,7 +5436,16 @@ export const countries: Country[] = [
     "currencySymbol": "€",
     "languages": [
       "Slovene"
-    ]
+    ],
+    "area": 20273,
+    "borders": [
+      "AT",
+      "HR",
+      "IT",
+      "HU"
+    ],
+    "landlocked": false,
+    "demonym": "Slovene"
   },
   {
     "code": "SB",
@@ -3993,7 +5464,11 @@ export const countries: Country[] = [
     "currencySymbol": "$",
     "languages": [
       "English"
-    ]
+    ],
+    "area": 28896,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "Solomon Islander"
   },
   {
     "code": "SO",
@@ -4013,7 +5488,15 @@ export const countries: Country[] = [
     "languages": [
       "Arabic",
       "Somali"
-    ]
+    ],
+    "area": 637657,
+    "borders": [
+      "DJ",
+      "ET",
+      "KE"
+    ],
+    "landlocked": false,
+    "demonym": "Somali"
   },
   {
     "code": "ZA",
@@ -4042,7 +5525,18 @@ export const countries: Country[] = [
       "Venda",
       "Xhosa",
       "Zulu"
-    ]
+    ],
+    "area": 1221037,
+    "borders": [
+      "BW",
+      "LS",
+      "MZ",
+      "NA",
+      "SZ",
+      "ZW"
+    ],
+    "landlocked": false,
+    "demonym": "South African"
   },
   {
     "code": "GS",
@@ -4061,7 +5555,11 @@ export const countries: Country[] = [
     "currencySymbol": "£",
     "languages": [
       "English"
-    ]
+    ],
+    "area": 3903,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "South Georgian South Sandwich Islander"
   },
   {
     "code": "KR",
@@ -4080,7 +5578,13 @@ export const countries: Country[] = [
     "currencySymbol": "₩",
     "languages": [
       "Korean"
-    ]
+    ],
+    "area": 100210,
+    "borders": [
+      "KP"
+    ],
+    "landlocked": false,
+    "demonym": "South Korean"
   },
   {
     "code": "SS",
@@ -4099,7 +5603,18 @@ export const countries: Country[] = [
     "currencySymbol": "£",
     "languages": [
       "English"
-    ]
+    ],
+    "area": 619745,
+    "borders": [
+      "CF",
+      "CD",
+      "ET",
+      "KE",
+      "SD",
+      "UG"
+    ],
+    "landlocked": true,
+    "demonym": "South Sudanese"
   },
   {
     "code": "ES",
@@ -4118,7 +5633,17 @@ export const countries: Country[] = [
     "currencySymbol": "€",
     "languages": [
       "Spanish"
-    ]
+    ],
+    "area": 505992,
+    "borders": [
+      "AD",
+      "FR",
+      "GI",
+      "PT",
+      "MA"
+    ],
+    "landlocked": false,
+    "demonym": "Spanish"
   },
   {
     "code": "LK",
@@ -4138,7 +5663,13 @@ export const countries: Country[] = [
     "languages": [
       "Sinhala",
       "Tamil"
-    ]
+    ],
+    "area": 65610,
+    "borders": [
+      "IN"
+    ],
+    "landlocked": false,
+    "demonym": "Sri Lankan"
   },
   {
     "code": "SD",
@@ -4158,7 +5689,19 @@ export const countries: Country[] = [
     "languages": [
       "Arabic",
       "English"
-    ]
+    ],
+    "area": 1886068,
+    "borders": [
+      "CF",
+      "TD",
+      "EG",
+      "ER",
+      "ET",
+      "LY",
+      "SS"
+    ],
+    "landlocked": false,
+    "demonym": "Sudanese"
   },
   {
     "code": "SR",
@@ -4177,7 +5720,15 @@ export const countries: Country[] = [
     "currencySymbol": "$",
     "languages": [
       "Dutch"
-    ]
+    ],
+    "area": 163820,
+    "borders": [
+      "BR",
+      "GF",
+      "GY"
+    ],
+    "landlocked": false,
+    "demonym": "Surinamer"
   },
   {
     "code": "SJ",
@@ -4196,7 +5747,11 @@ export const countries: Country[] = [
     "currencySymbol": "kr",
     "languages": [
       "Norwegian"
-    ]
+    ],
+    "area": -1,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "Norwegian"
   },
   {
     "code": "SE",
@@ -4215,7 +5770,14 @@ export const countries: Country[] = [
     "currencySymbol": "kr",
     "languages": [
       "Swedish"
-    ]
+    ],
+    "area": 450295,
+    "borders": [
+      "FI",
+      "NO"
+    ],
+    "landlocked": false,
+    "demonym": "Swedish"
   },
   {
     "code": "CH",
@@ -4237,7 +5799,17 @@ export const countries: Country[] = [
       "Swiss German",
       "Italian",
       "Romansh"
-    ]
+    ],
+    "area": 41284,
+    "borders": [
+      "AT",
+      "FR",
+      "IT",
+      "LI",
+      "DE"
+    ],
+    "landlocked": true,
+    "demonym": "Swiss"
   },
   {
     "code": "SY",
@@ -4256,7 +5828,17 @@ export const countries: Country[] = [
     "currencySymbol": "£",
     "languages": [
       "Arabic"
-    ]
+    ],
+    "area": 185180,
+    "borders": [
+      "IQ",
+      "IL",
+      "JO",
+      "LB",
+      "TR"
+    ],
+    "landlocked": false,
+    "demonym": "Syrian"
   },
   {
     "code": "TW",
@@ -4275,7 +5857,11 @@ export const countries: Country[] = [
     "currencySymbol": "$",
     "languages": [
       "Chinese"
-    ]
+    ],
+    "area": 36193,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "Taiwanese"
   },
   {
     "code": "TJ",
@@ -4295,7 +5881,16 @@ export const countries: Country[] = [
     "languages": [
       "Russian",
       "Tajik"
-    ]
+    ],
+    "area": 143100,
+    "borders": [
+      "AF",
+      "CN",
+      "KG",
+      "UZ"
+    ],
+    "landlocked": true,
+    "demonym": "Tadzhik"
   },
   {
     "code": "TZ",
@@ -4315,7 +5910,20 @@ export const countries: Country[] = [
     "languages": [
       "English",
       "Swahili"
-    ]
+    ],
+    "area": 945087,
+    "borders": [
+      "BI",
+      "CD",
+      "KE",
+      "MW",
+      "MZ",
+      "RW",
+      "UG",
+      "ZM"
+    ],
+    "landlocked": false,
+    "demonym": "Tanzanian"
   },
   {
     "code": "TH",
@@ -4334,7 +5942,16 @@ export const countries: Country[] = [
     "currencySymbol": "฿",
     "languages": [
       "Thai"
-    ]
+    ],
+    "area": 513120,
+    "borders": [
+      "MM",
+      "KH",
+      "LA",
+      "MY"
+    ],
+    "landlocked": false,
+    "demonym": "Thai"
   },
   {
     "code": "TL",
@@ -4354,7 +5971,13 @@ export const countries: Country[] = [
     "languages": [
       "Portuguese",
       "Tetum"
-    ]
+    ],
+    "area": 14874,
+    "borders": [
+      "ID"
+    ],
+    "landlocked": false,
+    "demonym": "East Timorese"
   },
   {
     "code": "TG",
@@ -4373,7 +5996,15 @@ export const countries: Country[] = [
     "currencySymbol": "Fr",
     "languages": [
       "French"
-    ]
+    ],
+    "area": 56785,
+    "borders": [
+      "BJ",
+      "BF",
+      "GH"
+    ],
+    "landlocked": false,
+    "demonym": "Togolese"
   },
   {
     "code": "TK",
@@ -4394,7 +6025,11 @@ export const countries: Country[] = [
       "English",
       "Samoan",
       "Tokelauan"
-    ]
+    ],
+    "area": 12,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "Tokelauan"
   },
   {
     "code": "TO",
@@ -4414,7 +6049,11 @@ export const countries: Country[] = [
     "languages": [
       "English",
       "Tongan"
-    ]
+    ],
+    "area": 747,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "Tongan"
   },
   {
     "code": "TT",
@@ -4433,7 +6072,11 @@ export const countries: Country[] = [
     "currencySymbol": "$",
     "languages": [
       "English"
-    ]
+    ],
+    "area": 5130,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "Trinidadian"
   },
   {
     "code": "TN",
@@ -4452,7 +6095,14 @@ export const countries: Country[] = [
     "currencySymbol": "د.ت",
     "languages": [
       "Arabic"
-    ]
+    ],
+    "area": 163610,
+    "borders": [
+      "DZ",
+      "LY"
+    ],
+    "landlocked": false,
+    "demonym": "Tunisian"
   },
   {
     "code": "TR",
@@ -4471,7 +6121,20 @@ export const countries: Country[] = [
     "currencySymbol": "₺",
     "languages": [
       "Turkish"
-    ]
+    ],
+    "area": 783562,
+    "borders": [
+      "AM",
+      "AZ",
+      "BG",
+      "GE",
+      "GR",
+      "IR",
+      "IQ",
+      "SY"
+    ],
+    "landlocked": false,
+    "demonym": "Turkish"
   },
   {
     "code": "TM",
@@ -4491,7 +6154,16 @@ export const countries: Country[] = [
     "languages": [
       "Russian",
       "Turkmen"
-    ]
+    ],
+    "area": 488100,
+    "borders": [
+      "AF",
+      "IR",
+      "KZ",
+      "UZ"
+    ],
+    "landlocked": true,
+    "demonym": "Turkmen"
   },
   {
     "code": "TC",
@@ -4510,7 +6182,11 @@ export const countries: Country[] = [
     "currencySymbol": "$",
     "languages": [
       "English"
-    ]
+    ],
+    "area": 948,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "Turks and Caicos Islander"
   },
   {
     "code": "TV",
@@ -4530,7 +6206,11 @@ export const countries: Country[] = [
     "languages": [
       "English",
       "Tuvaluan"
-    ]
+    ],
+    "area": 26,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "Tuvaluan"
   },
   {
     "code": "UG",
@@ -4550,7 +6230,17 @@ export const countries: Country[] = [
     "languages": [
       "English",
       "Swahili"
-    ]
+    ],
+    "area": 241550,
+    "borders": [
+      "CD",
+      "KE",
+      "RW",
+      "SS",
+      "TZ"
+    ],
+    "landlocked": true,
+    "demonym": "Ugandan"
   },
   {
     "code": "UA",
@@ -4569,7 +6259,19 @@ export const countries: Country[] = [
     "currencySymbol": "₴",
     "languages": [
       "Ukrainian"
-    ]
+    ],
+    "area": 603500,
+    "borders": [
+      "BY",
+      "HU",
+      "MD",
+      "PL",
+      "RO",
+      "RU",
+      "SK"
+    ],
+    "landlocked": false,
+    "demonym": "Ukrainian"
   },
   {
     "code": "AE",
@@ -4588,7 +6290,14 @@ export const countries: Country[] = [
     "currencySymbol": "د.إ",
     "languages": [
       "Arabic"
-    ]
+    ],
+    "area": 83600,
+    "borders": [
+      "OM",
+      "SA"
+    ],
+    "landlocked": false,
+    "demonym": "Emirati"
   },
   {
     "code": "GB",
@@ -4607,7 +6316,13 @@ export const countries: Country[] = [
     "currencySymbol": "£",
     "languages": [
       "English"
-    ]
+    ],
+    "area": 242900,
+    "borders": [
+      "IE"
+    ],
+    "landlocked": false,
+    "demonym": "British"
   },
   {
     "code": "US",
@@ -4626,7 +6341,14 @@ export const countries: Country[] = [
     "currencySymbol": "$",
     "languages": [
       "English"
-    ]
+    ],
+    "area": 9372610,
+    "borders": [
+      "CA",
+      "MX"
+    ],
+    "landlocked": false,
+    "demonym": "American"
   },
   {
     "code": "UM",
@@ -4644,7 +6366,11 @@ export const countries: Country[] = [
     "currencySymbol": "$",
     "languages": [
       "English"
-    ]
+    ],
+    "area": 34.2,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "American Islander"
   },
   {
     "code": "VI",
@@ -4663,7 +6389,11 @@ export const countries: Country[] = [
     "currencySymbol": "$",
     "languages": [
       "English"
-    ]
+    ],
+    "area": 347,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "Virgin Islander"
   },
   {
     "code": "UY",
@@ -4682,7 +6412,14 @@ export const countries: Country[] = [
     "currencySymbol": "$",
     "languages": [
       "Spanish"
-    ]
+    ],
+    "area": 181034,
+    "borders": [
+      "AR",
+      "BR"
+    ],
+    "landlocked": false,
+    "demonym": "Uruguayan"
   },
   {
     "code": "UZ",
@@ -4702,7 +6439,17 @@ export const countries: Country[] = [
     "languages": [
       "Russian",
       "Uzbek"
-    ]
+    ],
+    "area": 447400,
+    "borders": [
+      "AF",
+      "KZ",
+      "KG",
+      "TJ",
+      "TM"
+    ],
+    "landlocked": true,
+    "demonym": "Uzbekistani"
   },
   {
     "code": "VU",
@@ -4723,7 +6470,11 @@ export const countries: Country[] = [
       "Bislama",
       "English",
       "French"
-    ]
+    ],
+    "area": 12189,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "Ni-Vanuatu"
   },
   {
     "code": "VA",
@@ -4743,7 +6494,13 @@ export const countries: Country[] = [
     "languages": [
       "Italian",
       "Latin"
-    ]
+    ],
+    "area": 0.44,
+    "borders": [
+      "IT"
+    ],
+    "landlocked": true,
+    "demonym": "Vatican"
   },
   {
     "code": "VE",
@@ -4762,7 +6519,15 @@ export const countries: Country[] = [
     "currencySymbol": "Bs.S.",
     "languages": [
       "Spanish"
-    ]
+    ],
+    "area": 916445,
+    "borders": [
+      "BR",
+      "CO",
+      "GY"
+    ],
+    "landlocked": false,
+    "demonym": "Venezuelan"
   },
   {
     "code": "VN",
@@ -4781,7 +6546,15 @@ export const countries: Country[] = [
     "currencySymbol": "₫",
     "languages": [
       "Vietnamese"
-    ]
+    ],
+    "area": 331212,
+    "borders": [
+      "KH",
+      "CN",
+      "LA"
+    ],
+    "landlocked": false,
+    "demonym": "Vietnamese"
   },
   {
     "code": "WF",
@@ -4800,7 +6573,11 @@ export const countries: Country[] = [
     "currencySymbol": "₣",
     "languages": [
       "French"
-    ]
+    ],
+    "area": 142,
+    "borders": [],
+    "landlocked": false,
+    "demonym": "Wallis and Futuna Islander"
   },
   {
     "code": "EH",
@@ -4821,7 +6598,15 @@ export const countries: Country[] = [
       "Berber",
       "Hassaniya",
       "Spanish"
-    ]
+    ],
+    "area": 266000,
+    "borders": [
+      "DZ",
+      "MR",
+      "MA"
+    ],
+    "landlocked": false,
+    "demonym": "Sahrawi"
   },
   {
     "code": "YE",
@@ -4840,7 +6625,14 @@ export const countries: Country[] = [
     "currencySymbol": "﷼",
     "languages": [
       "Arabic"
-    ]
+    ],
+    "area": 527968,
+    "borders": [
+      "OM",
+      "SA"
+    ],
+    "landlocked": false,
+    "demonym": "Yemeni"
   },
   {
     "code": "ZM",
@@ -4859,7 +6651,20 @@ export const countries: Country[] = [
     "currencySymbol": "ZK",
     "languages": [
       "English"
-    ]
+    ],
+    "area": 752612,
+    "borders": [
+      "AO",
+      "BW",
+      "CD",
+      "MW",
+      "MZ",
+      "NA",
+      "TZ",
+      "ZW"
+    ],
+    "landlocked": true,
+    "demonym": "Zambian"
   },
   {
     "code": "ZW",
@@ -4892,6 +6697,15 @@ export const countries: Country[] = [
       "Venda",
       "Xhosa",
       "Zimbabwean Sign Language"
-    ]
+    ],
+    "area": 390757,
+    "borders": [
+      "BW",
+      "MZ",
+      "ZA",
+      "ZM"
+    ],
+    "landlocked": true,
+    "demonym": "Zimbabwean"
   }
 ];

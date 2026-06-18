@@ -21,6 +21,10 @@ export type Country = {
   currencySymbol?: string;
   languages?: string[];
   population?: number;
+  area?: number;
+  borders?: string[];
+  landlocked?: boolean;
+  demonym?: string;
 };
 
 export const getFlagUrl = (code: string) =>

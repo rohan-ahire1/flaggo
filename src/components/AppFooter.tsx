@@ -6,8 +6,6 @@ export default function AppFooter() {
       <Link className="hover:text-flaggo-green" to="/privacy">Privacy</Link>
       <span className="mx-2">.</span>
       <Link className="hover:text-flaggo-green" to="/terms">Terms</Link>
-      <span className="mx-2">.</span>
-      <Link className="hover:text-flaggo-green" to="/refund">Refunds</Link>
     </footer>
   );
 }

@@ -1,15 +1,17 @@
 import { useEffect, useState } from "react";
 import { getAdConsent, setAdConsent, type AdConsent } from "./consent";
 import { trackEvent } from "../lib/analytics";
+import { BRAND } from "../config/brand";
+import { env } from "../config/env";
 
-export default function AdConsentBanner({ onChange }: { onChange: (consent: AdConsent) => void }) {
+export default function AdConsentBanner({ onChange }: { onChange?: (consent: AdConsent) => void }) {
   const [consent, setConsent] = useState<AdConsent>(() => getAdConsent());
 
   useEffect(() => {
-    onChange(consent);
+    onChange?.(consent);
   }, [consent, onChange]);
 
-  if (consent !== "unset") return null;
+  if (!env.adsEnabled || consent !== "unset") return null;
 
   function choose(value: "granted" | "declined") {
     setAdConsent(value);
@@ -22,7 +24,7 @@ export default function AdConsentBanner({ onChange }: { onChange: (consent: AdCo
       <section className="rounded-[22px] border border-flaggo-border bg-white p-4 shadow-soft">
         <h2 className="font-display text-lg font-black">Ads consent</h2>
         <p className="mt-1 text-sm font-bold text-flaggo-muted">
-          Flaggo uses Google AdSense to support the free app. Ads only load if you allow ad cookies and personalized ad storage.
+          {BRAND.name} uses Google AdSense to support the free app. Ads only load if you allow ad cookies and personalized ad storage.
         </p>
         <div className="mt-3 grid grid-cols-2 gap-2">
           <button onClick={() => choose("declined")} className="flaggo-button bg-white text-flaggo-text shadow-card">

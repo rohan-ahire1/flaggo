@@ -4,7 +4,20 @@ import { defaultProgress } from "../../types/progress";
 import { applyDailyResult, buildDailyQuiz, dailyTopics } from "../dailyChallenge";
 
 function country(code: string, continent: Country["continent"] = "Europe", capital = "Capital"): Country {
-  return { code, name: code, continent, capital, difficulty: "easy", isUNMember: true, isIndependent: true, flagUrl: `${code}.svg`, ccn3: code };
+  return {
+    code,
+    name: code,
+    continent,
+    capital,
+    difficulty: "easy",
+    isUNMember: true,
+    isIndependent: true,
+    flagUrl: `${code}.svg`,
+    ccn3: code,
+    currencyName: `Currency ${Number(code.slice(1)) % 8}`,
+    languages: [`Language ${Number(code.slice(1)) % 8}`],
+    borders: [`C${(Number(code.slice(1)) + 1) % 20}`]
+  };
 }
 
 const countries = Array.from({ length: 20 }, (_, index) => country(`C${index}`, index % 3 === 0 ? "Asia" : "Europe"));
@@ -19,7 +32,7 @@ describe("dailyChallenge", () => {
   });
 
   it("switches location topic with map availability", () => {
-    expect(dailyTopics(false)).toEqual(["flag", "capital"]);
+    expect(dailyTopics(false)).toEqual(["flag", "capital", "currency", "language", "neighbor"]);
     expect(dailyTopics(true)).toContain("location");
   });
 

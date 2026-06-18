@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { defaultProgress, type AppProgress } from "../../types/progress";
+import { parseReviewKey, reviewKey, TOPICS } from "../../types/topic";
 import { mergeProgress, normalizeProgress } from "../progressMerge";
 
 function progress(partial: Partial<AppProgress>): AppProgress {
@@ -130,6 +131,30 @@ describe("mergeProgress", () => {
 
     expect(merged.review["FR:flag"]).toMatchObject({ topic: "flag", box: 5, correctCount: 7, wrongCount: 1 });
     expect(merged.review["FR:capital"]).toMatchObject({ topic: "capital", box: 4, correctCount: 5, wrongCount: 2 });
+  });
+
+  it("round-trips new topic review keys and normalizes defensive review shapes", () => {
+    TOPICS.forEach((topic) => {
+      expect(parseReviewKey(reviewKey("FR", topic))).toEqual({ code: "FR", topic });
+    });
+
+    const normalized = normalizeProgress({
+      selectedTopic: "currency",
+      xp: -1,
+      completedLessonIds: ["ok", 1] as never,
+      review: {
+        "FR:currency": { countryCode: "wrong", topic: "flag", box: 2.9, correctCount: 3.4, wrongCount: -1, lastSeenAt: null, nextReviewAt: 12 } as never,
+        "FR:bad": { countryCode: "FR", box: 1, correctCount: 1, wrongCount: 0, lastSeenAt: null, nextReviewAt: "" } as never,
+        "ES:language": "bad" as never
+      }
+    });
+
+    expect(normalized.selectedTopic).toBe("currency");
+    expect(normalized.xp).toBe(0);
+    expect(normalized.completedLessonIds).toEqual(["ok"]);
+    expect(normalized.review["FR:currency"]).toMatchObject({ countryCode: "FR", topic: "currency", box: 2, correctCount: 3, wrongCount: 0 });
+    expect(normalized.review["FR:bad"]).toBeUndefined();
+    expect(normalized.review["ES:language"]).toBeUndefined();
   });
 
   it("merges daily, arcade, and decks without data loss", () => {

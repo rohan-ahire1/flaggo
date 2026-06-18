@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import type { Question } from "../utils/quiz";
+import type { TriviaRound } from "../utils/trivia";
 import AnswerOption from "./AnswerOption";
 import FlagImage from "./FlagImage";
 import Icon, { type IconName } from "./Icon";
@@ -137,6 +138,97 @@ export default function QuestionCard({
     );
   }
 
+  if (question.type === "guess-currency") {
+    return (
+      <div className="space-y-5">
+        <Flag />
+        <div>
+          <Eyebrow icon="coin">Pick the currency</Eyebrow>
+          <h1 className="font-display text-2xl font-black">What currency does {question.correctCountry.name} use?</h1>
+        </div>
+        <div className="grid gap-3">
+          {question.optionCurrencies.map((currency) => (
+            <AnswerOption key={currency} label={currency} disabled={disabled} onClick={() => onAnswer(currency === question.correctCurrency)} />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (question.type === "currency-to-country") {
+    return (
+      <div className="space-y-5">
+        <div className="rounded-[28px] bg-white p-6 text-center shadow-[0_8px_0_#e5e7eb]">
+          <p className="font-display text-4xl font-black text-flaggo-text">{question.correctCurrency}</p>
+        </div>
+        <div>
+          <Eyebrow icon="coin">Currency to country</Eyebrow>
+          <h1 className="font-display text-2xl font-black">Which country uses this currency?</h1>
+        </div>
+        <div className="grid gap-3">
+          {question.options.map((country) => (
+            <AnswerOption key={country.code} country={country} disabled={disabled} onClick={() => onAnswer(country.code === question.correctCountry.code)} />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (question.type === "guess-language") {
+    return (
+      <div className="space-y-5">
+        <Flag />
+        <div>
+          <Eyebrow icon="globe">Pick the language</Eyebrow>
+          <h1 className="font-display text-2xl font-black">Which official language is spoken in {question.correctCountry.name}?</h1>
+        </div>
+        <div className="grid gap-3">
+          {question.optionLanguages.map((language) => (
+            <AnswerOption key={language} label={language} disabled={disabled} onClick={() => onAnswer(language === question.correctLanguage)} />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (question.type === "language-to-country") {
+    return (
+      <div className="space-y-5">
+        <div className="rounded-[28px] bg-white p-6 text-center shadow-[0_8px_0_#e5e7eb]">
+          <p className="font-display text-4xl font-black text-flaggo-text">{question.correctLanguage}</p>
+        </div>
+        <div>
+          <Eyebrow icon="globe">Language to country</Eyebrow>
+          <h1 className="font-display text-2xl font-black">Which country has this official language?</h1>
+        </div>
+        <div className="grid gap-3">
+          {question.options.map((country) => (
+            <AnswerOption key={country.code} country={country} disabled={disabled} onClick={() => onAnswer(country.code === question.correctCountry.code)} />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (question.type === "pick-neighbor" || question.type === "not-neighbor") {
+    return (
+      <div className="space-y-5">
+        <Flag />
+        <div>
+          <Eyebrow icon="target">{question.type === "pick-neighbor" ? "Pick a neighbor" : "Find the odd border"}</Eyebrow>
+          <h1 className="font-display text-2xl font-black">
+            {question.type === "pick-neighbor" ? `Which country borders ${question.correctCountry.name}?` : `Which country does not border ${question.correctCountry.name}?`}
+          </h1>
+        </div>
+        <div className="grid gap-3">
+          {question.options.map((country) => (
+            <AnswerOption key={country.code} country={country} disabled={disabled} onClick={() => onAnswer(country.code === question.correctNeighbor.code)} />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   if (question.type === "true-false") {
     return (
       <div className="space-y-5">
@@ -166,6 +258,85 @@ export default function QuestionCard({
         {question.options.map((country) => (
           <AnswerOption key={country.code} country={country} disabled={disabled} onClick={() => onAnswer(country.code === question.correctCountry.code)} />
         ))}
+      </div>
+    </div>
+  );
+}
+
+function formatMetric(value: number, metric: "population" | "area") {
+  return metric === "area" ? `${value.toLocaleString()} km2` : value.toLocaleString();
+}
+
+export function TriviaCard({
+  round,
+  disabled,
+  onAnswer
+}: {
+  round: TriviaRound;
+  disabled: boolean;
+  onAnswer: (wasCorrect: boolean) => void;
+}) {
+  if (round.mode === "higher-lower") {
+    return (
+      <div className="space-y-5">
+        <div>
+          <Eyebrow icon="stats">Higher or lower</Eyebrow>
+          <h1 className="font-display text-2xl font-black">Which country has the larger {round.metric}?</h1>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-2">
+          {round.countries.map((country) => (
+            <button
+              key={country.code}
+              disabled={disabled}
+              onClick={() => onAnswer(country.code === round.correctCountry.code)}
+              className="rounded-[24px] border-2 border-b-[5px] border-slate-200 bg-white p-4 text-left transition active:translate-y-[3px] active:border-b-2"
+            >
+              <FlagImage code={country.code} name={country.name} src={country.flagUrl} className="aspect-[4/3] w-full rounded-xl p-2" />
+              <p className="mt-3 font-display text-xl font-black">{country.name}</p>
+              {disabled && <p className="text-sm font-bold text-flaggo-muted">{formatMetric(country[round.metric] ?? 0, round.metric)}</p>}
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (round.mode === "odd-one-out") {
+    return (
+      <div className="space-y-5">
+        <div>
+          <Eyebrow icon="target">Odd one out</Eyebrow>
+          <h1 className="font-display text-2xl font-black">Which country does not fit the set?</h1>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          {round.countries.map((country) => (
+            <button
+              key={country.code}
+              disabled={disabled}
+              onClick={() => onAnswer(country.code === round.correctCountry.code)}
+              className="rounded-2xl border-2 border-b-[5px] border-slate-200 bg-white p-3 text-left transition active:translate-y-[3px] active:border-b-2"
+            >
+              <FlagImage code={country.code} name={country.name} src={country.flagUrl} className="aspect-[4/3] w-full rounded-xl p-2" />
+              <p className="mt-2 font-display font-black">{country.name}</p>
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-5">
+      <div className="rounded-[28px] bg-white p-6 text-center shadow-[0_8px_0_#e5e7eb]">
+        <p className="font-display text-2xl font-black text-flaggo-text">{round.statement}</p>
+      </div>
+      <div>
+        <Eyebrow icon="sparkle">True or false</Eyebrow>
+        <h1 className="font-display text-2xl font-black">Is this statement correct?</h1>
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <AnswerOption label="True" disabled={disabled} onClick={() => onAnswer(round.answer)} />
+        <AnswerOption label="False" disabled={disabled} onClick={() => onAnswer(!round.answer)} />
       </div>
     </div>
   );

@@ -30,11 +30,17 @@ function chooseReview(a: ReviewState | undefined, b: ReviewState | undefined): R
 export function normalizeProgress(progress: Partial<AppProgress> | null | undefined): AppProgress {
   const review: AppProgress["review"] = {};
   Object.entries(progress?.review ?? {}).forEach(([key, value]) => {
+    if (!value || typeof value !== "object") return;
     const parsed = parseReviewKey(key);
     if (!validTopic(parsed.topic)) return;
-    const nextKey = key.includes(":") ? key : reviewKey(key, "flag");
+    const state = value as Partial<ReviewState>;
+    const nextKey = reviewKey(parsed.code, parsed.topic);
     const normalizedState = {
-      ...value,
+      box: Math.max(1, nonNegativeInteger(state.box || 1)),
+      correctCount: nonNegativeInteger(state.correctCount),
+      wrongCount: nonNegativeInteger(state.wrongCount),
+      lastSeenAt: typeof state.lastSeenAt === "string" ? state.lastSeenAt : null,
+      nextReviewAt: typeof state.nextReviewAt === "string" ? state.nextReviewAt : new Date(0).toISOString(),
       countryCode: parsed.code,
       topic: parsed.topic
     };
@@ -47,9 +53,15 @@ export function normalizeProgress(progress: Partial<AppProgress> | null | undefi
   return {
     ...defaultProgress,
     ...(progress ?? {}),
-    completedLessonIds: progress?.completedLessonIds ?? [],
+    xp: nonNegativeInteger(progress?.xp),
+    coins: nonNegativeInteger(progress?.coins),
+    streak: nonNegativeInteger(progress?.streak),
+    lastLessonDate: typeof progress?.lastLessonDate === "string" ? progress.lastLessonDate : null,
+    completedLessonIds: Array.isArray(progress?.completedLessonIds) ? progress.completedLessonIds.filter((id): id is string => typeof id === "string") : [],
     selectedTopic,
     review,
+    totalCorrect: nonNegativeInteger(progress?.totalCorrect),
+    totalWrong: nonNegativeInteger(progress?.totalWrong),
     daily,
     arcade,
     decks
