@@ -30,7 +30,7 @@ export default function TestSetupScreen({
       <p className="mt-1 font-bold text-flaggo-muted">Pick a 50-country tier, answer in your head, then self-grade after reveal.</p>
 
       <section className="mt-5 rounded-[28px] bg-white p-5 shadow-[0_8px_0_#e5e7eb]">
-        <label className="text-sm font-black uppercase text-flaggo-blue">Topic</label>
+        <label className="font-display text-sm font-black uppercase text-flaggo-blue">Topic</label>
         <div className="mt-2 grid grid-cols-2 gap-3">
           {([
             ["flag", "Flags"],
@@ -39,7 +39,7 @@ export default function TestSetupScreen({
             <button
               key={value}
               onClick={() => setTopic(value)}
-              className={`rounded-2xl border-b-4 p-4 text-left font-black transition active:translate-y-1 ${
+              className={`rounded-2xl border-b-4 p-4 text-left font-display font-black transition active:translate-y-1 ${
                 topic === value ? "border-flaggo-greenDark bg-flaggo-green text-white" : "border-slate-200 bg-slate-50 text-flaggo-text"
               }`}
             >
@@ -48,11 +48,11 @@ export default function TestSetupScreen({
           ))}
         </div>
 
-        <label className="text-sm font-black uppercase text-flaggo-blue">Country set</label>
+        <label className="font-display text-sm font-black uppercase text-flaggo-blue">Country set</label>
         <select
           value={groupId}
           onChange={(event) => setGroupId(event.target.value)}
-          className="mt-2 w-full rounded-2xl border-2 border-flaggo-border bg-white p-4 font-black outline-none focus:border-flaggo-blue"
+          className="mt-2 w-full rounded-2xl border-2 border-flaggo-border bg-white p-4 font-display font-black outline-none focus:border-flaggo-blue"
         >
           {groups.map((group) => (
             <option key={group.id} value={group.id}>
@@ -64,7 +64,7 @@ export default function TestSetupScreen({
         <div className="mt-5 grid grid-cols-2 gap-3">
           <button
             onClick={() => setMode("recall")}
-            className={`rounded-2xl border-b-4 p-4 text-left font-black transition active:translate-y-1 ${
+            className={`rounded-2xl border-b-4 p-4 text-left font-display font-black transition active:translate-y-1 ${
               mode === "recall" ? "border-flaggo-greenDark bg-flaggo-green text-white" : "border-slate-200 bg-slate-50 text-flaggo-text"
             }`}
           >
@@ -73,7 +73,7 @@ export default function TestSetupScreen({
           </button>
           <button
             onClick={() => setMode("options")}
-            className={`rounded-2xl border-b-4 p-4 text-left font-black transition active:translate-y-1 ${
+            className={`rounded-2xl border-b-4 p-4 text-left font-display font-black transition active:translate-y-1 ${
               mode === "options" ? "border-flaggo-greenDark bg-flaggo-green text-white" : "border-slate-200 bg-slate-50 text-flaggo-text"
             }`}
           >
@@ -84,7 +84,7 @@ export default function TestSetupScreen({
 
         <div className="mt-5 rounded-2xl bg-flaggo-bg p-4">
           <p className="text-sm font-bold text-flaggo-muted">Selected set</p>
-          <p className="mt-1 font-black">{selected?.countries.slice(0, 6).map((country) => country.name).join(", ")}...</p>
+          <p className="mt-1 font-display font-black">{selected?.countries.slice(0, 6).map((country) => country.name).join(", ")}...</p>
         </div>
 
         <button onClick={() => selected && onStart(selected, mode, topic)} className="flaggo-button mt-5 w-full bg-flaggo-green text-white">

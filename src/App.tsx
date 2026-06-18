@@ -214,7 +214,7 @@ export default function App() {
       <Toast message={toast} />
       <SignInModal open={signInOpen} onClose={() => setSignInOpen(false)} />
       <AdConsentBanner onChange={setAdConsent} />
-      <div className="mx-auto flex h-[100dvh] max-w-md flex-col bg-flaggo-bg md:my-6 md:h-[calc(100dvh-3rem)] md:w-full md:overflow-hidden md:rounded-[30px] md:border md:border-flaggo-border md:shadow-soft">
+      <div className="mx-auto flex h-[100dvh] max-w-md flex-col bg-flaggo-bg md:my-6 md:h-[calc(100dvh-3rem)] md:w-full md:max-w-2xl md:overflow-hidden md:rounded-[30px] md:border md:border-flaggo-border md:shadow-soft lg:max-w-3xl">
         <main className="flex-1 overflow-y-auto">
         {loading && (
           <div className="px-5 pt-4">

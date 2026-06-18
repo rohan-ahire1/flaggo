@@ -14,7 +14,7 @@ export default function FlagImage({ code, name, src, className = "", imgClassNam
   return (
     <div className={`grid overflow-hidden rounded-2xl border border-flaggo-border bg-white p-2 ${className}`}>
       {failed ? (
-        <div className="grid h-full w-full place-items-center rounded-xl bg-slate-100 text-lg font-black text-flaggo-muted">
+        <div className="grid h-full w-full place-items-center rounded-xl bg-slate-100 font-display text-lg font-black text-flaggo-muted">
           {code}
         </div>
       ) : (

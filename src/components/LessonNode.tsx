@@ -27,7 +27,7 @@ export default function LessonNode({
     if (state === "completed") return <Icon name="check" size={26} />;
     if (state === "locked") return <Icon name="lock" size={22} />;
     if (lesson.isTerritoryLesson) return <Icon name="star" size={24} />;
-    return <span className="text-xl font-black">{index + 1}</span>;
+    return <span className="font-display text-xl font-black">{index + 1}</span>;
   };
 
   return (

@@ -88,7 +88,7 @@ export default function DecksScreen({
       <section className="mt-6 rounded-[24px] bg-white p-4 shadow-card">
         <h2 className="font-display text-xl font-black">Quick builders</h2>
         <button onClick={createWeak} className="mt-3 w-full rounded-2xl bg-flaggo-blue p-3 font-display font-black text-white">Weak countries</button>
-        <div className="mt-3 grid grid-cols-2 gap-2">
+        <div className="mt-3 grid grid-cols-2 gap-2 md:grid-cols-3">
           {regions.map((region) => <button key={region} onClick={() => createRegion(region)} className="rounded-2xl border border-flaggo-border p-3 font-display font-black">{region}</button>)}
         </div>
       </section>

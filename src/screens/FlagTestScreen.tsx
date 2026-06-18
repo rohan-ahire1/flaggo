@@ -112,7 +112,7 @@ export default function FlagTestScreen({
 
         {mode === "recall" ? (
           <div className="mt-5 rounded-[24px] bg-flaggo-bg p-4 text-center">
-            <p className="text-xl font-black">Say the {topic === "capital" ? "capital" : "country"} in your head.</p>
+            <p className="font-display text-xl font-black">Say the {topic === "capital" ? "capital" : "country"} in your head.</p>
             <p className="mt-1 text-sm font-bold text-flaggo-muted">Tap Reveal when you are ready.</p>
           </div>
         ) : (
@@ -125,7 +125,7 @@ export default function FlagTestScreen({
                 key={value}
                 disabled={revealed}
                 onClick={() => setSelectedValue(value)}
-                className={`rounded-2xl border-b-4 p-4 text-left font-black transition active:translate-y-1 ${
+                className={`rounded-2xl border-b-4 p-4 text-left font-display font-black transition active:translate-y-1 ${
                   selectedValue === value ? "border-flaggo-blue bg-blue-50 text-flaggo-blue" : "border-slate-200 bg-slate-50 text-flaggo-text"
                 }`}
               >
@@ -138,8 +138,8 @@ export default function FlagTestScreen({
 
         {revealed ? (
           <div className={`mt-5 rounded-[24px] p-4 ${graded === true ? "bg-green-50 text-flaggo-green" : graded === false ? "bg-red-50 text-flaggo-red" : "bg-blue-50 text-flaggo-blue"}`}>
-            <p className="text-sm font-black uppercase">{graded === null ? "Answer" : graded ? "Marked right" : "Marked wrong"}</p>
-            <p className="mt-1 font-black text-flaggo-text">{answer}</p>
+            <p className="font-display text-sm font-black uppercase">{graded === null ? "Answer" : graded ? "Marked right" : "Marked wrong"}</p>
+            <p className="mt-1 font-display font-black text-flaggo-text">{answer}</p>
             {topic === "flag" && country.officialName && <p className="text-sm font-bold text-flaggo-muted">{country.officialName}</p>}
             {topic === "capital" && <p className="text-sm font-bold text-flaggo-muted">{country.name}</p>}
             <div className="mt-4 grid grid-cols-2 gap-3">

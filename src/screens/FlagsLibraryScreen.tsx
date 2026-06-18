@@ -78,7 +78,7 @@ export default function FlagsLibraryScreen({
         </div>
       </div>
       {filtered.length ? (
-        <div className="mt-5 grid grid-cols-2 gap-3">
+        <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
           {filtered.map((country) => (
             <div key={country.code} className="relative">
               <FlagCard country={country} review={progress.review[reviewKey(country.code, topic)]} onClick={() => onPractice(country)} />

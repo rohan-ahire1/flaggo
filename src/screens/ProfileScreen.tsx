@@ -62,7 +62,7 @@ export default function ProfileScreen({ progress, onReset, userEmail, adsRemoved
         <p className="mt-1 text-sm font-bold text-flaggo-muted">Use your browser&apos;s install or add-to-home-screen button for quick offline practice.</p>
       </section>
 
-      <div className="mt-5 grid grid-cols-2 gap-3">
+      <div className="mt-5 grid grid-cols-2 gap-3 md:grid-cols-4">
         {stats.map((stat) => (
           <div key={stat.label} className="rounded-[22px] border border-flaggo-border bg-white p-4 shadow-card">
             <div className={`flex items-center gap-1.5 ${stat.color}`}>
