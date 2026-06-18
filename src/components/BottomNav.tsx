@@ -11,7 +11,7 @@ const tabs: { screen: Screen; label: string; icon: IconName }[] = [
 
 export default function BottomNav({ active, onNavigate }: { active: Screen; onNavigate: (screen: Screen) => void }) {
   return (
-    <nav className="safe-bottom sticky bottom-0 z-30 grid grid-cols-5 gap-1 border-t border-flaggo-border bg-white/90 px-2 pt-2 shadow-[0_-12px_30px_rgba(38,50,56,0.08)] backdrop-blur-lg">
+    <nav className="safe-bottom z-30 grid shrink-0 grid-cols-5 gap-1 border-t border-flaggo-border bg-white/90 px-2 pt-2 shadow-[0_-12px_30px_rgba(38,50,56,0.08)] backdrop-blur-lg">
       {tabs.map((tab) => {
         const isActive = active === tab.screen;
         return (

@@ -1,5 +1,6 @@
 export type Country = {
   code: string;
+  ccn3?: string;
   name: string;
   officialName?: string;
   continent:
@@ -14,6 +15,12 @@ export type Country = {
   isUNMember: boolean;
   isIndependent: boolean;
   flagUrl: string;
+  capital?: string;
+  currencyCode?: string;
+  currencyName?: string;
+  currencySymbol?: string;
+  languages?: string[];
+  population?: number;
 };
 
 export const getFlagUrl = (code: string) =>

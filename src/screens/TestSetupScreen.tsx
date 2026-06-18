@@ -1,27 +1,53 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { Country } from "../types/country";
+import type { Topic } from "../types/topic";
 import { getPopularityGroups, type PopularityGroup } from "../utils/popularity";
 
 export type TestMode = "recall" | "options";
 
 export default function TestSetupScreen({
   countries,
+  selectedTopic,
   onStart
 }: {
   countries: Country[];
-  onStart: (group: PopularityGroup, mode: TestMode) => void;
+  selectedTopic: Topic;
+  onStart: (group: PopularityGroup, mode: TestMode, topic: Topic) => void;
 }) {
-  const groups = useMemo(() => getPopularityGroups(countries), [countries]);
+  const [topic, setTopic] = useState<Topic>(selectedTopic);
+  const topicCountries = useMemo(() => topic === "capital" ? countries.filter((country) => country.capital?.trim()) : countries, [countries, topic]);
+  const groups = useMemo(() => getPopularityGroups(topicCountries), [topicCountries]);
   const [groupId, setGroupId] = useState(groups[0]?.id ?? "");
   const [mode, setMode] = useState<TestMode>("recall");
   const selected = groups.find((group) => group.id === groupId) ?? groups[0];
+  useEffect(() => {
+    setGroupId(groups[0]?.id ?? "");
+  }, [groups]);
 
   return (
     <main className="p-5 pb-24">
       <h1 className="font-display text-3xl font-black">Custom test</h1>
-      <p className="mt-1 font-bold text-flaggo-muted">Pick a 50-flag tier, answer in your head, then self-grade after reveal.</p>
+      <p className="mt-1 font-bold text-flaggo-muted">Pick a 50-country tier, answer in your head, then self-grade after reveal.</p>
 
       <section className="mt-5 rounded-[28px] bg-white p-5 shadow-[0_8px_0_#e5e7eb]">
+        <label className="text-sm font-black uppercase text-flaggo-blue">Topic</label>
+        <div className="mt-2 grid grid-cols-2 gap-3">
+          {([
+            ["flag", "Flags"],
+            ["capital", "Capitals"]
+          ] as const).map(([value, label]) => (
+            <button
+              key={value}
+              onClick={() => setTopic(value)}
+              className={`rounded-2xl border-b-4 p-4 text-left font-black transition active:translate-y-1 ${
+                topic === value ? "border-flaggo-greenDark bg-flaggo-green text-white" : "border-slate-200 bg-slate-50 text-flaggo-text"
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
         <label className="text-sm font-black uppercase text-flaggo-blue">Country set</label>
         <select
           value={groupId}
@@ -61,7 +87,7 @@ export default function TestSetupScreen({
           <p className="mt-1 font-black">{selected?.countries.slice(0, 6).map((country) => country.name).join(", ")}...</p>
         </div>
 
-        <button onClick={() => selected && onStart(selected, mode)} className="flaggo-button mt-5 w-full bg-flaggo-green text-white">
+        <button onClick={() => selected && onStart(selected, mode, topic)} className="flaggo-button mt-5 w-full bg-flaggo-green text-white">
           Start test
         </button>
       </section>

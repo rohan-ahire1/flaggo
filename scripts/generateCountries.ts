@@ -4,10 +4,15 @@ import { resolve } from "node:path";
 type RawCountry = {
   name?: { common?: string; official?: string };
   cca2?: string;
+  ccn3?: string;
   region?: string;
   subregion?: string;
   unMember?: boolean;
   independent?: boolean;
+  capital?: string[];
+  currencies?: Record<string, { name?: string; symbol?: string }>;
+  languages?: Record<string, string>;
+  population?: number;
 };
 
 const easyCodes = [
@@ -37,8 +42,10 @@ const countries = raw
     const code = country.cca2!.toUpperCase();
     const isIndependent = Boolean(country.independent);
     const isUNMember = Boolean(country.unMember);
+    const currency = Object.entries(country.currencies ?? {})[0];
     return {
       code,
+      ccn3: country.ccn3 || undefined,
       name: country.name!.common!,
       officialName: country.name!.official,
       continent: normalizeContinent(country.region),
@@ -46,7 +53,13 @@ const countries = raw
       difficulty: getDifficulty(code, isIndependent, isUNMember),
       isUNMember,
       isIndependent,
-      flagUrl: `https://flagcdn.com/${code.toLowerCase()}.svg`
+      flagUrl: `https://flagcdn.com/${code.toLowerCase()}.svg`,
+      capital: country.capital?.[0],
+      currencyCode: currency?.[0],
+      currencyName: currency?.[1].name,
+      currencySymbol: currency?.[1].symbol,
+      languages: Object.values(country.languages ?? {}),
+      population: country.population
     };
   })
   .filter((country) => country.continent && validContinents.includes(country.continent))

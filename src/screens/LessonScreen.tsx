@@ -6,6 +6,7 @@ import QuestionCard from "../components/QuestionCard";
 import type { Country } from "../types/country";
 import type { Lesson } from "../types/lesson";
 import type { AppProgress } from "../types/progress";
+import type { Topic } from "../types/topic";
 import { updateStreak } from "../utils/date";
 import { generateLessonQuestions, generateReviewQuestions, type Question } from "../utils/quiz";
 import { updateReviewState } from "../utils/spacedRepetition";
@@ -19,7 +20,8 @@ export default function LessonScreen({
   onProgress,
   onComplete,
   onHome,
-  reviewCountries = []
+  reviewCountries = [],
+  reviewTopic = "flag"
 }: {
   lesson?: Lesson;
   countries: Country[];
@@ -29,21 +31,28 @@ export default function LessonScreen({
   onComplete: (result: LessonResult) => void;
   onHome: () => void;
   reviewCountries?: Country[];
+  reviewTopic?: Topic;
 }) {
+  const activeTopic = mode === "review" ? reviewTopic : lesson?.topic ?? "flag";
   const questions = useMemo<Question[]>(() => {
-    if (mode === "review") return generateReviewQuestions(reviewCountries.length ? reviewCountries : countries);
+    if (mode === "review") return generateReviewQuestions(reviewCountries.length ? reviewCountries : countries, activeTopic);
     return lesson ? generateLessonQuestions(lesson, countries) : [];
-  }, [countries, lesson, mode, reviewCountries]);
+  }, [activeTopic, countries, lesson, mode, reviewCountries]);
   const [index, setIndex] = useState(0);
   const [correct, setCorrect] = useState(0);
   const [xp, setXp] = useState(0);
   const [feedback, setFeedback] = useState<{ ok: boolean; question: Question } | null>(null);
   const question = questions[index];
+  const correctAnswerLabel = (answeredQuestion: Question) => {
+    if ("correctCapital" in answeredQuestion) return answeredQuestion.correctCapital;
+    if (answeredQuestion.type === "capital-true-false") return answeredQuestion.correctCountry.capital ?? answeredQuestion.correctCountry.name;
+    return answeredQuestion.correctCountry.name;
+  };
 
   function answer(wasCorrect: boolean) {
     if (!question || feedback) return;
     const earned = wasCorrect ? 10 : 0;
-    let next = updateReviewState(question.correctCountry.code, wasCorrect, progress);
+    let next = updateReviewState(question.correctCountry.code, activeTopic, wasCorrect, progress);
     next = { ...next, xp: next.xp + earned };
     onProgress(next);
     setXp((value) => value + earned);
@@ -64,7 +73,7 @@ export default function LessonScreen({
       });
     }
     onProgress(next);
-    onComplete({ xpEarned: xp + bonusXp, accuracy: Math.round((correct / total) * 100), correct, total, streak: next.streak, coinsEarned });
+    onComplete({ xpEarned: xp + bonusXp, accuracy: Math.round((correct / total) * 100), correct, total, streak: next.streak, coinsEarned, topic: activeTopic });
   }
 
   function continueNext() {
@@ -101,7 +110,15 @@ export default function LessonScreen({
       <section key={index} className="animate-fade-in p-5">
         <QuestionCard question={question} disabled={Boolean(feedback)} onAnswer={answer} />
       </section>
-      {feedback && <FeedbackPanel correct={feedback.ok} country={feedback.question.correctCountry} xp={10} onContinue={continueNext} />}
+      {feedback && (
+        <FeedbackPanel
+          correct={feedback.ok}
+          country={feedback.question.correctCountry}
+          xp={10}
+          answerLabel={correctAnswerLabel(feedback.question)}
+          onContinue={continueNext}
+        />
+      )}
     </main>
   );
 }

@@ -3,13 +3,28 @@ import FlagCard from "../components/FlagCard";
 import Icon from "../components/Icon";
 import type { Country } from "../types/country";
 import type { AppProgress } from "../types/progress";
+import { reviewKey } from "../types/topic";
+import { isStarred, toggleStarredDeck } from "../utils/decks";
 
-export default function FlagsLibraryScreen({ countries, progress, onPractice }: { countries: Country[]; progress: AppProgress; onPractice: (country: Country) => void }) {
+export default function FlagsLibraryScreen({
+  countries,
+  progress,
+  onProgress,
+  onPractice,
+  onExploreMap
+}: {
+  countries: Country[];
+  progress: AppProgress;
+  onProgress: (progress: AppProgress) => void;
+  onPractice: (country: Country) => void;
+  onExploreMap: () => void;
+}) {
   const [query, setQuery] = useState("");
   const [continent, setContinent] = useState("All");
   const [difficulty, setDifficulty] = useState("All");
   const [scope, setScope] = useState("All");
   const [sort, setSort] = useState("az");
+  const topic = progress.selectedTopic;
 
   const filtered = useMemo(() => {
     const result = countries.filter((country) => {
@@ -22,15 +37,19 @@ export default function FlagsLibraryScreen({ countries, progress, onPractice }: 
       return true;
     });
     return result.sort((a, b) => {
-      if (sort === "mastery") return (progress.review[b.code]?.box ?? 0) - (progress.review[a.code]?.box ?? 0);
-      if (sort === "weakest") return (progress.review[b.code]?.wrongCount ?? 0) - (progress.review[a.code]?.wrongCount ?? 0);
+      if (sort === "mastery") return (progress.review[reviewKey(b.code, topic)]?.box ?? 0) - (progress.review[reviewKey(a.code, topic)]?.box ?? 0);
+      if (sort === "weakest") return (progress.review[reviewKey(b.code, topic)]?.wrongCount ?? 0) - (progress.review[reviewKey(a.code, topic)]?.wrongCount ?? 0);
       return a.name.localeCompare(b.name);
     });
-  }, [continent, countries, difficulty, progress.review, query, scope, sort]);
+  }, [continent, countries, difficulty, progress.review, query, scope, sort, topic]);
 
   return (
     <main className="p-5 pb-24">
       <h1 className="font-display text-3xl font-black">Flag library</h1>
+      <div className="mt-4 grid grid-cols-2 rounded-2xl bg-white p-1 shadow-card">
+        <button className="rounded-xl bg-flaggo-green px-4 py-2 font-display text-sm font-extrabold text-white shadow-sm">Flags</button>
+        <button onClick={onExploreMap} className="rounded-xl px-4 py-2 font-display text-sm font-extrabold text-flaggo-muted hover:text-flaggo-text">Explore</button>
+      </div>
       <div className="mt-4 grid gap-3">
         <div className="relative">
           <Icon name="search" size={18} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-flaggo-muted" />
@@ -60,7 +79,21 @@ export default function FlagsLibraryScreen({ countries, progress, onPractice }: 
       </div>
       {filtered.length ? (
         <div className="mt-5 grid grid-cols-2 gap-3">
-          {filtered.map((country) => <FlagCard key={country.code} country={country} review={progress.review[country.code]} onClick={() => onPractice(country)} />)}
+          {filtered.map((country) => (
+            <div key={country.code} className="relative">
+              <FlagCard country={country} review={progress.review[reviewKey(country.code, topic)]} onClick={() => onPractice(country)} />
+              <button
+                onClick={(event) => {
+                  event.stopPropagation();
+                  onProgress(toggleStarredDeck(progress, country.code, topic));
+                }}
+                className={`absolute right-2 top-2 z-20 grid h-8 w-8 place-items-center rounded-full shadow-md ${isStarred(progress, country.code, topic) ? "bg-flaggo-yellow text-white" : "bg-white text-flaggo-muted"}`}
+                aria-label={isStarred(progress, country.code, topic) ? "Remove from starred deck" : "Add to starred deck"}
+              >
+                <Icon name="star" size={15} />
+              </button>
+            </div>
+          ))}
         </div>
       ) : (
         <div className="mt-8 rounded-[24px] bg-white p-6 text-center font-bold text-flaggo-muted">No flags match those filters.</div>

@@ -4,7 +4,8 @@ import Icon from "../components/Icon";
 import ProgressBar from "../components/ProgressBar";
 import type { Country } from "../types/country";
 import type { AppProgress } from "../types/progress";
-import { getDistractors, shuffleArray } from "../utils/quiz";
+import type { Topic } from "../types/topic";
+import { getCapitalDistractors, getDistractors, shuffleArray } from "../utils/quiz";
 import { updateReviewState } from "../utils/spacedRepetition";
 import type { TestMode } from "./TestSetupScreen";
 
@@ -12,6 +13,7 @@ export default function FlagTestScreen({
   countries,
   allCountries,
   mode,
+  topic,
   progress,
   onProgress,
   onDone
@@ -19,28 +21,32 @@ export default function FlagTestScreen({
   countries: Country[];
   allCountries: Country[];
   mode: TestMode;
+  topic: Topic;
   progress: AppProgress;
   onProgress: (progress: AppProgress) => void;
   onDone: () => void;
 }) {
   const questions = useMemo(() => shuffleArray(countries), [countries]);
   const [index, setIndex] = useState(0);
-  const [selectedCode, setSelectedCode] = useState<string | null>(null);
+  const [selectedValue, setSelectedValue] = useState<string | null>(null);
   const [revealed, setRevealed] = useState(false);
   const [graded, setGraded] = useState<null | boolean>(null);
   const [correctCount, setCorrectCount] = useState(0);
   const country = questions[index];
   const options = useMemo(() => {
     if (!country) return [];
+    if (topic === "capital") return shuffleArray([country.capital!.trim(), ...getCapitalDistractors(country, allCountries, 3)]);
     return shuffleArray([country, ...getDistractors(country, allCountries, 3)]);
-  }, [allCountries, country]);
+  }, [allCountries, country, topic]);
+  const answer = topic === "capital" ? country?.capital?.trim() : country?.name;
+  const topicLabel = topic === "capital" ? "Capital" : "Flag";
 
   function reveal() {
     if (!country || revealed) return;
     setRevealed(true);
     if ("speechSynthesis" in window) {
       window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(country.name);
+      const utterance = new SpeechSynthesisUtterance(answer ?? country.name);
       utterance.rate = 0.9;
       window.speechSynthesis.speak(utterance);
     }
@@ -50,7 +56,7 @@ export default function FlagTestScreen({
     if (!country || graded !== null) return;
     setGraded(ok);
     setCorrectCount((value) => value + (ok ? 1 : 0));
-    const next = updateReviewState(country.code, ok, progress);
+    const next = updateReviewState(country.code, topic, ok, progress);
     onProgress({ ...next, xp: next.xp + (ok ? 5 : 0) });
   }
 
@@ -60,7 +66,7 @@ export default function FlagTestScreen({
       return;
     }
     setIndex((value) => value + 1);
-    setSelectedCode(null);
+    setSelectedValue(null);
     setRevealed(false);
     setGraded(null);
   }
@@ -92,7 +98,7 @@ export default function FlagTestScreen({
               <Icon name={mode === "recall" ? "target" : "library"} size={15} />
               {mode === "recall" ? "Recall test" : "Multiple choice"}
             </p>
-            <h1 className="font-display text-2xl font-black">Flag {index + 1} of {questions.length}</h1>
+            <h1 className="font-display text-2xl font-black">{topicLabel} {index + 1} of {questions.length}</h1>
           </div>
           <div className="flex items-center gap-1 rounded-2xl bg-white px-3 py-2 text-sm font-display font-extrabold text-flaggo-green shadow-card">
             <Icon name="check" size={15} />
@@ -106,31 +112,36 @@ export default function FlagTestScreen({
 
         {mode === "recall" ? (
           <div className="mt-5 rounded-[24px] bg-flaggo-bg p-4 text-center">
-            <p className="text-xl font-black">Say the country in your head.</p>
+            <p className="text-xl font-black">Say the {topic === "capital" ? "capital" : "country"} in your head.</p>
             <p className="mt-1 text-sm font-bold text-flaggo-muted">Tap Reveal when you are ready.</p>
           </div>
         ) : (
           <div className="mt-5 grid gap-3">
-            {options.map((option) => (
+            {options.map((option) => {
+              const value = typeof option === "string" ? option : option.code;
+              const label = typeof option === "string" ? option : option.name;
+              return (
               <button
-                key={option.code}
+                key={value}
                 disabled={revealed}
-                onClick={() => setSelectedCode(option.code)}
+                onClick={() => setSelectedValue(value)}
                 className={`rounded-2xl border-b-4 p-4 text-left font-black transition active:translate-y-1 ${
-                  selectedCode === option.code ? "border-flaggo-blue bg-blue-50 text-flaggo-blue" : "border-slate-200 bg-slate-50 text-flaggo-text"
+                  selectedValue === value ? "border-flaggo-blue bg-blue-50 text-flaggo-blue" : "border-slate-200 bg-slate-50 text-flaggo-text"
                 }`}
               >
-                {option.name}
+                {label}
               </button>
-            ))}
+              );
+            })}
           </div>
         )}
 
         {revealed ? (
           <div className={`mt-5 rounded-[24px] p-4 ${graded === true ? "bg-green-50 text-flaggo-green" : graded === false ? "bg-red-50 text-flaggo-red" : "bg-blue-50 text-flaggo-blue"}`}>
             <p className="text-sm font-black uppercase">{graded === null ? "Answer" : graded ? "Marked right" : "Marked wrong"}</p>
-            <p className="mt-1 font-black text-flaggo-text">{country.name}</p>
-            {country.officialName && <p className="text-sm font-bold text-flaggo-muted">{country.officialName}</p>}
+            <p className="mt-1 font-black text-flaggo-text">{answer}</p>
+            {topic === "flag" && country.officialName && <p className="text-sm font-bold text-flaggo-muted">{country.officialName}</p>}
+            {topic === "capital" && <p className="text-sm font-bold text-flaggo-muted">{country.name}</p>}
             <div className="mt-4 grid grid-cols-2 gap-3">
               <button
                 disabled={graded !== null}
@@ -155,7 +166,7 @@ export default function FlagTestScreen({
           disabled={revealed && graded === null}
           className="flaggo-button mt-5 w-full bg-flaggo-green text-white"
         >
-          {revealed ? (index >= questions.length - 1 ? "Finish" : "Next flag") : "Reveal answer"}
+          {revealed ? (index >= questions.length - 1 ? "Finish" : `Next ${topic}`) : "Reveal answer"}
         </button>
       </section>
     </main>
