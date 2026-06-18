@@ -57,7 +57,7 @@ export default function SignInModal({ open, onClose }: { open: boolean; onClose:
             <h2 className="font-display text-2xl font-black">Sign in</h2>
             <p className="mt-1 text-sm font-bold text-flaggo-muted">Sync progress and keep Pro across devices.</p>
           </div>
-          <button onClick={onClose} className="rounded-full p-2 font-black text-flaggo-muted hover:bg-slate-100" aria-label="Close">
+          <button onClick={onClose} className="rounded-full p-2 font-display font-black text-flaggo-muted hover:bg-slate-100" aria-label="Close">
             x
           </button>
         </div>

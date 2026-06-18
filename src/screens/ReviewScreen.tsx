@@ -62,7 +62,7 @@ export default function ReviewScreen({
         <Icon name="heart" size={18} className="text-flaggo-red" /> Weakest {label}
       </h2>
       {weak.length ? (
-        <div className="mt-3 grid grid-cols-2 gap-3">
+        <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
           {weak.map((country) => <FlagCard key={country.code} country={country} review={progress.review[reviewKey(country.code, topic)]} onClick={() => onStart([country])} />)}
         </div>
       ) : <p className="mt-3 font-bold text-flaggo-muted">Practice will include new {label} until weak {label} appear.</p>}

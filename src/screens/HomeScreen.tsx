@@ -92,7 +92,7 @@ export default function HomeScreen({
             </span>
           </span>
         </button>
-        <div className="mt-4 grid grid-cols-2 gap-3">
+        <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">
           {[
             ["Paths", "learn", onOpenPaths],
             ["Arcade", "trophy", onOpenArcade],
