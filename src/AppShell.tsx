@@ -1,0 +1,40 @@
+import { useEffect } from "react";
+import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
+import App from "./App";
+import { AuthProvider } from "./auth/AuthProvider";
+import AuthCallbackPage from "./pages/AuthCallbackPage";
+import { PrivacyPage, RefundPage, TermsPage } from "./pages/LegalPages";
+import NotFoundPage from "./pages/NotFoundPage";
+import { ProCancelPage, ProSuccessPage } from "./pages/ProPages";
+import { loadPlausible, trackEvent } from "./lib/analytics";
+
+function PageTracker() {
+  const location = useLocation();
+  useEffect(() => {
+    loadPlausible();
+  }, []);
+  useEffect(() => {
+    trackEvent("pageview", { path: location.pathname });
+  }, [location.pathname]);
+  return null;
+}
+
+export default function AppShell() {
+  return (
+    <BrowserRouter>
+      <AuthProvider>
+        <PageTracker />
+        <Routes>
+          <Route path="/" element={<App />} />
+          <Route path="/privacy" element={<PrivacyPage />} />
+          <Route path="/terms" element={<TermsPage />} />
+          <Route path="/refund" element={<RefundPage />} />
+          <Route path="/auth/callback" element={<AuthCallbackPage />} />
+          <Route path="/pro/success" element={<ProSuccessPage />} />
+          <Route path="/pro/cancel" element={<ProCancelPage />} />
+          <Route path="*" element={<NotFoundPage />} />
+        </Routes>
+      </AuthProvider>
+    </BrowserRouter>
+  );
+}

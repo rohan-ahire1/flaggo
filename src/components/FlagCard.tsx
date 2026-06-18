@@ -18,6 +18,7 @@ export default function FlagCard({ country, review, onClick }: { country: Countr
       )}
       <FlagImage code={country.code} name={country.name} src={country.flagUrl} className="mb-3 aspect-[4/3] w-full" />
       <div className="truncate font-display font-extrabold leading-tight">{country.name}</div>
+      {country.capital && <div className="truncate text-xs font-bold text-flaggo-blue">{country.capital}</div>}
       <div className="text-xs font-bold capitalize text-flaggo-muted">{country.continent} · {country.difficulty}</div>
       <div className="mt-3 h-2 overflow-hidden rounded-full bg-slate-100">
         <div

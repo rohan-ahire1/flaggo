@@ -1,4 +1,5 @@
 import Icon from "../components/Icon";
+import type { Topic } from "../types/topic";
 
 export type LessonResult = {
   xpEarned: number;
@@ -7,11 +8,12 @@ export type LessonResult = {
   total: number;
   streak: number;
   coinsEarned: number;
+  topic: Topic;
 };
 
 const CONFETTI = ["#58CC02", "#1CB0F6", "#FFC800", "#FF9600", "#CE82FF", "#FF4B4B"];
 
-export default function LessonCompleteScreen({ result, onContinue }: { result: LessonResult; onContinue: () => void }) {
+export default function LessonCompleteScreen({ result, onContinue, adSlot }: { result: LessonResult; onContinue: () => void; adSlot?: React.ReactNode }) {
   const perfect = result.correct === result.total;
   return (
     <main className="relative grid min-h-screen place-items-center overflow-hidden bg-hero-sky p-5">
@@ -58,6 +60,7 @@ export default function LessonCompleteScreen({ result, onContinue }: { result: L
         <button onClick={onContinue} className="flaggo-button mt-6 w-full bg-green-grad text-white shadow-button-green">
           Continue
         </button>
+        {adSlot}
       </section>
     </main>
   );

@@ -1,5 +1,6 @@
 import type { Country } from "../types/country";
 import type { AppProgress, ReviewState } from "../types/progress";
+import { reviewKey, type Topic } from "../types/topic";
 
 const intervals: Record<number, number> = {
   0: 0,
@@ -18,11 +19,14 @@ function dateAfter(days: number) {
 
 export function updateReviewState(
   countryCode: string,
+  topic: Topic,
   wasCorrect: boolean,
   progress: AppProgress
 ): AppProgress {
-  const previous: ReviewState = progress.review[countryCode] ?? {
+  const key = reviewKey(countryCode, topic);
+  const previous: ReviewState = progress.review[key] ?? {
     countryCode,
+    topic,
     box: 0,
     correctCount: 0,
     wrongCount: 0,
@@ -36,8 +40,10 @@ export function updateReviewState(
     totalWrong: progress.totalWrong + (wasCorrect ? 0 : 1),
     review: {
       ...progress.review,
-      [countryCode]: {
+      [key]: {
         ...previous,
+        countryCode,
+        topic,
         box,
         correctCount: previous.correctCount + (wasCorrect ? 1 : 0),
         wrongCount: previous.wrongCount + (wasCorrect ? 0 : 1),
@@ -48,33 +54,33 @@ export function updateReviewState(
   };
 }
 
-export function getDueCountries(progress: AppProgress, countries: Country[]) {
+export function getDueCountries(progress: AppProgress, countries: Country[], topic: Topic) {
   const now = Date.now();
   return countries
     .filter((country) => {
-      const state = progress.review[country.code];
+      const state = progress.review[reviewKey(country.code, topic)];
       return !state || new Date(state.nextReviewAt).getTime() <= now;
     })
     .sort((a, b) => {
-      const ar = progress.review[a.code];
-      const br = progress.review[b.code];
+      const ar = progress.review[reviewKey(a.code, topic)];
+      const br = progress.review[reviewKey(b.code, topic)];
       return (ar?.box ?? -1) - (br?.box ?? -1);
     });
 }
 
-export function getWeakCountries(progress: AppProgress, countries: Country[]) {
+export function getWeakCountries(progress: AppProgress, countries: Country[], topic: Topic) {
   return countries
-    .filter((country) => (progress.review[country.code]?.wrongCount ?? 0) > 0)
+    .filter((country) => (progress.review[reviewKey(country.code, topic)]?.wrongCount ?? 0) > 0)
     .sort((a, b) => {
-      const ar = progress.review[a.code];
-      const br = progress.review[b.code];
+      const ar = progress.review[reviewKey(a.code, topic)];
+      const br = progress.review[reviewKey(b.code, topic)];
       return (br?.wrongCount ?? 0) - (ar?.wrongCount ?? 0);
     });
 }
 
-export function getMasteredCountries(progress: AppProgress, countries: Country[]) {
+export function getMasteredCountries(progress: AppProgress, countries: Country[], topic: Topic) {
   return countries.filter((country) => {
-    const state = progress.review[country.code];
+    const state = progress.review[reviewKey(country.code, topic)];
     if (!state) return false;
     return state.box >= 5 && state.correctCount >= 5 && state.correctCount >= state.wrongCount * 2;
   });

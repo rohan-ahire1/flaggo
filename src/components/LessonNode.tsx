@@ -41,7 +41,7 @@ export default function LessonNode({
       </span>
       <span className="min-w-0">
         <span className="block truncate text-sm font-display font-extrabold leading-tight">{lesson.title}</span>
-        <span className="block text-xs font-bold opacity-80">{lesson.countryCodes.length} flags</span>
+        <span className="block text-xs font-bold opacity-80">{lesson.countryCodes.length} {lesson.topic === "capital" ? "capitals" : "flags"}</span>
       </span>
     </button>
   );

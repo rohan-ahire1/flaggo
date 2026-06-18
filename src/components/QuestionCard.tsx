@@ -68,6 +68,75 @@ export default function QuestionCard({
     );
   }
 
+  if (question.type === "guess-capital") {
+    return (
+      <div className="space-y-5">
+        <Flag />
+        <div>
+          <Eyebrow icon="globe">Pick the capital</Eyebrow>
+          <h1 className="font-display text-2xl font-black">What is the capital of {question.correctCountry.name}?</h1>
+        </div>
+        <div className="grid gap-3">
+          {question.optionCapitals.map((capital) => (
+            <AnswerOption key={capital} label={capital} disabled={disabled} onClick={() => onAnswer(capital === question.correctCapital)} />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (question.type === "capital-to-country") {
+    return (
+      <div className="space-y-5">
+        <div className="rounded-[28px] bg-white p-6 text-center shadow-[0_8px_0_#e5e7eb]">
+          <p className="font-display text-4xl font-black text-flaggo-text">{question.correctCountry.capital}</p>
+        </div>
+        <div>
+          <Eyebrow icon="target">Capital to country</Eyebrow>
+          <h1 className="font-display text-2xl font-black">Which country has this capital?</h1>
+        </div>
+        <div className="grid gap-3">
+          {question.options.map((country) => (
+            <AnswerOption key={country.code} country={country} disabled={disabled} onClick={() => onAnswer(country.code === question.correctCountry.code)} />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (question.type === "flag-to-capital") {
+    return (
+      <div className="space-y-5">
+        <Flag />
+        <div>
+          <Eyebrow icon="review">Flag to capital</Eyebrow>
+          <h1 className="font-display text-2xl font-black">Which capital belongs to this country?</h1>
+        </div>
+        <div className="grid gap-3">
+          {question.optionCapitals.map((capital) => (
+            <AnswerOption key={capital} label={capital} disabled={disabled} onClick={() => onAnswer(capital === question.correctCapital)} />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (question.type === "capital-true-false") {
+    return (
+      <div className="space-y-5">
+        <Flag />
+        <div>
+          <Eyebrow icon="sparkle">True or false</Eyebrow>
+          <h1 className="font-display text-2xl font-black">Is {question.shownCapital} the capital of {question.correctCountry.name}?</h1>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <AnswerOption label="Yes" disabled={disabled} onClick={() => onAnswer(question.answer)} />
+          <AnswerOption label="No" disabled={disabled} onClick={() => onAnswer(!question.answer)} />
+        </div>
+      </div>
+    );
+  }
+
   if (question.type === "true-false") {
     return (
       <div className="space-y-5">

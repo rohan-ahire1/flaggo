@@ -6,11 +6,13 @@ export default function FeedbackPanel({
   correct,
   country,
   xp,
+  answerLabel,
   onContinue
 }: {
   correct: boolean;
   country: Country;
   xp: number;
+  answerLabel?: string;
   onContinue: () => void;
 }) {
   return (
@@ -34,7 +36,7 @@ export default function FeedbackPanel({
                 <Icon name="bolt" size={16} /> +{xp} XP
               </>
             ) : (
-              <>Correct answer: {country.name}</>
+              <>Correct answer: {answerLabel ?? country.name}</>
             )}
           </p>
         </div>
