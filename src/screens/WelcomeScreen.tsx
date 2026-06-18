@@ -1,6 +1,7 @@
 import { countries } from "../data/countries";
 import FlagImage from "../components/FlagImage";
 import Icon from "../components/Icon";
+import { BRAND } from "../config/brand";
 
 export default function WelcomeScreen({ onStart, onExplore }: { onStart: () => void; onExplore: () => void }) {
   const heroFlags = ["JP", "BR", "IN", "ZA", "CA", "KR"]
@@ -30,9 +31,9 @@ export default function WelcomeScreen({ onStart, onExplore }: { onStart: () => v
           <Icon name="globe" size={14} />
           195+ flags
         </div>
-        <h1 className="font-display text-5xl font-black tracking-tight text-flaggo-green">Flaggo</h1>
+        <h1 className="font-display text-5xl font-black tracking-tight text-flaggo-green">{BRAND.name}</h1>
         <p className="mt-3 text-balance text-lg font-bold text-flaggo-muted">
-          Learn world flags one tiny lesson at a time.
+          {BRAND.tagline}
         </p>
 
         <div className="mt-8 grid gap-3">

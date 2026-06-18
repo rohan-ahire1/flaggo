@@ -3,9 +3,8 @@ import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 import App from "./App";
 import { AuthProvider } from "./auth/AuthProvider";
 import AuthCallbackPage from "./pages/AuthCallbackPage";
-import { PrivacyPage, RefundPage, TermsPage } from "./pages/LegalPages";
+import { PrivacyPage, TermsPage } from "./pages/LegalPages";
 import NotFoundPage from "./pages/NotFoundPage";
-import { ProCancelPage, ProSuccessPage } from "./pages/ProPages";
 import { loadPlausible, trackEvent } from "./lib/analytics";
 
 function PageTracker() {
@@ -28,10 +27,7 @@ export default function AppShell() {
           <Route path="/" element={<App />} />
           <Route path="/privacy" element={<PrivacyPage />} />
           <Route path="/terms" element={<TermsPage />} />
-          <Route path="/refund" element={<RefundPage />} />
           <Route path="/auth/callback" element={<AuthCallbackPage />} />
-          <Route path="/pro/success" element={<ProSuccessPage />} />
-          <Route path="/pro/cancel" element={<ProCancelPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </AuthProvider>

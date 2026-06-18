@@ -15,8 +15,11 @@ export default function HomeScreen({
   onOpenDaily,
   onOpenPaths,
   onOpenArcade,
+  onOpenTrivia,
   onOpenDecks,
-  onOpenLeaderboard
+  onOpenLeaderboard,
+  onOpenFriends,
+  onChallenge
 }: {
   progress: AppProgress;
   lessons: Lesson[];
@@ -26,8 +29,11 @@ export default function HomeScreen({
   onOpenDaily: () => void;
   onOpenPaths: () => void;
   onOpenArcade: () => void;
+  onOpenTrivia: () => void;
   onOpenDecks: () => void;
   onOpenLeaderboard: () => void;
+  onOpenFriends: () => void;
+  onChallenge: () => void;
 }) {
   const topicLessons = lessonsForTopic(lessons, progress.selectedTopic);
   const completed = topicLessons.filter((lesson) => progress.completedLessonIds.includes(lesson.id)).length;
@@ -92,12 +98,25 @@ export default function HomeScreen({
             </span>
           </span>
         </button>
-        <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">
+        <button onClick={onChallenge} className="mt-4 w-full overflow-hidden rounded-[24px] border border-flaggo-border bg-white p-4 text-left shadow-card">
+          <span className="flex items-center gap-4">
+            <span className="grid h-14 w-14 place-items-center rounded-2xl bg-flaggo-green/10 text-flaggo-green">
+              <Icon name="trophy" size={28} />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block font-display text-xl font-black">Challenge a friend</span>
+              <span className="block font-bold text-flaggo-muted">Share a seeded quiz and compare scores.</span>
+            </span>
+          </span>
+        </button>
+        <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-6">
           {[
             ["Paths", "learn", onOpenPaths],
             ["Arcade", "trophy", onOpenArcade],
+            ["Trivia", "sparkle", onOpenTrivia],
             ["Decks", "star", onOpenDecks],
-            ["Leaderboard", "stats", onOpenLeaderboard]
+            ["Leaderboard", "stats", onOpenLeaderboard],
+            ["Friends", "heart", onOpenFriends]
           ].map(([label, icon, handler]) => (
             <button key={label as string} onClick={handler as () => void} className="rounded-[22px] border border-flaggo-border bg-white p-4 text-left shadow-card">
               <Icon name={icon as "learn"} size={24} className="mb-2 text-flaggo-blue" />

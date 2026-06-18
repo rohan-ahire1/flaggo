@@ -18,9 +18,16 @@ export function sanitizeDisplayName(value: string) {
   return value.replace(/[\u0000-\u001f\u007f]/g, "").trim().slice(0, 24);
 }
 
+// A public handle must never be an email address (PII). Reject anything containing "@".
+export function isPublicSafeHandle(value: string) {
+  const clean = sanitizeDisplayName(value);
+  return clean.length >= 2 && !clean.includes("@");
+}
+
 export async function updateDisplayName(userId: string, displayName: string): Promise<string> {
   const clean = sanitizeDisplayName(displayName);
   if (clean.length < 2) throw new Error("Display name must be 2-24 characters.");
+  if (clean.includes("@")) throw new Error("Display name can't be an email address.");
   const client = supabase;
   if (!client) throw new Error("Supabase is not configured.");
   const { error } = await client.from("profiles").upsert({ id: userId, display_name: clean }, { onConflict: "id" });
@@ -33,7 +40,8 @@ export async function submitScore(board: string, score: number, displayName: str
   const { data: auth } = client ? await client.auth.getUser() : { data: { user: null } };
   const user = auth.user;
   const clean = sanitizeDisplayName(displayName);
-  if (!client || !user || clean.length < 2) return;
+  // Never publish a handle that is empty or an email address (PII protection).
+  if (!client || !user || !isPublicSafeHandle(clean)) return;
   const { data, error: fetchError } = await client
     .from("leaderboard_scores")
     .select("score")

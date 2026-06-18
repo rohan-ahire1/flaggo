@@ -20,11 +20,14 @@ import { arcadeBoard, submitScore, updateDisplayName } from "../lib/leaderboard"
 const WorldMap = lazy(() => import("../components/WorldMap"));
 
 type ArcadeQuestion =
-  | { topic: "flag" | "capital"; country: Country; question: Question }
+  | { topic: Exclude<Topic, "location">; country: Country; question: Question }
   | { topic: "location"; country: Country; question: MapQuestion };
 
 function answerLabel(question: ArcadeQuestion) {
   if (question.topic === "location") return question.country.name;
+  if ("correctCurrency" in question.question) return question.question.correctCurrency;
+  if ("correctLanguage" in question.question) return question.question.correctLanguage;
+  if ("correctNeighbor" in question.question) return question.question.correctNeighbor.name;
   if ("correctCapital" in question.question) return question.question.correctCapital;
   return question.question.correctCountry.name;
 }
@@ -35,7 +38,8 @@ export default function ArcadeScreen({
   onProgress,
   onBack,
   onOpenLeaderboard,
-  onSignIn
+  onSignIn,
+  onChallenge
 }: {
   countries: Country[];
   progress: AppProgress;
@@ -43,6 +47,7 @@ export default function ArcadeScreen({
   onBack: () => void;
   onOpenLeaderboard: () => void;
   onSignIn: () => void;
+  onChallenge: () => void;
 }) {
   const { user, displayName, setDisplayName } = useAuth();
   const [mode, setMode] = useState<ArcadeMode>("timed");
@@ -133,7 +138,10 @@ export default function ArcadeScreen({
           <section className="mt-4 rounded-[24px] bg-white p-5 text-center shadow-card">
             <p className="font-display text-5xl font-black text-flaggo-green">{score}</p>
             <p className="font-bold text-flaggo-muted">Best {Math.max(best, score)}</p>
-            <button onClick={onOpenLeaderboard} className="mt-3 font-display font-black text-flaggo-blue underline">Leaderboard</button>
+            <div className="mt-4 grid gap-3">
+              <button onClick={onChallenge} className="flaggo-button bg-flaggo-green text-white">Challenge a friend</button>
+              <button onClick={onOpenLeaderboard} className="font-display font-black text-flaggo-blue underline">Leaderboard</button>
+            </div>
           </section>
         )}
         <section className="mt-5 grid gap-4">

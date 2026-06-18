@@ -11,7 +11,13 @@ export type Question =
   | { id: string; type: "guess-capital"; correctCountry: Country; correctCapital: string; optionCapitals: string[] }
   | { id: string; type: "capital-to-country"; correctCountry: Country; options: Country[] }
   | { id: string; type: "flag-to-capital"; correctCountry: Country; correctCapital: string; optionCapitals: string[] }
-  | { id: string; type: "capital-true-false"; correctCountry: Country; shownCapital: string; answer: boolean };
+  | { id: string; type: "capital-true-false"; correctCountry: Country; shownCapital: string; answer: boolean }
+  | { id: string; type: "guess-currency"; correctCountry: Country; correctCurrency: string; optionCurrencies: string[] }
+  | { id: string; type: "currency-to-country"; correctCountry: Country; correctCurrency: string; options: Country[] }
+  | { id: string; type: "guess-language"; correctCountry: Country; correctLanguage: string; optionLanguages: string[] }
+  | { id: string; type: "language-to-country"; correctCountry: Country; correctLanguage: string; options: Country[] }
+  | { id: string; type: "pick-neighbor"; correctCountry: Country; correctNeighbor: Country; options: Country[] }
+  | { id: string; type: "not-neighbor"; correctCountry: Country; correctNeighbor: Country; options: Country[] };
 
 export type MapMode = "locate" | "identify";
 
@@ -71,6 +77,51 @@ function capitalCountries(countries: Country[]) {
   return countries.filter(hasCapital);
 }
 
+function currencyCountries(countries: Country[]) {
+  return countries.filter((country) => Boolean(country.currencyName?.trim()));
+}
+
+function languageCountries(countries: Country[]) {
+  return countries.filter((country) => (country.languages ?? []).some((language) => language.trim()));
+}
+
+function neighborCountries(countries: Country[]) {
+  return countries.filter((country) => (country.borders ?? []).length > 0);
+}
+
+function uniqueValues(values: (string | undefined)[]) {
+  return Array.from(new Set(values.map((value) => value?.trim()).filter((value): value is string => Boolean(value))));
+}
+
+function makeCurrencyOptions(correctCountry: Country, allCountries: Country[], rng: () => number = Math.random) {
+  const correct = correctCountry.currencyName!.trim();
+  const distractors = uniqueValues(allCountries.map((country) => country.currencyName)).filter((currency) => currency !== correct);
+  return shuffleArray([correct, ...shuffleArray(distractors, rng).slice(0, 3)], rng);
+}
+
+function makeLanguageOptions(correctCountry: Country, allCountries: Country[], rng: () => number = Math.random) {
+  const actualLanguages = new Set(uniqueValues(correctCountry.languages ?? []));
+  const correct = shuffleArray(Array.from(actualLanguages), rng)[0];
+  const distractors = uniqueValues(allCountries.flatMap((country) => country.languages ?? [])).filter((language) => !actualLanguages.has(language));
+  return {
+    correct,
+    options: shuffleArray([correct, ...shuffleArray(distractors, rng).slice(0, 3)], rng)
+  };
+}
+
+function countriesWithDifferentCurrency(correctCountry: Country, allCountries: Country[]) {
+  const correct = correctCountry.currencyName?.trim();
+  return allCountries.filter((country) => country.code === correctCountry.code || country.currencyName?.trim() !== correct);
+}
+
+function countriesWithoutLanguage(language: string, correctCountry: Country, allCountries: Country[]) {
+  return allCountries.filter((country) => country.code === correctCountry.code || !(country.languages ?? []).includes(language));
+}
+
+function countryByCode(countries: Country[]) {
+  return new Map(countries.map((country) => [country.code, country]));
+}
+
 export function generateFlagQuestions(idPrefix: string, lessonCountries: Country[], countries: Country[], rng: () => number = Math.random): Question[] {
   const pool = shuffleArray(lessonCountries, rng).slice(0, Math.min(lessonCountries.length, 8));
   return pool.map((country, index) => {
@@ -101,6 +152,73 @@ export function generateCapitalQuestions(idPrefix: string, lessonCountries: Coun
   });
 }
 
+export function generateCurrencyQuestions(idPrefix: string, lessonCountries: Country[], countries: Country[], rng: () => number = Math.random): Question[] {
+  const pool = shuffleArray(currencyCountries(lessonCountries), rng).slice(0, Math.min(lessonCountries.length, 8));
+  const currencyPool = currencyCountries(countries);
+  return pool.map((country, index) => {
+    const correctCurrency = country.currencyName!.trim();
+    if (index % 2 === 0) {
+      return { id: `${idPrefix}-${index}`, type: "guess-currency", correctCountry: country, correctCurrency, optionCurrencies: makeCurrencyOptions(country, currencyPool, rng) };
+    }
+    return {
+      id: `${idPrefix}-${index}`,
+      type: "currency-to-country",
+      correctCountry: country,
+      correctCurrency,
+      options: makeOptions(country, countriesWithDifferentCurrency(country, currencyPool), rng)
+    };
+  });
+}
+
+export function generateLanguageQuestions(idPrefix: string, lessonCountries: Country[], countries: Country[], rng: () => number = Math.random): Question[] {
+  const pool = shuffleArray(languageCountries(lessonCountries), rng).slice(0, Math.min(lessonCountries.length, 8));
+  const languagePool = languageCountries(countries);
+  return pool.map((country, index) => {
+    const languageOptions = makeLanguageOptions(country, languagePool, rng);
+    if (index % 2 === 0) {
+      return { id: `${idPrefix}-${index}`, type: "guess-language", correctCountry: country, correctLanguage: languageOptions.correct, optionLanguages: languageOptions.options };
+    }
+    return {
+      id: `${idPrefix}-${index}`,
+      type: "language-to-country",
+      correctCountry: country,
+      correctLanguage: languageOptions.correct,
+      options: makeOptions(country, countriesWithoutLanguage(languageOptions.correct, country, languagePool), rng)
+    };
+  });
+}
+
+export function generateNeighborQuestions(idPrefix: string, lessonCountries: Country[], countries: Country[], rng: () => number = Math.random): Question[] {
+  const byCode = countryByCode(countries);
+  const pool = shuffleArray(neighborCountries(lessonCountries), rng).slice(0, Math.min(lessonCountries.length, 8));
+  return pool.flatMap((country, index): Question[] => {
+    const borderSet = new Set(country.borders ?? []);
+    const borderCountries = shuffleArray((country.borders ?? []).map((code) => byCode.get(code)).filter((item): item is Country => Boolean(item)), rng);
+    const nonBorders = countries.filter((item) => item.code !== country.code && !borderSet.has(item.code));
+    const correctNeighbor = borderCountries[0];
+    if (!correctNeighbor || nonBorders.length < 3) return [];
+    if (index % 2 === 0 || borderCountries.length < 3) {
+      return [{
+        id: `${idPrefix}-${index}`,
+        type: "pick-neighbor",
+        correctCountry: country,
+        correctNeighbor,
+        options: shuffleArray([correctNeighbor, ...shuffleArray(nonBorders, rng).slice(0, 3)], rng)
+      }];
+    }
+    const correctNonNeighbor = shuffleArray(nonBorders, rng)[0];
+    const distractors = borderCountries.slice(0, 3);
+    if (!correctNonNeighbor || distractors.length < 3) return [];
+    return [{
+      id: `${idPrefix}-${index}`,
+      type: "not-neighbor",
+      correctCountry: country,
+      correctNeighbor: correctNonNeighbor,
+      options: shuffleArray([correctNonNeighbor, ...distractors], rng)
+    }];
+  });
+}
+
 export function generateLessonQuestions(lesson: Lesson, countries: Country[]): Question[] {
   const lessonCountries = lesson.countryCodes
     .map((code) => countries.find((country) => country.code === code))
@@ -112,6 +230,9 @@ export function generateLessonQuestions(lesson: Lesson, countries: Country[]): Q
 export function generateReviewQuestions(countries: Country[], topic: Topic, rng: () => number = Math.random): Question[] {
   const pool = topic === "capital" ? capitalCountries(countries) : countries;
   if (topic === "capital") return generateCapitalQuestions("review", pool, pool, rng);
+  if (topic === "currency") return generateCurrencyQuestions("review", currencyCountries(countries), currencyCountries(countries), rng);
+  if (topic === "language") return generateLanguageQuestions("review", languageCountries(countries), languageCountries(countries), rng);
+  if (topic === "neighbor") return generateNeighborQuestions("review", neighborCountries(countries), countries, rng);
   return shuffleArray(pool, rng).slice(0, 8).map((country, index) => {
     if (index % 3 === 1) return { id: `review-${country.code}-${index}`, type: "pick-flag", correctCountry: country, options: makeOptions(country, pool, rng) };
     if (index % 3 === 2) return { id: `review-${country.code}-${index}`, type: "memory-review", correctCountry: country, options: makeOptions(country, pool, rng) };

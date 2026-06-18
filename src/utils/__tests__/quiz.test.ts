@@ -1,9 +1,10 @@
 import { describe, expect, it } from "vitest";
 import type { Country } from "../../types/country";
 import type { Lesson } from "../../types/lesson";
-import { generateLessonQuestions, generateMapQuestions, getCapitalDistractors } from "../quiz";
+import { generateCurrencyQuestions, generateLanguageQuestions, generateLessonQuestions, generateMapQuestions, generateNeighborQuestions, getCapitalDistractors } from "../quiz";
+import { hashStringToSeed, mulberry32 } from "../seededRandom";
 
-function country(code: string, name: string, continent: Country["continent"], capital?: string, ccn3?: string): Country {
+function country(code: string, name: string, continent: Country["continent"], capital?: string, ccn3?: string, extra: Partial<Country> = {}): Country {
   return {
     code,
     ccn3,
@@ -13,7 +14,8 @@ function country(code: string, name: string, continent: Country["continent"], ca
     isUNMember: true,
     isIndependent: true,
     flagUrl: `https://example.com/${code}.svg`,
-    capital
+    capital,
+    ...extra
   };
 }
 
@@ -52,6 +54,76 @@ describe("capital quiz generation", () => {
         expect(question.optionCapitals).toHaveLength(4);
         expect(new Set(question.optionCapitals).size).toBe(4);
         expect(question.optionCapitals).toContain(question.correctCapital);
+      }
+    });
+  });
+});
+
+describe("attribute quiz generation", () => {
+  const countries = [
+    country("FR", "France", "Europe", "Paris", "250", { currencyName: "Euro", languages: ["French"], borders: ["ES", "DE", "IT"] }),
+    country("ES", "Spain", "Europe", "Madrid", "724", { currencyName: "Euro", languages: ["Spanish"], borders: ["FR"] }),
+    country("DE", "Germany", "Europe", "Berlin", "276", { currencyName: "Euro", languages: ["German"], borders: ["FR"] }),
+    country("IT", "Italy", "Europe", "Rome", "380", { currencyName: "Euro", languages: ["Italian"], borders: ["FR"] }),
+    country("JP", "Japan", "Asia", "Tokyo", "392", { currencyName: "Yen", languages: ["Japanese"], borders: [] }),
+    country("BR", "Brazil", "Americas", "Brasilia", "076", { currencyName: "Real", languages: ["Portuguese"], borders: [] }),
+    country("IN", "India", "Asia", "New Delhi", "356", { currencyName: "Indian rupee", languages: ["Hindi", "English"], borders: [] }),
+    country("EG", "Egypt", "Africa", "Cairo", "818", { currencyName: "Egyptian pound", languages: ["Arabic"], borders: [] })
+  ];
+
+  it("generates deterministic currency questions without same-currency country distractors", () => {
+    const rngA = mulberry32(hashStringToSeed("currency"));
+    const rngB = mulberry32(hashStringToSeed("currency"));
+    const questions = generateCurrencyQuestions("currency", countries, countries, rngA);
+    expect(questions).toEqual(generateCurrencyQuestions("currency", countries, countries, rngB));
+
+    questions.forEach((question) => {
+      if (question.type === "guess-currency") {
+        expect(question.optionCurrencies).toContain(question.correctCurrency);
+        expect(new Set(question.optionCurrencies).size).toBe(question.optionCurrencies.length);
+      }
+      if (question.type === "currency-to-country") {
+        expect(question.options.map((option) => option.code)).toContain(question.correctCountry.code);
+        question.options.filter((option) => option.code !== question.correctCountry.code).forEach((option) => {
+          expect(option.currencyName).not.toBe(question.correctCurrency);
+        });
+      }
+    });
+  });
+
+  it("generates language questions with distractors outside the country's actual languages", () => {
+    const questions = generateLanguageQuestions("language", countries, countries, mulberry32(hashStringToSeed("language")));
+    questions.forEach((question) => {
+      if (question.type === "guess-language") {
+        const actual = new Set(question.correctCountry.languages ?? []);
+        expect(question.optionLanguages).toContain(question.correctLanguage);
+        question.optionLanguages.filter((language) => language !== question.correctLanguage).forEach((language) => {
+          expect(actual.has(language)).toBe(false);
+        });
+      }
+      if (question.type === "language-to-country") {
+        expect(question.options.map((option) => option.code)).toContain(question.correctCountry.code);
+        question.options.filter((option) => option.code !== question.correctCountry.code).forEach((option) => {
+          expect(option.languages ?? []).not.toContain(question.correctLanguage);
+        });
+      }
+    });
+  });
+
+  it("generates neighbor questions with no accidentally-correct distractors", () => {
+    const questions = generateNeighborQuestions("neighbor", countries, countries, mulberry32(hashStringToSeed("neighbor")));
+    expect(questions.length).toBeGreaterThan(0);
+    questions.forEach((question) => {
+      if (question.type !== "pick-neighbor" && question.type !== "not-neighbor") return;
+      const borders = new Set(question.correctCountry.borders ?? []);
+      expect(question.options.map((option) => option.code)).toContain(question.correctNeighbor.code);
+      if (question.type === "pick-neighbor") {
+        expect(borders.has(question.correctNeighbor.code)).toBe(true);
+        question.options.filter((option) => option.code !== question.correctNeighbor.code).forEach((option) => expect(borders.has(option.code)).toBe(false));
+      }
+      if (question.type === "not-neighbor") {
+        expect(borders.has(question.correctNeighbor.code)).toBe(false);
+        question.options.filter((option) => option.code !== question.correctNeighbor.code).forEach((option) => expect(borders.has(option.code)).toBe(true));
       }
     });
   });

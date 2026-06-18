@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import AdSlot from "../AdSlot";
 
 describe("AdSlot", () => {
@@ -13,8 +13,12 @@ describe("AdSlot", () => {
     expect(container).toBeEmptyDOMElement();
   });
 
-  it("renders an ad placeholder when enabled, consented, and not Pro", () => {
-    render(<AdSlot consent="granted" adsRemoved={false} />);
+  it("renders an ad placeholder when explicitly enabled, consented, and not Pro", async () => {
+    vi.stubEnv("VITE_ADS_ENABLED", "true");
+    vi.resetModules();
+    const { default: EnabledAdSlot } = await import("../AdSlot");
+
+    render(<EnabledAdSlot consent="granted" adsRemoved={false} />);
     expect(screen.getByText("Ad space supports free flag learning.")).toBeInTheDocument();
   });
 });

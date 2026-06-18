@@ -1,9 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
   <rect width="1200" height="630" fill="#F7FAFC"/>
-  <circle cx="230" cy="315" r="145" fill="#58CC02"/>
-  <circle cx="230" cy="315" r="94" fill="#fff"/>
-  <path d="M188 378V245h103l-18 37 18 37h-82v59z" fill="#1CB0F6"/>
-  <path d="M188 245h21v133h-21z" fill="#263238"/>
-  <text x="420" y="285" font-family="Nunito, Arial, sans-serif" font-size="92" font-weight="900" fill="#1F2937">Flaggo</text>
-  <text x="424" y="365" font-family="Inter, Arial, sans-serif" font-size="36" font-weight="800" fill="#6B7280">Learn world flags, one tiny lesson at a time.</text>
+  <rect x="70" y="70" width="1060" height="490" rx="48" fill="#fff"/>
+  <circle cx="282" cy="315" r="145" fill="#1CB0F6"/>
+  <circle cx="282" cy="315" r="94" fill="#F7FAFC"/>
+  <path d="M204 315h156M282 221c27 27 41 59 41 94s-14 67-41 94M282 221c-27 27-41 59-41 94s14 67 41 94M192 315c21-20 52-31 90-31s69 11 90 31M192 315c21 20 52 31 90 31s69-11 90-31" fill="none" stroke="#1CB0F6" stroke-width="12" stroke-linecap="round"/>
+  <path d="M242 273l20 84 20-58 20 58 20-84" fill="none" stroke="#58CC02" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="388" cy="216" r="34" fill="#FFC800"/>
+  <text x="485" y="292" font-family="Nunito, Arial, sans-serif" font-size="96" font-weight="900" fill="#1F2937">Worldly</text>
+  <text x="490" y="372" font-family="Inter, Arial, sans-serif" font-size="36" font-weight="800" fill="#6B7280">Master the world, one round at a time.</text>
 </svg>

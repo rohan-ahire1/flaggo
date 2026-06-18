@@ -11,11 +11,15 @@ import { applyDailyResult, buildDailyQuiz, dateKey, type DailyQuestion } from ".
 import { updateReviewState } from "../utils/spacedRepetition";
 import { trackEvent } from "../lib/analytics";
 import { dailyBoard, submitScore, updateDisplayName } from "../lib/leaderboard";
+import { BRAND } from "../config/brand";
 
 const WorldMap = lazy(() => import("../components/WorldMap"));
 
 function answerLabel(question: DailyQuestion) {
   if (question.topic === "location") return question.country.name;
+  if ("correctCurrency" in question.question) return question.question.correctCurrency;
+  if ("correctLanguage" in question.question) return question.question.correctLanguage;
+  if ("correctNeighbor" in question.question) return question.question.correctNeighbor.name;
   if ("correctCapital" in question.question) return question.question.correctCapital;
   if (question.question.type === "capital-true-false") return question.question.correctCountry.capital ?? question.question.correctCountry.name;
   return question.question.correctCountry.name;
@@ -27,7 +31,8 @@ export default function DailyChallengeScreen({
   onProgress,
   onHome,
   onOpenLeaderboard,
-  onSignIn
+  onSignIn,
+  onChallenge
 }: {
   countries: Country[];
   progress: AppProgress;
@@ -35,6 +40,7 @@ export default function DailyChallengeScreen({
   onHome: () => void;
   onOpenLeaderboard: () => void;
   onSignIn: () => void;
+  onChallenge: () => void;
 }) {
   const { user, displayName, setDisplayName } = useAuth();
   const today = dateKey();
@@ -88,7 +94,7 @@ export default function DailyChallengeScreen({
   }
 
   async function share() {
-    const text = `Flaggo Daily ${today} - ${correct}/${questions.length} streak ${currentProgress.daily.streak}\nhttps://flaggo.app`;
+    const text = `${BRAND.name} Daily ${today} - ${correct}/${questions.length} streak ${currentProgress.daily.streak}\n${BRAND.url}`;
     if (navigator.share) await navigator.share({ text });
     else await navigator.clipboard?.writeText(text);
   }
@@ -106,6 +112,7 @@ export default function DailyChallengeScreen({
           <p className="mt-1 font-bold text-flaggo-muted">Daily streak {currentProgress.daily.streak}</p>
           <div className="mt-5 grid gap-3">
             <button onClick={share} className="flaggo-button bg-flaggo-green text-white">Share score</button>
+            <button onClick={onChallenge} className="flaggo-button bg-flaggo-blue text-white">Challenge a friend</button>
             <button onClick={onOpenLeaderboard} className="flaggo-button bg-flaggo-blue text-white">Leaderboard</button>
             {!user && <button onClick={onSignIn} className="font-display font-black text-flaggo-green underline">Sign in to compete</button>}
           </div>

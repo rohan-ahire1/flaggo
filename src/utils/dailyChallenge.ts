@@ -1,13 +1,13 @@
 import type { Country } from "../types/country";
 import type { AppProgress, DailyResult } from "../types/progress";
 import { TOPICS, type Topic } from "../types/topic";
-import { generateCapitalQuestions, generateFlagQuestions, generateMapQuestions, type MapQuestion, type Question } from "./quiz";
+import { generateCapitalQuestions, generateCurrencyQuestions, generateFlagQuestions, generateLanguageQuestions, generateMapQuestions, generateNeighborQuestions, type MapQuestion, type Question } from "./quiz";
 import { hashStringToSeed, mulberry32, seededPick } from "./seededRandom";
 
 export const DAILY_QUESTION_COUNT = 10;
 
 export type DailyQuestion =
-  | { id: string; topic: "flag" | "capital"; country: Country; question: Question }
+  | { id: string; topic: Exclude<Topic, "location">; country: Country; question: Question }
   | { id: string; topic: "location"; country: Country; question: MapQuestion };
 
 export function dateKey(d = new Date()): string {
@@ -18,28 +18,42 @@ export function dateKey(d = new Date()): string {
 }
 
 export function dailyTopics(mapShipped: boolean): Topic[] {
-  return mapShipped && TOPICS.includes("location") ? ["flag", "capital", "location"] : ["flag", "capital"];
+  return mapShipped && TOPICS.includes("location") ? ["flag", "capital", "location", "currency", "language", "neighbor"] : ["flag", "capital", "currency", "language", "neighbor"];
 }
 
 function eligibleCountries(countries: Country[]) {
   return countries.filter((country) => country.isIndependent && country.isUNMember && country.continent !== "Antarctic");
 }
 
+function topicPool(countries: Country[], topic: Topic) {
+  if (topic === "capital") return countries.filter((country) => country.capital?.trim());
+  if (topic === "currency") return countries.filter((country) => country.currencyName?.trim());
+  if (topic === "language") return countries.filter((country) => (country.languages ?? []).some((language) => language.trim()));
+  if (topic === "neighbor") return countries.filter((country) => (country.borders ?? []).length > 0);
+  return countries;
+}
+
 export function buildDailyQuiz(dateStr: string, countries: Country[], mapShipped = TOPICS.includes("location")): DailyQuestion[] {
   const rng = mulberry32(hashStringToSeed(`flaggo-daily-${dateStr}`));
   const pool = eligibleCountries(countries);
-  const selected = seededPick(pool, DAILY_QUESTION_COUNT, rng);
   const topics = dailyTopics(mapShipped);
-  return selected.map((country, index) => {
+  return Array.from({ length: DAILY_QUESTION_COUNT }, (_, index) => {
     const topic = topics[index % topics.length];
+    const currentPool = topicPool(pool, topic);
+    const country = seededPick(currentPool, 1, rng)[0];
     if (topic === "location") {
       const [question] = generateMapQuestions([country, ...pool.filter((item) => item.code !== country.code)], "locate", rng);
       return { id: `daily-${dateStr}-${index}`, topic, country, question };
     }
-    const [question] =
-      topic === "capital"
-        ? generateCapitalQuestions(`daily-${dateStr}-${index}`, [country], pool, rng)
-        : generateFlagQuestions(`daily-${dateStr}-${index}`, [country], pool, rng);
+    const [question] = topic === "capital"
+      ? generateCapitalQuestions(`daily-${dateStr}-${index}`, [country], topicPool(pool, "capital"), rng)
+      : topic === "currency"
+        ? generateCurrencyQuestions(`daily-${dateStr}-${index}`, [country], topicPool(pool, "currency"), rng)
+        : topic === "language"
+          ? generateLanguageQuestions(`daily-${dateStr}-${index}`, [country], topicPool(pool, "language"), rng)
+          : topic === "neighbor"
+            ? generateNeighborQuestions(`daily-${dateStr}-${index}`, [country], pool, rng)
+            : generateFlagQuestions(`daily-${dateStr}-${index}`, [country], pool, rng);
     return { id: `daily-${dateStr}-${index}`, topic, country, question };
   });
 }

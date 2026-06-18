@@ -7,7 +7,17 @@ import { arcadeBoard, dailyBoard, fetchTopScores, type LeaderboardRow, xpBoard }
 import { dateKey } from "../utils/dailyChallenge";
 import { trackEvent } from "../lib/analytics";
 
-export default function LeaderboardScreen({ onBack, onSignIn }: { onBack: () => void; onSignIn: () => void }) {
+export default function LeaderboardScreen({
+  onBack,
+  onSignIn,
+  onChallenge,
+  onOpenFriends
+}: {
+  onBack: () => void;
+  onSignIn: () => void;
+  onChallenge: () => void;
+  onOpenFriends: () => void;
+}) {
   const { user } = useAuth();
   const boards = useMemo(
     () => [
@@ -44,6 +54,10 @@ export default function LeaderboardScreen({ onBack, onSignIn }: { onBack: () => 
       <select value={board} onChange={(event) => setBoard(event.target.value)} className="mt-4 w-full rounded-2xl border border-flaggo-border bg-white p-3 font-display font-black shadow-card">
         {boards.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}
       </select>
+      <div className="mt-4 grid grid-cols-2 gap-3">
+        <button onClick={onChallenge} className="rounded-2xl bg-flaggo-green p-3 font-display font-black text-white shadow-card">Challenge a friend</button>
+        <button onClick={onOpenFriends} className="rounded-2xl bg-white p-3 font-display font-black text-flaggo-blue shadow-card">Friends</button>
+      </div>
       {!user && <button onClick={onSignIn} className="mt-4 w-full rounded-2xl bg-flaggo-green p-3 font-display font-black text-white">Sign in to compete</button>}
       {error && <div className="mt-4 rounded-2xl bg-red-50 p-4 font-bold text-flaggo-red">{error}</div>}
       <section className="mt-5 grid gap-2">
