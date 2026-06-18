@@ -9,7 +9,7 @@ export default function FlagCard({ country, review, onClick }: { country: Countr
   return (
     <button
       onClick={onClick}
-      className="group relative rounded-[22px] border border-flaggo-border bg-white p-3 text-left shadow-card transition-all duration-150 hover:-translate-y-0.5 active:translate-y-1 active:shadow-none"
+      className="group relative flex h-full w-full min-w-0 flex-col rounded-[22px] border border-flaggo-border bg-white p-3 text-left shadow-card transition-all duration-150 hover:-translate-y-0.5 active:translate-y-1 active:shadow-none"
     >
       {mastered && (
         <span className="absolute right-2 top-2 z-10 grid h-7 w-7 place-items-center rounded-full bg-flaggo-yellow text-white shadow-md">
