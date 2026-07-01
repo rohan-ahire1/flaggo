@@ -33,7 +33,7 @@ export default function MapMenuScreen({
   }, [groups, mapCountries, pickerMode, selectedId]);
 
   return (
-    <main className="p-5 pb-24">
+    <main className="p-5">
       <h1 className="font-display text-3xl font-black">World Map</h1>
       <p className="mt-1 font-bold text-flaggo-muted">Practice uses countries present in the offline world map.</p>
 

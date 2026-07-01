@@ -12,8 +12,8 @@ export default defineConfig({
         name: BRAND.name,
         short_name: BRAND.shortName,
         description: BRAND.tagline,
-        theme_color: "#1CB0F6",
-        background_color: "#F7FAFC",
+        theme_color: "#14506b",
+        background_color: "#faf6ee",
         display: "standalone",
         start_url: "/",
         icons: [

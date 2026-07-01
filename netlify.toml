@@ -5,3 +5,8 @@
   from = "/stripe-webhook"
   to = "/.netlify/functions/stripe-webhook"
   status = 200
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

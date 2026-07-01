@@ -18,7 +18,7 @@ export default function PathsScreen({ lessons, progress, onOpenLesson, onBack }:
   const visibleLessons = region ? topicLessons.filter((lesson) => lesson.region === region) : [];
 
   return (
-    <main className="p-5 pb-24">
+    <main className="p-5">
       <button onClick={region ? () => setRegion(null) : onBack} className="mb-4 grid h-10 w-10 place-items-center rounded-full bg-white text-flaggo-muted shadow-card" aria-label="Back">
         <Icon name="chevron" size={20} className="rotate-180" />
       </button>

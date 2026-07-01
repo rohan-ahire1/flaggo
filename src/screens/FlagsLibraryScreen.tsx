@@ -44,7 +44,7 @@ export default function FlagsLibraryScreen({
   }, [continent, countries, difficulty, progress.review, query, scope, sort, topic]);
 
   return (
-    <main className="p-5 pb-24">
+    <main className="p-5">
       <h1 className="font-display text-3xl font-black">Flag library</h1>
       <div className="mt-4 grid grid-cols-2 rounded-2xl bg-white p-1 shadow-card">
         <button className="rounded-xl bg-flaggo-green px-4 py-2 font-display text-sm font-extrabold text-white shadow-sm">Flags</button>

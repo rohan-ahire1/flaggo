@@ -32,7 +32,7 @@ export default function FriendsScreen({
   }, []);
 
   return (
-    <main className="p-5 pb-24">
+    <main className="p-5">
       <button onClick={onBack} className="mb-4 grid h-10 w-10 place-items-center rounded-full bg-white text-flaggo-muted shadow-card" aria-label="Back"><Icon name="chevron" className="rotate-180" /></button>
       <div className="flex items-start justify-between gap-3">
         <div>

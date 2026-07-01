@@ -57,7 +57,7 @@ export default function DecksScreen({
   }
 
   return (
-    <main className="p-5 pb-24">
+    <main className="p-5">
       <button onClick={onBack} className="mb-4 grid h-10 w-10 place-items-center rounded-full bg-white text-flaggo-muted shadow-card" aria-label="Back"><Icon name="chevron" className="rotate-180" /></button>
       <h1 className="font-display text-3xl font-black">Decks</h1>
       <div className="mt-4 grid grid-cols-2 rounded-2xl bg-white p-1 shadow-card">

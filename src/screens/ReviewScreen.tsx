@@ -25,7 +25,7 @@ export default function ReviewScreen({
   const weak = getWeakCountries(progress, topicCountries, topic).slice(0, 6);
   const practice = due.length ? due : weak.length ? weak : topicCountries.slice(0, 8);
   return (
-    <main className="p-5 pb-24">
+    <main className="p-5">
       <h1 className="font-display text-3xl font-black">Review</h1>
       <section className="mt-5 overflow-hidden rounded-[24px] border border-flaggo-border bg-white p-5 shadow-card-lg">
         <div className="flex items-center gap-3">

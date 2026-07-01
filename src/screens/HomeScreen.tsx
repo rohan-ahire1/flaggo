@@ -1,24 +1,24 @@
-import HeaderStats from "../components/HeaderStats";
-import Icon from "../components/Icon";
-import LearningPath from "../components/LearningPath";
+import Icon, { type IconName } from "../components/Icon";
+import { DAILY_QUESTION_COUNT } from "../utils/dailyChallenge";
 import type { Lesson } from "../types/lesson";
 import type { AppProgress } from "../types/progress";
 import type { Topic } from "../types/topic";
-import { lessonsForTopic } from "../utils/lessonGenerator";
+
+const DOW = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+const MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 export default function HomeScreen({
   progress,
-  lessons,
-  onOpenLesson,
   onTopicChange,
   onOpenMap,
   onOpenDaily,
-  onOpenPaths,
   onOpenArcade,
   onOpenTrivia,
   onOpenDecks,
   onOpenLeaderboard,
   onOpenFriends,
+  onOpenLibrary,
+  onOpenStats,
   onChallenge
 }: {
   progress: AppProgress;
@@ -33,100 +33,144 @@ export default function HomeScreen({
   onOpenDecks: () => void;
   onOpenLeaderboard: () => void;
   onOpenFriends: () => void;
+  onOpenLibrary: () => void;
+  onOpenStats: () => void;
   onChallenge: () => void;
 }) {
-  const topicLessons = lessonsForTopic(lessons, progress.selectedTopic);
-  const completed = topicLessons.filter((lesson) => progress.completedLessonIds.includes(lesson.id)).length;
-  const pct = topicLessons.length ? Math.round((completed / topicLessons.length) * 100) : 0;
-  const isCapital = progress.selectedTopic === "capital";
   const today = new Date();
   const todayKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
   const dailyResult = progress.daily.history[todayKey];
+  const played = Boolean(dailyResult);
+  const total = dailyResult?.total ?? DAILY_QUESTION_COUNT;
+  const score = dailyResult?.score ?? 0;
+  const streak = progress.daily.streak;
+  const hoursToReset = 24 - today.getHours();
+
+  const quick: { label: string; icon: IconName; onClick: () => void }[] = [
+    { label: "Flags", icon: "flag", onClick: () => { onTopicChange("flag"); onOpenArcade(); } },
+    { label: "Capitals", icon: "pin", onClick: () => { onTopicChange("capital"); onOpenArcade(); } },
+    { label: "Find on map", icon: "globe", onClick: onOpenMap },
+    { label: "Trivia", icon: "sparkle", onClick: onOpenTrivia }
+  ];
+
+  const more: { label: string; icon: IconName; onClick: () => void }[] = [
+    { label: "Leaderboard", icon: "trophy", onClick: onOpenLeaderboard },
+    { label: "Flag library", icon: "library", onClick: onOpenLibrary },
+    { label: "Decks", icon: "star", onClick: onOpenDecks },
+    { label: "Stats", icon: "stats", onClick: onOpenStats }
+  ];
+
   return (
-    <>
-      <HeaderStats progress={progress} />
-      <section className="px-5 pt-4">
-        <div className="mb-4 grid grid-cols-2 rounded-2xl bg-white p-1 shadow-card">
-          {([
-            ["flag", "Flags"],
-            ["capital", "Capitals"]
-          ] as const).map(([topic, label]) => (
-            <button
-              key={topic}
-              onClick={() => onTopicChange(topic)}
-              className={`rounded-xl px-4 py-2 font-display text-sm font-extrabold transition ${
-                progress.selectedTopic === topic ? "bg-flaggo-green text-white shadow-sm" : "text-flaggo-muted hover:text-flaggo-text"
-              }`}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-        <div className="relative overflow-hidden rounded-[28px] bg-blue-grad p-5 text-white shadow-[0_8px_0_#1899D6]">
-          <div className="absolute -right-6 -top-6 opacity-20">
-            <Icon name="globe" size={120} className="animate-spin-slow" />
-          </div>
-          <p className="flex items-center gap-1.5 text-sm font-display font-extrabold uppercase tracking-wide text-white/85">
-            <Icon name="learn" size={15} /> Countries mode
+    <div className="px-5 pb-5 pt-5">
+      {/* header */}
+      <header className="mb-5 flex items-start justify-between">
+        <div>
+          <h1 className="font-display text-3xl font-semibold leading-none text-ink">Today</h1>
+          <p className="mt-1 text-sm font-medium text-muted">
+            {DOW[today.getDay()]}, {MON[today.getMonth()]} {today.getDate()}
           </p>
-          <h1 className="font-display text-3xl font-black">Learn {isCapital ? "capitals" : "flags"}</h1>
-          <p className="font-bold text-white/85">Tiny lessons, big memory gains.</p>
-          <div className="mt-4 flex items-center gap-3">
-            <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-white/30">
-              <div className="h-full rounded-full bg-white transition-all duration-500" style={{ width: `${pct}%` }} />
-            </div>
-            <span className="text-sm font-display font-extrabold">{completed}/{topicLessons.length}</span>
-          </div>
         </div>
-        <button onClick={onOpenDaily} className="mt-4 w-full rounded-[24px] border border-flaggo-border bg-white p-4 text-left shadow-card">
-          <span className="flex items-center gap-4">
-            <span className="grid h-14 w-14 place-items-center rounded-2xl bg-flaggo-red/10 text-flaggo-red"><Icon name="flame" size={28} /></span>
-            <span className="min-w-0 flex-1">
-              <span className="block font-display text-xl font-black">Daily Challenge</span>
-              <span className="block font-bold text-flaggo-muted">{dailyResult ? `Completed ${dailyResult.score}/${dailyResult.total} · play again` : "Not played today"} · streak {progress.daily.streak}</span>
-            </span>
-          </span>
-        </button>
-        <button onClick={onOpenMap} className="mt-4 w-full overflow-hidden rounded-[24px] border border-flaggo-border bg-white p-4 text-left shadow-card">
-          <span className="flex items-center gap-4">
-            <span className="grid h-14 w-14 place-items-center rounded-2xl bg-flaggo-blue/10 text-flaggo-blue">
-              <Icon name="globe" size={28} />
-            </span>
-            <span className="min-w-0 flex-1">
-              <span className="block font-display text-xl font-black">World Map</span>
-              <span className="block font-bold text-flaggo-muted">Locate countries, identify shapes, or explore freely.</span>
-            </span>
-          </span>
-        </button>
-        <button onClick={onChallenge} className="mt-4 w-full overflow-hidden rounded-[24px] border border-flaggo-border bg-white p-4 text-left shadow-card">
-          <span className="flex items-center gap-4">
-            <span className="grid h-14 w-14 place-items-center rounded-2xl bg-flaggo-green/10 text-flaggo-green">
-              <Icon name="trophy" size={28} />
-            </span>
-            <span className="min-w-0 flex-1">
-              <span className="block font-display text-xl font-black">Challenge a friend</span>
-              <span className="block font-bold text-flaggo-muted">Share a seeded quiz and compare scores.</span>
-            </span>
-          </span>
-        </button>
-        <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-6">
-          {[
-            ["Paths", "learn", onOpenPaths],
-            ["Arcade", "trophy", onOpenArcade],
-            ["Trivia", "sparkle", onOpenTrivia],
-            ["Decks", "star", onOpenDecks],
-            ["Leaderboard", "stats", onOpenLeaderboard],
-            ["Friends", "heart", onOpenFriends]
-          ].map(([label, icon, handler]) => (
-            <button key={label as string} onClick={handler as () => void} className="rounded-[22px] border border-flaggo-border bg-white p-4 text-left shadow-card">
-              <Icon name={icon as "learn"} size={24} className="mb-2 text-flaggo-blue" />
-              <span className="font-display font-black">{label as string}</span>
-            </button>
-          ))}
+        <div className="flex items-center gap-1.5 rounded-[22px] border border-line bg-surface px-3.5 py-1.5 text-[17px] font-bold text-accent">
+          <Icon name="flame" size={17} />
+          {streak}
         </div>
-      </section>
-      <LearningPath lessons={topicLessons} progress={progress} onOpenLesson={onOpenLesson} />
-      <div className="pb-24" />
-    </>
+      </header>
+
+      {/* hero daily card */}
+      <button
+        onClick={onOpenDaily}
+        className="relative mb-[18px] w-full overflow-hidden rounded-[26px] bg-primary p-5 text-left shadow-card-lg"
+      >
+        <span className="wl-dots absolute inset-0 opacity-90" />
+        <span className="relative block">
+          <span className="flex items-center justify-between">
+            <span className="text-xs font-bold uppercase tracking-[0.12em] text-white/80">Daily Challenge</span>
+            <span className="rounded-[20px] bg-white/15 px-2.5 py-1 text-xs font-semibold text-white/80">resets in {hoursToReset}h</span>
+          </span>
+          <span className="mt-2.5 block font-display text-[34px] font-semibold leading-tight text-white">Today's Challenge</span>
+          <span className="block text-[15px] text-white/80">{total} mixed questions · same for everyone</span>
+          <span className="my-4 flex gap-1.5">
+            {Array.from({ length: total }).map((_, i) => (
+              <span
+                key={i}
+                className={`h-[7px] flex-1 rounded ${played && i < score ? "bg-white" : "bg-white/30"}`}
+              />
+            ))}
+          </span>
+          <span className="block rounded-2xl bg-white py-3.5 text-center font-display text-xl font-semibold text-primary shadow-[0_4px_12px_rgba(0,0,0,0.18)]">
+            {played ? `Done ${score}/${total} · play again →` : "Play today's challenge →"}
+          </span>
+        </span>
+      </button>
+
+      {/* challenge a friend */}
+      <button
+        onClick={onChallenge}
+        className="mb-6 flex w-full items-center gap-3.5 rounded-[20px] border-[1.5px] border-line bg-surface p-3.5 text-left"
+      >
+        <span className="grid h-[46px] w-[46px] flex-none place-items-center rounded-[14px] bg-accent text-white">
+          <Icon name="flag" size={24} />
+        </span>
+        <span className="flex-1">
+          <span className="block font-display text-[18px] font-medium text-ink">Challenge a friend</span>
+          <span className="block text-[13px] text-muted">Send today's exact round &amp; compare</span>
+        </span>
+        <Icon name="chevron" size={20} className="text-muted" />
+      </button>
+
+      {/* quick play */}
+      <h2 className="mb-2.5 font-display text-[17px] font-medium text-ink">Quick play</h2>
+      <div className="mb-6 grid grid-cols-2 gap-3">
+        {quick.map((q) => (
+          <button
+            key={q.label}
+            onClick={q.onClick}
+            className="flex items-center gap-2.5 rounded-[18px] border-[1.5px] border-line bg-paper p-3.5 text-left shadow-card"
+          >
+            <Icon name={q.icon} size={24} className="text-primary" />
+            <span className="font-semibold text-ink">{q.label}</span>
+          </button>
+        ))}
+      </div>
+
+      {/* friends today */}
+      <div className="mb-3 flex items-center justify-between">
+        <h2 className="font-display text-[17px] font-medium text-ink">Friends</h2>
+        <button onClick={onOpenLeaderboard} className="text-[13px] font-semibold text-primary">
+          See all
+        </button>
+      </div>
+      <div className="mb-7 flex gap-4">
+        {["Mia", "Leo", "Ada"].map((name, i) => (
+          <button key={name} onClick={onOpenFriends} className="flex flex-col items-center gap-1.5">
+            <span
+              className="h-[52px] w-[52px] rounded-full border-[2.5px] border-line"
+              style={{ background: ["#c9b79a", "#a9bcc4", "#cdb9c4"][i] }}
+            />
+            <span className="text-xs font-semibold text-ink">{name}</span>
+          </button>
+        ))}
+        <button onClick={onOpenFriends} className="flex flex-col items-center gap-1.5">
+          <span className="grid h-[52px] w-[52px] place-items-center rounded-full border-2 border-dashed border-muted text-2xl text-muted">
+            +
+          </span>
+          <span className="text-xs font-semibold text-muted">Invite</span>
+        </button>
+      </div>
+
+      {/* more */}
+      <div className="grid grid-cols-2 gap-3">
+        {more.map((m) => (
+          <button
+            key={m.label}
+            onClick={m.onClick}
+            className="flex items-center gap-2.5 rounded-[18px] border-[1.5px] border-line bg-paper p-3.5 text-left shadow-card"
+          >
+            <Icon name={m.icon} size={22} className="text-muted" />
+            <span className="font-semibold text-ink">{m.label}</span>
+          </button>
+        ))}
+      </div>
+    </div>
   );
 }

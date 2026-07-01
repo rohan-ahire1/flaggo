@@ -1,4 +1,5 @@
 import Icon, { type IconName } from "../components/Icon";
+import ThemeSwitcher from "../components/ThemeSwitcher";
 import { BRAND } from "../config/brand";
 import type { AppProgress } from "../types/progress";
 
@@ -21,11 +22,11 @@ export default function ProfileScreen({ progress, onReset, userEmail, syncState,
     { label: "Flags seen", value: Object.keys(progress.review).length, icon: "globe", color: "text-flaggo-green" }
   ];
   return (
-    <main className="p-5 pb-24">
+    <main className="p-5">
       <section className="relative overflow-hidden rounded-[28px] bg-white p-6 text-center shadow-card-lg">
         <div className="pointer-events-none absolute inset-x-0 top-0 h-20 bg-green-grad" />
-        <div className="relative mx-auto grid h-24 w-24 place-items-center rounded-full bg-green-grad text-white shadow-[0_6px_0_#46A302] ring-4 ring-white">
-          <Icon name="profile" size={48} />
+        <div className="relative mx-auto grid h-24 w-24 place-items-center rounded-full bg-green-grad text-white shadow-button ring-4 ring-paper">
+          <Icon name="user" size={48} />
         </div>
         <h1 className="mt-4 font-display text-3xl font-black">{BRAND.name} learner</h1>
         <p className="font-bold text-flaggo-muted">{userEmail ?? "Sign in to sync progress"}</p>
@@ -40,11 +41,17 @@ export default function ProfileScreen({ progress, onReset, userEmail, syncState,
             </p>
           </div>
           {userEmail ? (
-            <button onClick={onSignOut} className="rounded-2xl bg-slate-100 px-4 py-2 font-display font-black text-flaggo-text">Sign out</button>
+            <button onClick={onSignOut} className="rounded-2xl bg-surface px-4 py-2 font-display font-black text-ink">Sign out</button>
           ) : (
-            <button onClick={onSignIn} className="rounded-2xl bg-flaggo-blue px-4 py-2 font-display font-black text-white">Sign in</button>
+            <button onClick={onSignIn} className="rounded-2xl bg-primary px-4 py-2 font-display font-black text-white">Sign in</button>
           )}
         </div>
+      </section>
+
+      <section className="mt-5 rounded-[22px] border border-line bg-paper p-4 shadow-card">
+        <h2 className="text-xs font-bold uppercase tracking-[0.1em] text-muted">Appearance — Theme</h2>
+        <p className="mb-3 mt-1 text-sm font-medium text-muted">Re-themes every screen instantly.</p>
+        <ThemeSwitcher />
       </section>
 
       <section className="mt-5 rounded-[22px] border border-flaggo-border bg-white p-4 shadow-card">
