@@ -1,0 +1,20 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Default palette (Ocean & Atlas). ThemeProvider overrides these at runtime via
+   NativeWind vars() when another theme is selected. */
+:root {
+  --paper: 250 246 238;
+  --surface: 241 235 221;
+  --surface-2: 230 220 200;
+  --line: 219 207 185;
+  --ink: 32 48 58;
+  --muted: 95 113 120;
+  --primary: 20 80 107;
+  --primary-dark: 14 58 78;
+  --accent: 217 138 61;
+  --success: 63 125 82;
+  --error: 193 87 77;
+  --map: 212 226 220;
+}
