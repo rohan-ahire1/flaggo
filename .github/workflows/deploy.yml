@@ -1,0 +1,40 @@
+name: Deploy web to Netlify
+
+# Auto-deploys the web app to Netlify production on every push to main.
+# Mobile-only and docs-only changes are skipped.
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - "mobile/**"
+      - "plans/**"
+      - "**/*.md"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: netlify-prod
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          VITE_SITE_URL: https://flaggo-world-flags.netlify.app
+      - name: Deploy to Netlify
+        run: npx --yes netlify-cli@17 deploy --prod --dir=dist
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: 1b1e7491-ac64-4937-9902-92c8493d6a3d
