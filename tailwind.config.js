@@ -1,4 +1,25 @@
 /** @type {import('tailwindcss').Config} */
+
+// Every color resolves through a CSS variable set by the ThemeProvider, so the
+// whole app re-themes live when the user switches palette. Channels are "R G B"
+// triplets, which keeps Tailwind opacity utilities (e.g. bg-primary/10) working.
+const v = (name) => `rgb(var(${name}) / <alpha-value>)`;
+
+const semantic = {
+  paper: v("--paper"),
+  surface: v("--surface"),
+  surface2: v("--surface-2"),
+  line: v("--line"),
+  ink: v("--ink"),
+  muted: v("--muted"),
+  primary: v("--primary"),
+  primaryDark: v("--primary-dark"),
+  accent: v("--accent"),
+  success: v("--success"),
+  error: v("--error"),
+  map: v("--map")
+};
+
 export default {
   content: ["./index.html", "./src/**/*.{ts,tsx}"],
   future: {
@@ -7,42 +28,46 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ["Inter", "ui-sans-serif", "system-ui", "sans-serif"],
-        display: ["Nunito", "ui-rounded", "Inter", "system-ui", "sans-serif"]
+        sans: ["Figtree", "ui-sans-serif", "system-ui", "sans-serif"],
+        display: ["Fredoka", "ui-rounded", "Figtree", "system-ui", "sans-serif"]
       },
       colors: {
+        ...semantic,
+        // Legacy "flaggo" palette remapped onto the new semantic vars so existing
+        // markup adopts the cartographic identity without per-file edits.
         flaggo: {
-          green: "#58CC02",
-          greenDark: "#46A302",
-          greenLight: "#89E219",
-          blue: "#1CB0F6",
-          blueDark: "#1899D6",
-          red: "#FF4B4B",
-          redDark: "#E63939",
-          yellow: "#FFC800",
-          orange: "#FF9600",
-          purple: "#CE82FF",
-          bg: "#F7FAFC",
-          card: "#FFFFFF",
-          text: "#1F2937",
-          muted: "#6B7280",
-          border: "#E5E7EB"
+          green: v("--primary"),
+          greenDark: v("--primary-dark"),
+          greenLight: v("--primary"),
+          blue: v("--primary"),
+          blueDark: v("--primary-dark"),
+          red: v("--error"),
+          redDark: v("--error"),
+          yellow: v("--accent"),
+          orange: v("--accent"),
+          purple: v("--accent"),
+          bg: v("--paper"),
+          card: v("--paper"),
+          text: v("--ink"),
+          muted: v("--muted"),
+          border: v("--line")
         }
       },
       boxShadow: {
-        button: "0 6px 0 rgba(38, 50, 56, 0.16)",
-        "button-green": "0 5px 0 #46A302",
-        "button-blue": "0 5px 0 #1899D6",
-        "button-red": "0 5px 0 #E63939",
-        soft: "0 16px 40px rgba(38, 50, 56, 0.10)",
-        card: "0 6px 0 #e5e7eb",
-        "card-lg": "0 8px 0 #e5e7eb",
-        glow: "0 12px 32px rgba(88, 204, 2, 0.35)"
+        button: "0 6px 0 rgb(var(--primary-dark))",
+        "button-green": "0 5px 0 rgb(var(--primary-dark))",
+        "button-blue": "0 5px 0 rgb(var(--primary-dark))",
+        "button-red": "0 5px 0 rgb(var(--error))",
+        soft: "0 16px 40px rgba(20, 30, 40, 0.16)",
+        card: "0 2px 6px rgba(20, 30, 40, 0.07)",
+        "card-lg": "0 8px 20px rgba(20, 30, 40, 0.12)",
+        glow: "0 12px 32px rgb(var(--primary) / 0.30)"
       },
       backgroundImage: {
-        "hero-sky": "linear-gradient(180deg, #E8F7FF 0%, #F7FAFC 70%)",
-        "green-grad": "linear-gradient(180deg, #6FDB12 0%, #58CC02 100%)",
-        "blue-grad": "linear-gradient(180deg, #46C3FF 0%, #1CB0F6 100%)"
+        "hero-sky": "linear-gradient(180deg, rgb(var(--surface)) 0%, rgb(var(--paper)) 70%)",
+        "green-grad": "linear-gradient(180deg, rgb(var(--primary)) 0%, rgb(var(--primary-dark)) 100%)",
+        "blue-grad": "linear-gradient(180deg, rgb(var(--primary)) 0%, rgb(var(--primary-dark)) 100%)",
+        "accent-grad": "linear-gradient(180deg, rgb(var(--accent)) 0%, rgb(var(--accent)) 100%)"
       },
       keyframes: {
         bounceSoft: {
@@ -63,8 +88,8 @@ export default {
           "100%": { opacity: "1", transform: "translateY(0) scale(1)" }
         },
         pulseNode: {
-          "0%, 100%": { boxShadow: "0 0 0 0 rgba(88, 204, 2, 0.45)" },
-          "50%": { boxShadow: "0 0 0 14px rgba(88, 204, 2, 0)" }
+          "0%, 100%": { boxShadow: "0 0 0 0 rgb(var(--primary) / 0.45)" },
+          "50%": { boxShadow: "0 0 0 14px rgb(var(--primary) / 0)" }
         },
         float: {
           "0%, 100%": { transform: "translateY(0)" },

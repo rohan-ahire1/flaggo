@@ -224,7 +224,7 @@ export default function App() {
       <SignInModal open={signInOpen} onClose={() => setSignInOpen(false)} />
       <AdConsentBanner />
       <div className="mx-auto flex h-[100dvh] max-w-md flex-col bg-flaggo-bg md:my-6 md:h-[calc(100dvh-3rem)] md:w-full md:max-w-2xl md:overflow-hidden md:rounded-[30px] md:border md:border-flaggo-border md:shadow-soft lg:max-w-3xl">
-        <main className="flex-1 overflow-y-auto">
+        <main className="no-scrollbar flex-1 overflow-y-auto">
         {loading && (
           <div className="px-5 pt-4">
             <div className="h-3 w-32 animate-pulse rounded-full bg-slate-200" />
@@ -245,6 +245,8 @@ export default function App() {
             onOpenDecks={() => setScreen("decks")}
             onOpenLeaderboard={() => setScreen("leaderboard")}
             onOpenFriends={() => setScreen("friends")}
+            onOpenLibrary={() => setScreen("library")}
+            onOpenStats={() => setScreen("stats")}
             onChallenge={() => void createAndShareChallenge()}
           />
         )}

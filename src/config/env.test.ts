@@ -6,6 +6,10 @@ describe("env config", () => {
     expect(() => assertClientEnv(["VITE_SUPABASE_URL"], true)).toThrow("Missing Worldly env vars: VITE_SUPABASE_URL");
   });
 
+  it("does not require Stripe for the free MVP", () => {
+    expect(() => assertClientEnv(["VITE_STRIPE_PUBLISHABLE_KEY"], false)).not.toThrow();
+  });
+
   it("does not throw in production mode", () => {
     expect(() => assertClientEnv(["VITE_SUPABASE_URL"], false)).not.toThrow();
   });

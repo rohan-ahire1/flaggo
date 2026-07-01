@@ -2,10 +2,24 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Default palette (Ocean & Atlas) — ThemeProvider overrides these on <html>. */
 :root {
-  font-family: "Inter", ui-rounded, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  color: #1f2937;
-  background: #f7fafc;
+  --paper: 250 246 238;
+  --surface: 241 235 221;
+  --surface-2: 230 220 200;
+  --line: 219 207 185;
+  --ink: 32 48 58;
+  --muted: 95 113 120;
+  --primary: 20 80 107;
+  --primary-dark: 14 58 78;
+  --accent: 217 138 61;
+  --success: 63 125 82;
+  --error: 193 87 77;
+  --map: 212 226 220;
+
+  font-family: "Figtree", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: rgb(var(--ink));
+  background: rgb(var(--paper));
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
@@ -14,13 +28,11 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  background:
-    radial-gradient(120% 60% at 50% -10%, rgba(28, 176, 246, 0.14), rgba(247, 250, 252, 0) 60%),
-    #f7fafc;
+  background: rgb(var(--paper));
 }
 
 h1, h2, h3, .font-display {
-  font-family: "Nunito", ui-rounded, "Inter", system-ui, sans-serif;
+  font-family: "Fredoka", ui-rounded, "Figtree", system-ui, sans-serif;
   letter-spacing: -0.01em;
 }
 
@@ -40,7 +52,7 @@ button {
   height: 10px;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(38, 50, 56, 0.18);
+  background: rgb(var(--line));
   border-radius: 999px;
   border: 3px solid transparent;
   background-clip: padding-box;
@@ -48,11 +60,11 @@ button {
 
 @layer components {
   .flaggo-button {
-    @apply rounded-2xl px-5 py-4 font-display font-extrabold tracking-wide shadow-button transition-all duration-150 active:translate-y-1 active:shadow-none disabled:cursor-not-allowed disabled:opacity-50;
+    @apply rounded-2xl px-5 py-4 font-display font-semibold tracking-wide shadow-button transition-all duration-150 active:translate-y-1 active:shadow-none disabled:cursor-not-allowed disabled:opacity-50;
   }
 
   .flaggo-card {
-    @apply rounded-[24px] border border-flaggo-border bg-white shadow-soft;
+    @apply rounded-[24px] border border-line bg-paper shadow-card;
   }
 
   /* Chunky tappable surface with a colored 3D edge */
@@ -65,7 +77,27 @@ button {
   .text-balance {
     text-wrap: balance;
   }
+
+  /* Hide scrollbar while keeping scroll functionality */
+  .no-scrollbar {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
   .safe-bottom {
     padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+  }
+  /* Subtle cartographic dot texture for primary/hero surfaces */
+  .wl-dots {
+    background-image: radial-gradient(rgba(255, 255, 255, 0.16) 1.3px, transparent 1.4px);
+    background-size: 17px 17px;
+  }
+  .wl-grid {
+    background-image:
+      linear-gradient(rgb(var(--line)) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(var(--line)) 1px, transparent 1px);
+    background-size: 26px 26px;
   }
 }

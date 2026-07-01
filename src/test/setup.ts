@@ -9,3 +9,4 @@ vi.stubEnv("VITE_PLAUSIBLE_DOMAIN", "worldly.app");
 vi.stubEnv("VITE_SENTRY_DSN", "https://example@sentry.io/1");
 vi.stubEnv("VITE_SITE_URL", "https://worldly.app");
 vi.stubEnv("VITE_ADS_ENABLED", "false");
+vi.stubEnv("VITE_MONETIZATION_ENABLED", "false");

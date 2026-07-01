@@ -36,7 +36,7 @@ export default function StatsScreen({ progress, countries, lessons }: { progress
   }, [countries, progress]);
 
   return (
-    <main className="p-5 pb-24">
+    <main className="p-5">
       <h1 className="font-display text-3xl font-black">Stats</h1>
       <div className="mt-5 grid grid-cols-2 gap-3 md:grid-cols-4">
         <StatCard label="Total XP" value={progress.xp} tone="blue" icon="bolt" />

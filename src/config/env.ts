@@ -9,6 +9,7 @@ type ClientEnv = {
   sentryDsn: string;
   siteUrl: string;
   adsEnabled: boolean;
+  monetizationEnabled: boolean;
 };
 
 // All recognized client env keys.
@@ -20,19 +21,23 @@ type EnvKey =
   | "VITE_PLAUSIBLE_DOMAIN"
   | "VITE_SENTRY_DSN"
   | "VITE_SITE_URL"
-  | "VITE_ADS_ENABLED";
+  | "VITE_ADS_ENABLED"
+  | "VITE_MONETIZATION_ENABLED";
 
-// Only these are required to boot. Sentry/AdSense/Plausible are feature-flagged
-// (init only when present); VITE_ADS_ENABLED defaults to false when absent.
+// Only these are required to boot the free MVP. Stripe, Sentry, AdSense, and
+// Plausible are feature-flagged/init-only-when-present.
 const requiredKeys = [
   "VITE_SUPABASE_URL",
   "VITE_SUPABASE_ANON_KEY",
-  "VITE_STRIPE_PUBLISHABLE_KEY",
   "VITE_SITE_URL"
 ] as const;
 
 function read(key: EnvKey): string {
   return String(import.meta.env[key] ?? "");
+}
+
+function readBoolean(key: EnvKey): boolean {
+  return read(key).toLowerCase() === "true";
 }
 
 const missing = requiredKeys.filter((key) => !read(key));
@@ -55,8 +60,11 @@ export const env: ClientEnv = {
   plausibleDomain: read("VITE_PLAUSIBLE_DOMAIN"),
   sentryDsn: read("VITE_SENTRY_DSN"),
   siteUrl: read("VITE_SITE_URL") || window.location.origin,
-  adsEnabled: read("VITE_ADS_ENABLED") === "true"
+  adsEnabled: readBoolean("VITE_ADS_ENABLED"),
+  monetizationEnabled: readBoolean("VITE_MONETIZATION_ENABLED")
 };
+
+export const MONETIZATION_ENABLED = env.monetizationEnabled;
 
 export function getMissingClientEnv() {
   return missing;

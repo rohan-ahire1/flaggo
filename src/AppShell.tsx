@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 import App from "./App";
+import { ThemeProvider } from "./theme/ThemeProvider";
 import { AuthProvider } from "./auth/AuthProvider";
 import AuthCallbackPage from "./pages/AuthCallbackPage";
 import { PrivacyPage, TermsPage } from "./pages/LegalPages";
@@ -21,6 +22,7 @@ function PageTracker() {
 export default function AppShell() {
   return (
     <BrowserRouter>
+      <ThemeProvider>
       <AuthProvider>
         <PageTracker />
         <Routes>
@@ -31,6 +33,7 @@ export default function AppShell() {
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </AuthProvider>
+      </ThemeProvider>
     </BrowserRouter>
   );
 }

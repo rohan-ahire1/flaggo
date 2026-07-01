@@ -20,7 +20,13 @@ export type IconName =
   | "x"
   | "heart"
   | "target"
-  | "sparkle";
+  | "sparkle"
+  | "today"
+  | "play"
+  | "flag"
+  | "book"
+  | "user"
+  | "pin";
 
 type Props = SVGProps<SVGSVGElement> & {
   name: IconName;
@@ -178,6 +184,47 @@ export default function Icon({ name, size = 24, className = "", ...rest }: Props
         <svg {...common} fill="currentColor" stroke="none">
           <path d="M12 2.5c.5 3.8 1.7 5 5.5 5.5-3.8.5-5 1.7-5.5 5.5-.5-3.8-1.7-5-5.5-5.5 3.8-.5 5-1.7 5.5-5.5Z" />
           <path d="M18.5 13.5c.3 1.9.8 2.4 2.7 2.7-1.9.3-2.4.8-2.7 2.7-.3-1.9-.8-2.4-2.7-2.7 1.9-.3 2.4-.8 2.7-2.7Z" />
+        </svg>
+      );
+    case "today":
+      return (
+        <svg {...common}>
+          <rect x="3" y="4.5" width="18" height="16" rx="3" />
+          <path d="M3 9h18M8 2.5v4M16 2.5v4" />
+        </svg>
+      );
+    case "play":
+      return (
+        <svg {...common} fill="currentColor" stroke="none">
+          <path d="M7 4.5v15l12-7.5z" />
+        </svg>
+      );
+    case "flag":
+      return (
+        <svg {...common}>
+          <path d="M6 21V4" />
+          <path d="M6 4h11l-2.5 4L17 12H6" />
+        </svg>
+      );
+    case "book":
+      return (
+        <svg {...common}>
+          <path d="M4 5.5A2 2 0 0 1 6 4h6v16H6a2 2 0 0 0-2 1.2z" />
+          <path d="M20 5.5A2 2 0 0 0 18 4h-6v16h6a2 2 0 0 1 2 1.2z" />
+        </svg>
+      );
+    case "user":
+      return (
+        <svg {...common}>
+          <circle cx="12" cy="8" r="3.5" />
+          <path d="M5 20c0-3.6 3.1-6 7-6s7 2.4 7 6" />
+        </svg>
+      );
+    case "pin":
+      return (
+        <svg {...common}>
+          <path d="M12 21s6.5-5.6 6.5-10.5A6.5 6.5 0 1 0 5.5 10.5C5.5 15.4 12 21 12 21z" />
+          <circle cx="12" cy="10" r="2.4" />
         </svg>
       );
     default:

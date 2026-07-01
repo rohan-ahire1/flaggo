@@ -48,21 +48,22 @@ export default function WorldMap({
     setPosition({ coordinates: [longitude, latitude], zoom: 2.8 });
   }, [codeToCcn3, highlightCode]);
 
-  const OCEAN = "#CDE7FA";
-  const LAND = "#EAF2D9";
-  const LAND_STROKE = "#9FB870";
+  // CSS vars cascade into SVG, so the map re-themes with the active palette.
+  const OCEAN = "rgb(var(--surface-2))";
+  const LAND = "rgb(var(--map))";
+  const LAND_STROKE = "rgb(var(--line))";
 
   function fillFor(code?: string) {
-    if (code === correctCode) return "#A8E66B";
-    if (code === wrongCode) return "#FFB0B0";
-    if (code === highlightCode) return "#7FD0F7";
+    if (code === correctCode) return "rgb(var(--success) / 0.4)";
+    if (code === wrongCode) return "rgb(var(--error) / 0.35)";
+    if (code === highlightCode) return "rgb(var(--accent) / 0.4)";
     return LAND;
   }
 
   function strokeFor(code?: string) {
-    if (code === correctCode) return "#46A302";
-    if (code === wrongCode) return "#E63939";
-    if (code === highlightCode) return "#1899D6";
+    if (code === correctCode) return "rgb(var(--success))";
+    if (code === wrongCode) return "rgb(var(--error))";
+    if (code === highlightCode) return "rgb(var(--accent))";
     return LAND_STROKE;
   }
 
@@ -106,8 +107,8 @@ export default function WorldMap({
           maxZoom={8}
           onMoveEnd={(next) => setPosition(next as Position)}
         >
-          <Sphere id="ocean-sphere" fill={OCEAN} stroke="#A6CDE8" strokeWidth={0.5} />
-          <Graticule stroke="#B9DAF1" strokeWidth={0.4} />
+          <Sphere id="ocean-sphere" fill={OCEAN} stroke="rgb(var(--line))" strokeWidth={0.5} />
+          <Graticule stroke="rgb(var(--line))" strokeWidth={0.4} />
           <Geographies geography={world110m}>
             {({ geographies }) =>
               geographies.map((geo) => {
@@ -129,8 +130,8 @@ export default function WorldMap({
                     }}
                     style={{
                       default: { fill: fillFor(code), stroke: strokeFor(code), strokeWidth: 0.7, outline: "none" },
-                      hover: { fill: interactive && code ? "#F0FBFF" : fillFor(code), stroke: "#1CB0F6", strokeWidth: 0.9, outline: "none", cursor: interactive && code ? "pointer" : "default" },
-                      pressed: { fill: "#DBF1FE", stroke: "#1CB0F6", strokeWidth: 1, outline: "none" }
+                      hover: { fill: interactive && code ? "rgb(var(--surface))" : fillFor(code), stroke: "rgb(var(--primary))", strokeWidth: 0.9, outline: "none", cursor: interactive && code ? "pointer" : "default" },
+                      pressed: { fill: "rgb(var(--surface-2))", stroke: "rgb(var(--primary))", strokeWidth: 1, outline: "none" }
                     }}
                   />
                 );

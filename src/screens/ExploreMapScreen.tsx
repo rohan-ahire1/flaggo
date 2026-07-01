@@ -11,7 +11,7 @@ export default function ExploreMapScreen({ countries }: { countries: Country[] }
   const selected = selectedCode ? countryByCode.get(selectedCode) : undefined;
 
   return (
-    <main className="p-5 pb-24">
+    <main className="p-5">
       <h1 className="font-display text-3xl font-black">Explore</h1>
       <p className="mt-1 font-bold text-flaggo-muted">Pan, zoom, and tap a country.</p>
       <div className="mt-5">

@@ -48,7 +48,7 @@ export default function LeaderboardScreen({
   }, [board]);
 
   return (
-    <main className="p-5 pb-24">
+    <main className="p-5">
       <button onClick={onBack} className="mb-4 grid h-10 w-10 place-items-center rounded-full bg-white text-flaggo-muted shadow-card" aria-label="Back"><Icon name="chevron" className="rotate-180" /></button>
       <h1 className="font-display text-3xl font-black">Leaderboards</h1>
       <select value={board} onChange={(event) => setBoard(event.target.value)} className="mt-4 w-full rounded-2xl border border-flaggo-border bg-white p-3 font-display font-black shadow-card">
