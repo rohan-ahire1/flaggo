@@ -1,4 +1,6 @@
 [build]
+  # Web app deploy. The mobile app is built and released separately through
+  # Expo/EAS/Play Console.
   command = "npm run build"
   publish = "dist"
 
@@ -14,3 +16,8 @@
   from = "/*"
   to = "/index.html"
   status = 200
+
+[[headers]]
+  for = "/*.wasm"
+  [headers.values]
+    Content-Type = "application/wasm"
