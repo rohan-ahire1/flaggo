@@ -3,6 +3,7 @@ import Icon, { type IconName } from "../components/Icon";
 import { TriviaCard } from "../components/QuestionCard";
 import type { Country } from "../types/country";
 import type { AppProgress } from "../types/progress";
+import ResultCard from "../components/ResultCard";
 import { arcadeScore } from "../utils/arcade";
 import { hashStringToSeed, mulberry32 } from "../utils/seededRandom";
 import { buildTrivia, type TriviaMode, type TriviaRound } from "../utils/trivia";
@@ -44,6 +45,7 @@ export default function TriviaScreen({
   const [runMode, setRunMode] = useState<RunMode>("timed");
   const [running, setRunning] = useState(false);
   const [done, setDone] = useState(false);
+  const [newBest, setNewBest] = useState(false);
   const [seed, setSeed] = useState("idle");
   const [index, setIndex] = useState(0);
   const [answers, setAnswers] = useState<boolean[]>([]);
@@ -71,6 +73,7 @@ export default function TriviaScreen({
     setSeed(`trivia-${mode}-${runMode}-${Date.now()}`);
     setRunning(true);
     setDone(false);
+    setNewBest(false);
     setIndex(0);
     setAnswers([]);
     setFeedback(null);
@@ -89,6 +92,7 @@ export default function TriviaScreen({
     if (done) return;
     const finalScore = arcadeScore(runMode === "sudden" ? "sudden" : "timed", finalAnswers);
     const key = triviaKey(mode);
+    setNewBest(finalScore > (progress.arcade[key] ?? 0));
     const next = {
       ...progress,
       arcade: {
@@ -122,11 +126,18 @@ export default function TriviaScreen({
         </div>
 
         {done && (
-          <section className="mt-5 rounded-[24px] bg-green-grad p-6 text-center text-white shadow-glow">
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-white/70">You scored</p>
-            <p className="font-display text-6xl font-black leading-none">{score}</p>
-            <p className="mt-1 font-bold text-white/80">Best {Math.max(best, score)}</p>
-          </section>
+          <div className="mt-5">
+            <ResultCard
+              icon="bolt"
+              title="Run over"
+              praise={newBest ? "New personal best!" : undefined}
+              badge={newBest ? "New best!" : undefined}
+              heroValue={`${score}`}
+              heroCaption="You scored"
+              confetti={newBest}
+              stats={[{ icon: "star", label: "Best", value: `${Math.max(best, score)}`, tone: "text-flaggo-orange" }]}
+            />
+          </div>
         )}
 
         <div className="mt-7 flex flex-1 flex-col gap-7">

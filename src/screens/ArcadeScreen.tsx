@@ -3,6 +3,7 @@ import FeedbackPanel from "../components/FeedbackPanel";
 import FlagImage from "../components/FlagImage";
 import Icon, { type IconName } from "../components/Icon";
 import QuestionCard from "../components/QuestionCard";
+import ResultCard from "../components/ResultCard";
 import { useAuth } from "../auth/AuthProvider";
 import type { ArcadeMode } from "../types/arcade";
 import { ARCADE_MODES, arcadeKey } from "../types/arcade";
@@ -69,6 +70,7 @@ export default function ArcadeScreen({
   const [topic, setTopic] = useState<Topic>(progress.selectedTopic);
   const [running, setRunning] = useState(false);
   const [done, setDone] = useState(false);
+  const [newBest, setNewBest] = useState(false);
   const [index, setIndex] = useState(0);
   const [answers, setAnswers] = useState<boolean[]>([]);
   const [currentProgress, setCurrentProgress] = useState(progress);
@@ -108,6 +110,7 @@ export default function ArcadeScreen({
   function start() {
     setRunning(true);
     setDone(false);
+    setNewBest(false);
     setIndex(0);
     setAnswers([]);
     setFeedback(null);
@@ -128,6 +131,7 @@ export default function ArcadeScreen({
   async function finish(finalAnswers = answers) {
     if (done) return;
     const finalScore = arcadeScore(mode, finalAnswers);
+    setNewBest(finalScore > (currentProgress.arcade[arcadeKey(mode, topic)] ?? 0));
     const next = persistArcadeBest(currentProgress, mode, topic, finalScore);
     setCurrentProgress(next);
     onProgress(next);
@@ -156,15 +160,22 @@ export default function ArcadeScreen({
         </div>
 
         {done && (
-          <section className="mt-5 rounded-[24px] bg-green-grad p-6 text-center text-white shadow-glow">
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-white/70">You scored</p>
-            <p className="font-display text-6xl font-black leading-none">{score}</p>
-            <p className="mt-1 font-bold text-white/80">Best {Math.max(best, score)}</p>
-            <div className="mt-5 grid gap-3">
-              <button onClick={onChallenge} className="flaggo-button bg-white text-flaggo-green shadow-none">Challenge a friend</button>
-              <button onClick={onOpenLeaderboard} className="font-display font-black text-white underline">View leaderboard</button>
-            </div>
-          </section>
+          <div className="mt-5">
+            <ResultCard
+              icon="bolt"
+              title="Run over"
+              praise={newBest ? "New personal best!" : undefined}
+              badge={newBest ? "New best!" : undefined}
+              heroValue={`${score}`}
+              heroCaption="You scored"
+              confetti={newBest}
+              stats={[{ icon: "star", label: "Best", value: `${Math.max(best, score)}`, tone: "text-flaggo-orange" }]}
+              actions={[
+                { label: "Challenge a friend", onClick: onChallenge },
+                { label: "View leaderboard", onClick: onOpenLeaderboard, kind: "ghost" }
+              ]}
+            />
+          </div>
         )}
 
         <div className="mt-7 flex flex-1 flex-col gap-7">
