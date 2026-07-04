@@ -1,11 +1,11 @@
-# Worldly — Architecture
+# Flaggo — Architecture
 
-Deeper architecture reference for the `flaggo` repo (brand "Worldly"). For the quick
+Deeper architecture reference for the `flaggo` repo (brand "Flaggo"). For the quick
 orientation guide see `CLAUDE.md` at the repo root.
 
 ## 1. System overview
 
-Worldly is a client-heavy installable PWA. Almost all game logic runs in the browser
+Flaggo is a client-heavy installable PWA. Almost all game logic runs in the browser
 from static data bundled at build time. Supabase provides auth, a per-user progress
 store, public leaderboards, and multiplayer match storage. Netlify serves the static
 site and hosts a few privileged serverless functions (account deletion, Stripe). The

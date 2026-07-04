@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { BRAND } from "../config/brand";
 
-const contact = "support@worldly.app";
+const contact = "support@playflaggo.netlify.app";
 
 function LegalLayout({ title, children }: { title: string; children: React.ReactNode }) {
   return (

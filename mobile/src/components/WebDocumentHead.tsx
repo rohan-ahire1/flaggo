@@ -58,7 +58,7 @@ const ROUTE_TITLES: Record<string, string> = {
   "/test": "Custom Test",
   "/test-setup": "Custom Test",
   "/trivia": "Trivia",
-  "/welcome": "Worldly",
+  "/welcome": "Flaggo",
   "/auth/callback": "Sign In"
 };
 
@@ -68,8 +68,8 @@ export default function WebDocumentHead() {
   useFigtreeWebFont();
   if (Platform.OS !== "web") return null;
 
-  const routeTitle = ROUTE_TITLES[pathname] ?? (pathname.startsWith("/match/") ? "Challenge Match" : "Worldly");
-  const title = routeTitle === "Worldly" ? BRAND.name : `${routeTitle} | ${BRAND.name}`;
+  const routeTitle = ROUTE_TITLES[pathname] ?? (pathname.startsWith("/match/") ? "Challenge Match" : "Flaggo");
+  const title = routeTitle === "Flaggo" ? BRAND.name : `${routeTitle} | ${BRAND.name}`;
   const description = "Master the world, one round at a time.";
 
   return (

@@ -1,4 +1,4 @@
--- Worldly DB setup — paste this entire file into Supabase SQL Editor and Run.
+-- Flaggo DB setup — paste this entire file into Supabase SQL Editor and Run.
 -- Combines migrations 202606180001 + 202606180002 + 202606180003 (idempotent; safe to re-run).
 
 -- ============================================================

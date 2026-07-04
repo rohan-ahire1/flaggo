@@ -1,8 +1,8 @@
-# Flaggo (Worldly) — Free MVP Launch Plan
+# Flaggo (Flaggo) — Free MVP Launch Plan
 
 ## Summary
 
-Get Flaggo/Worldly across the finish line as a **free, public MVP** ready to post on
+Get Flaggo/Flaggo across the finish line as a **free, public MVP** ready to post on
 subreddits. Scope is free-only: the game, auth, leaderboards, and multiplayer must work
 end-to-end; Stripe checkout and AdSense are **deferred behind feature flags** (code stays
 in the repo but is disabled and not surfaced in the UI). Finish the in-progress theming
@@ -67,11 +67,11 @@ This plan assumes the current uncommitted theming WIP is **kept and completed**,
 - Verify PWA: manifest, icons, installability, offline shell.
 
 ### 5. README + launch polish
-- Write a `README.md`: one-line pitch ("Worldly — master world geography, one round at a
+- Write a `README.md`: one-line pitch ("Flaggo — master world geography, one round at a
   time"), screenshot/GIF, feature list, stack, local-dev setup, env var table, deploy notes.
 - Confirm social/OG meta in `index.html` (title, description, og:image) renders a good
   link preview — Reddit auto-embeds these. Provide a 1200×630 `og:image`.
-- Set a sensible favicon and PWA name/short_name to "Worldly".
+- Set a sensible favicon and PWA name/short_name to "Flaggo".
 
 ## Test Plan
 
@@ -100,7 +100,7 @@ Manual + automated. Codex must verify, not assume.
 - A production Supabase project and a Netlify account/site will be provisioned by the user;
   Codex wires config and documents required secrets.
 - Default theme is light (user preference).
-- "Worldly" is the public product name (per current OG meta); keep it consistent everywhere.
+- "Flaggo" is the public product name (per current OG meta); keep it consistent everywhere.
 
 ## Risks & Acceptance Criteria
 

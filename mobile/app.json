@@ -1,18 +1,18 @@
 {
   "expo": {
-    "name": "Worldly",
-    "slug": "worldly",
+    "name": "Flaggo",
+    "slug": "flaggo",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "worldly",
+    "scheme": "flaggo",
     "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "app.worldly"
+      "bundleIdentifier": "app.flaggo"
     },
     "android": {
-      "package": "app.worldly",
+      "package": "app.flaggo",
       "adaptiveIcon": {
         "backgroundColor": "#faf6ee",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -46,7 +46,7 @@
     "extra": {
       "supabaseUrl": "",
       "supabaseAnonKey": "",
-      "siteUrl": "https://worldly.app"
+      "siteUrl": "https://playflaggo.netlify.app"
     }
   }
 }
