@@ -38,7 +38,7 @@ export default function ReviewScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-paper" edges={["top"]}>
-      <ScrollView contentContainerClassName="p-5 pb-8 gap-5">
+      <ScrollView contentContainerClassName="w-full max-w-[1120px] self-center p-5 pb-8 gap-5 lg:p-8">
         <View>
           <Text className="text-[32px] font-black text-ink">Play</Text>
           <Text className="text-[15px] font-semibold text-muted">Review what's due, then go endless.</Text>
@@ -88,7 +88,7 @@ export default function ReviewScreen() {
           <SectionLabel>More ways to play</SectionLabel>
           <View className="flex-row flex-wrap justify-between gap-y-3">
             {QUICK.map((q) => (
-              <Card key={q.label} onPress={() => router.push(q.route as never)} className="w-[48%] gap-3">
+              <Card key={q.label} onPress={() => router.push(q.route as never)} className="w-[48%] gap-3 md:w-[23.5%]">
                 <View className="h-10 w-10 items-center justify-center rounded-xl bg-surface">
                   <Icon name={q.icon} size={22} color={themeColor(theme, "primary")} />
                 </View>
@@ -107,7 +107,7 @@ export default function ReviewScreen() {
                 <Pressable
                   key={c.code}
                   onPress={() => router.push({ pathname: "/quiz", params: { mode: "lesson", topic } })}
-                  className="w-[31%]"
+                  className="w-[31%] md:w-[15%]"
                 >
                   <FlagImage code={c.code} width={160} />
                   <Text className="mt-1 text-[12px] font-bold text-muted" numberOfLines={1}>

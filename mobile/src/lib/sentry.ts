@@ -1,12 +1,7 @@
-import * as Sentry from "@sentry/react-native";
-import { env } from "../config/env";
-
 export function initSentry() {
-  if (!env.sentryDsn) return;
-  Sentry.init({
-    dsn: env.sentryDsn,
-    tracesSampleRate: 0.1
-  });
+  // Web runs without Sentry until a browser package is added intentionally.
 }
 
-export { Sentry };
+export const Sentry = {
+  captureException: (_error: unknown) => undefined
+};

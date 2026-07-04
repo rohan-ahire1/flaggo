@@ -1,5 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createClient } from "@supabase/supabase-js";
+import { Platform } from "react-native";
 import { env } from "../config/env";
 
 export const hasSupabaseConfig = Boolean(env.supabaseUrl && env.supabaseAnonKey);
@@ -14,7 +15,8 @@ export const supabase = hasSupabaseConfig
         detectSessionInUrl: false,
         persistSession: true,
         autoRefreshToken: true,
-        flowType: "pkce"
+        flowType: "pkce",
+        storageKey: Platform.OS === "web" ? "worldly-auth" : "worldly-native-auth"
       }
     })
   : null;

@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Pressable, Text, View, type StyleProp, type ViewStyle } from "react-native";
+import { Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from "react-native";
 import Svg, { Circle, Line } from "react-native-svg";
 import Icon, { type IconName } from "./Icon";
 import { themeColor } from "@/theme/palettes";
@@ -28,13 +28,18 @@ export function Card({
   const base = `rounded-[20px] border border-line bg-paper p-4 ${className}`;
   if (onPress) {
     return (
-      <Pressable onPress={onPress} style={[softShadow, style]} className={base}>
+      <Pressable
+        accessibilityRole="button"
+        onPress={onPress}
+        style={({ pressed }) => [softShadow, StyleSheet.flatten(style), pressed ? { opacity: 0.86 } : null]}
+        className={base}
+      >
         {children}
       </Pressable>
     );
   }
   return (
-    <View style={[softShadow, style]} className={base}>
+    <View style={[softShadow, StyleSheet.flatten(style)]} className={base}>
       {children}
     </View>
   );
@@ -67,13 +72,17 @@ export function PillButton({
   const styles: Record<ButtonVariant, { box: string; text: string; icon: string }> = {
     primary: { box: "bg-primary", text: "text-white", icon: "#ffffff" },
     secondary: { box: "border-2 border-line bg-surface", text: "text-ink", icon: themeColor(theme, "ink") },
-    light: { box: "bg-white", text: "text-primary", icon: themeColor(theme, "primary") }
+    light: { box: "bg-paper", text: "text-primary", icon: themeColor(theme, "primary") }
   };
   const s = styles[variant];
   return (
     <Pressable
+      accessibilityRole="button"
       onPress={onPress}
-      style={variant !== "secondary" ? softShadow : undefined}
+      style={({ pressed }) => [
+        variant !== "secondary" ? softShadow : undefined,
+        pressed ? { opacity: 0.86 } : null
+      ]}
       className={`flex-row items-center justify-center gap-2 rounded-2xl px-6 py-4 ${s.box} ${className}`}
     >
       {icon ? <Icon name={icon} size={20} color={s.icon} /> : null}

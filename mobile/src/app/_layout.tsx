@@ -1,6 +1,6 @@
 import "../global.css";
-import { useEffect } from "react";
-import { LogBox } from "react-native";
+import { useEffect, useState } from "react";
+import { LogBox, Platform, Text, View } from "react-native";
 import { Stack } from "expo-router";
 import * as Linking from "expo-linking";
 import * as SplashScreen from "expo-splash-screen";
@@ -11,55 +11,158 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { createSessionFromUrl } from "@/auth/actions";
 import { AuthProvider } from "@/auth/AuthProvider";
+import PwaRegistration from "@/components/PwaRegistration";
+import WebDocumentHead from "@/components/WebDocumentHead";
+import WebSidebarShell from "@/components/WebSidebarShell";
 import { initDb } from "@/db/client";
 import { queryClient } from "@/lib/queryClient";
+import { initSentry } from "@/lib/sentry";
 import { ProgressProvider } from "@/state/ProgressProvider";
 import { useOnboardStore } from "@/state/onboarding";
 import { ThemeProvider } from "@/theme/ThemeProvider";
 import { applyFigtreeDefault, FIGTREE_FONTS } from "@/theme/fonts";
+import { DEFAULT_THEME, themeColor } from "@/theme/palettes";
 
 SplashScreen.preventAutoHideAsync();
 applyFigtreeDefault();
+initSentry();
 // Benign dev-only warning from async store hydration racing first paint.
 LogBox.ignoreLogs([/Can't perform a React state update on a component that hasn't mounted/]);
 
 export default function RootLayout() {
   const url = Linking.useURL();
   const [fontsLoaded] = useFonts(FIGTREE_FONTS);
+  const [dbReady, setDbReady] = useState(false);
+  const [dbError, setDbError] = useState<string | null>(null);
   const hydrateOnboard = useOnboardStore((s) => s.hydrate);
 
   useEffect(() => {
-    initDb();
+    let active = true;
+
+    void initDb()
+      .then(() => {
+        if (active) setDbReady(true);
+      })
+      .catch((error) => {
+        console.error("Failed to initialize local database", error);
+        if (active) {
+          setDbError(error instanceof Error ? error.message : "Failed to initialize local database.");
+        }
+      });
+
     void hydrateOnboard();
+
+    return () => {
+      active = false;
+    };
   }, [hydrateOnboard]);
 
   useEffect(() => {
-    if (fontsLoaded) void SplashScreen.hideAsync();
-  }, [fontsLoaded]);
+    if (fontsLoaded && (dbReady || dbError)) void SplashScreen.hideAsync();
+  }, [dbError, dbReady, fontsLoaded]);
+
+  // On web the local DB (OPFS) can fail to open when another document still
+  // holds the exclusive handle (hard refresh, deep link, second tab). A reload
+  // recovers once the old handle releases, so auto-reload a couple of times
+  // before falling back to the error screen. Cleared once the DB opens.
+  const RELOAD_KEY = "worldly-db-reload";
+  useEffect(() => {
+    if (Platform.OS !== "web" || typeof window === "undefined") return;
+    if (dbReady) {
+      try {
+        window.sessionStorage.removeItem(RELOAD_KEY);
+      } catch {
+        // ignore storage access errors
+      }
+      return;
+    }
+    if (!dbError) return;
+    let count = 0;
+    try {
+      count = Number(window.sessionStorage.getItem(RELOAD_KEY) ?? "0");
+    } catch {
+      count = 0;
+    }
+    if (count >= 2) return;
+    try {
+      window.sessionStorage.setItem(RELOAD_KEY, String(count + 1));
+    } catch {
+      // ignore storage access errors
+    }
+    const timer = setTimeout(() => window.location.reload(), 500);
+    return () => clearTimeout(timer);
+  }, [dbError, dbReady]);
 
   // Handle OAuth / magic-link callbacks that open the app via deep link.
   useEffect(() => {
     if (url) void createSessionFromUrl(url);
   }, [url]);
 
-  if (!fontsLoaded) return null;
+  if (dbError) {
+    return (
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <SafeAreaProvider>
+          <View
+            style={{
+              flex: 1,
+              justifyContent: "center",
+              backgroundColor: themeColor(DEFAULT_THEME, "paper"),
+              paddingHorizontal: 20,
+              paddingVertical: 24
+            }}
+          >
+            <View style={{ width: "100%", maxWidth: 420, alignSelf: "center" }}>
+              <Text
+                style={{
+                  color: themeColor(DEFAULT_THEME, "ink"),
+                  fontSize: 22,
+                  fontWeight: "900",
+                  textAlign: "center"
+                }}
+              >
+                Worldly could not open its local database.
+              </Text>
+              <Text
+                style={{
+                  color: themeColor(DEFAULT_THEME, "muted"),
+                  fontSize: 14,
+                  fontWeight: "600",
+                  marginTop: 8,
+                  textAlign: "center"
+                }}
+              >
+                {dbError}
+              </Text>
+            </View>
+          </View>
+        </SafeAreaProvider>
+      </GestureHandlerRootView>
+    );
+  }
+
+  if (!fontsLoaded || !dbReady) return null;
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <QueryClientProvider client={queryClient}>
           <ThemeProvider>
+            <WebDocumentHead />
+            <PwaRegistration />
             <AuthProvider>
               <ProgressProvider>
-                <StatusBar style="dark" />
-                <Stack screenOptions={{ headerShown: false }}>
-                  <Stack.Screen name="(tabs)" />
-                  <Stack.Screen name="quiz" options={{ presentation: "card" }} />
-                  <Stack.Screen name="arcade" options={{ presentation: "card" }} />
-                  <Stack.Screen name="match/[id]" options={{ presentation: "card" }} />
-                  <Stack.Screen name="friends" options={{ presentation: "card" }} />
-                  <Stack.Screen name="leaderboard" options={{ presentation: "card" }} />
-                </Stack>
+                <WebSidebarShell>
+                  <StatusBar style="dark" />
+                  <Stack screenOptions={{ headerShown: false }}>
+                    <Stack.Screen name="(tabs)" />
+                    <Stack.Screen name="quiz" options={{ presentation: "card" }} />
+                    <Stack.Screen name="arcade" options={{ presentation: "card" }} />
+                    <Stack.Screen name="match/[id]" options={{ presentation: "card" }} />
+                    <Stack.Screen name="friends" options={{ presentation: "card" }} />
+                    <Stack.Screen name="leaderboard" options={{ presentation: "card" }} />
+                    <Stack.Screen name="auth/callback" options={{ presentation: "card" }} />
+                  </Stack>
+                </WebSidebarShell>
               </ProgressProvider>
             </AuthProvider>
           </ThemeProvider>

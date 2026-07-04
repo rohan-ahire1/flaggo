@@ -43,8 +43,8 @@ export default function MapMenuScreen() {
   return (
     <SafeAreaView className="flex-1 bg-paper" edges={["top", "bottom"]}>
       <ScreenHeader title="World Map" subtitle="Locate or identify countries on the map." />
-      <ScrollView contentContainerClassName="px-5 pb-8 gap-5 pt-2">
-        <View className="gap-3">
+      <ScrollView contentContainerClassName="w-full max-w-[960px] self-center px-5 pb-8 gap-5 pt-2 lg:px-8">
+          <View className="gap-3 md:flex-row">
           {(
             [
               ["locate", "Locate", "Tap the named country on the map.", "target"],
@@ -56,7 +56,7 @@ export default function MapMenuScreen() {
               <Card
                 key={value}
                 onPress={() => setMode(value as MapMode)}
-                className={`flex-row items-center gap-3 ${on ? "border-2 border-primary" : ""}`}
+                className={`flex-row items-center gap-3 md:flex-1 ${on ? "border-2 border-primary" : ""}`}
               >
                 <View className={`h-11 w-11 items-center justify-center rounded-2xl ${on ? "bg-primary/15" : "bg-surface"}`}>
                   <Icon name={iconName} size={22} color={themeColor(theme, on ? "primary" : "muted")} />

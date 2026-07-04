@@ -32,7 +32,7 @@ export default function ArcadeScreen() {
   return (
     <SafeAreaView className="flex-1 bg-paper" edges={["top", "bottom"]}>
       <ScreenHeader title="Arcade" subtitle="Endless rounds, three ways." />
-      <ScrollView contentContainerClassName="px-5 pb-8 gap-5 pt-2">
+      <ScrollView contentContainerClassName="w-full max-w-[1120px] self-center px-5 pb-8 gap-5 pt-2 lg:px-8">
         <View className="gap-3">
           <SectionLabel>Topic</SectionLabel>
           <View className="flex-row flex-wrap gap-2">
@@ -53,6 +53,7 @@ export default function ArcadeScreen() {
 
         <View className="gap-3">
           <SectionLabel>Modes</SectionLabel>
+          <View className="gap-3 md:flex-row md:flex-wrap md:justify-between">
           {ARCADE_MODES.map((mode) => {
             const best = progress.arcade[arcadeKey(mode, topic)] ?? 0;
             const info = MODE_INFO[mode];
@@ -60,7 +61,7 @@ export default function ArcadeScreen() {
               <Card
                 key={mode}
                 onPress={() => router.push({ pathname: "/quiz", params: { mode: "arcade", topic, amode: mode } })}
-                className="flex-row items-center gap-3"
+                className="flex-row items-center gap-3 md:w-[32%]"
               >
                 <View className="h-12 w-12 items-center justify-center rounded-2xl bg-surface">
                   <Icon name={info.icon} size={24} color={themeColor(theme, "primary")} />
@@ -76,6 +77,7 @@ export default function ArcadeScreen() {
               </Card>
             );
           })}
+          </View>
         </View>
       </ScrollView>
     </SafeAreaView>

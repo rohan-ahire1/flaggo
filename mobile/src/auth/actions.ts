@@ -1,10 +1,17 @@
 import { getQueryParams } from "expo-auth-session/build/QueryParams";
 import * as Linking from "expo-linking";
 import * as WebBrowser from "expo-web-browser";
+import { Platform } from "react-native";
+import { env } from "../config/env";
 import { supabase } from "../lib/supabase";
 
-// Deep link the OAuth/magic-link callback returns to (worldly://auth/callback).
-const redirectTo = Linking.createURL("/auth/callback");
+export function getAuthRedirectUrl(): string {
+  if (Platform.OS === "web") {
+    if (typeof window !== "undefined") return new URL("/auth/callback", window.location.origin).toString();
+    return new URL("/auth/callback", env.siteUrl).toString();
+  }
+  return Linking.createURL("/auth/callback");
+}
 
 type Result = { error?: string; message?: string };
 
@@ -21,11 +28,13 @@ export async function createSessionFromUrl(url: string): Promise<Result> {
 
 export async function signInWithGoogle(): Promise<Result> {
   if (!supabase) return { error: "Sign-in is not configured." };
+  const redirectTo = getAuthRedirectUrl();
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
-    options: { redirectTo, skipBrowserRedirect: true }
+    options: { redirectTo, skipBrowserRedirect: Platform.OS !== "web" }
   });
   if (error) return { error: error.message };
+  if (Platform.OS === "web") return {};
   if (!data?.url) return { error: "Could not start Google sign-in." };
 
   const result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo);
@@ -39,6 +48,7 @@ export async function signInWithEmail(email: string): Promise<Result> {
   if (!supabase) return { error: "Sign-in is not configured." };
   const clean = email.trim();
   if (!clean) return { error: "Enter your email." };
+  const redirectTo = getAuthRedirectUrl();
   const { error } = await supabase.auth.signInWithOtp({
     email: clean,
     options: { emailRedirectTo: redirectTo }

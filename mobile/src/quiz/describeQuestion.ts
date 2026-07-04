@@ -73,7 +73,12 @@ export function describeQuestion(q: Question): DescribedQuestion {
         promptText: q.correctCountry.name,
         subText: "Pick the flag",
         layout: "flags",
-        options: q.options.map((c) => ({ key: c.code, flagCode: c.code, correct: c.code === q.correctCountry.code }))
+        options: q.options.map((c) => ({
+          key: c.code,
+          label: c.name,
+          flagCode: c.code,
+          correct: c.code === q.correctCountry.code
+        }))
       };
     case "true-false":
       return {

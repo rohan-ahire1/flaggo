@@ -2,9 +2,11 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router, useLocalSearchParams } from "expo-router";
+import { dismiss } from "@/utils/nav";
 import QuestionCard from "@/components/QuestionCard";
 import RoundResults, { type RoundResultItem } from "@/components/RoundResults";
 import Icon from "@/components/Icon";
+import FlagImage from "@/components/FlagImage";
 import { PillButton, Pill } from "@/components/ui";
 import { buildArcadeQuestions, buildLessonQuestions } from "@/quiz/buildQuestions";
 import { describeQuestion, questionLabel, type QuizOption } from "@/quiz/describeQuestion";
@@ -15,6 +17,7 @@ import { themeColor } from "@/theme/palettes";
 import { useThemeStore } from "@/theme/store";
 import type { AppProgress } from "@/types/progress";
 import type { ArcadeMode } from "@/types/arcade";
+import type { Country } from "@/types/country";
 import type { Topic } from "@/types/topic";
 import { generateLessonQuestions, generateReviewQuestions, type Question } from "@/utils/quiz";
 import { generateLessons } from "@/utils/lessonGenerator";
@@ -43,6 +46,12 @@ function bumpStreak(progress: AppProgress): AppProgress {
   const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
   const streak = progress.lastLessonDate === yesterday ? (progress.streak ?? 0) + 1 : 1;
   return { ...progress, streak, lastLessonDate: today };
+}
+
+function countryContext(country: Country) {
+  const parts = [country.subregion ?? country.continent];
+  if (country.capital) parts.push(`Capital: ${country.capital}`);
+  return parts.join(" · ");
 }
 
 export default function QuizScreen() {
@@ -118,7 +127,7 @@ export default function QuizScreen() {
       <SafeAreaView className="flex-1 items-center justify-center bg-paper p-6">
         <Text className="text-center text-lg font-bold text-ink">Not enough data for this topic yet.</Text>
         <View className="mt-5 w-48">
-          <PillButton label="Go back" variant="primary" onPress={() => router.back()} />
+          <PillButton label="Go back" variant="primary" onPress={() => dismiss()} />
         </View>
       </SafeAreaView>
     );
@@ -149,7 +158,11 @@ export default function QuizScreen() {
       {
         label: questionLabel(q),
         correct,
-        chosen: correct ? undefined : option.label ?? "—"
+        chosen: correct ? undefined : option.label ?? "—",
+        answer: correct ? undefined : correctOption?.label,
+        countryCode: q.correctCountry.code,
+        countryName: q.correctCountry.name,
+        context: countryContext(q.correctCountry)
       }
     ]);
   }
@@ -194,6 +207,7 @@ export default function QuizScreen() {
 
   if (finished) {
     const streak = isDaily ? draft.current.daily.streak : isArcade ? undefined : draft.current.streak;
+    const missed = results.filter((item) => !item.correct).length;
     const actions = isDaily
       ? [
           {
@@ -208,12 +222,22 @@ export default function QuizScreen() {
             icon: "trophy" as const,
             onPress: () => router.replace("/leaderboard")
           },
-          { label: "Done", variant: "secondary" as const, onPress: () => router.back() }
+          { label: "Done", variant: "secondary" as const, onPress: () => dismiss() }
         ]
       : [
+          ...(missed
+            ? [
+                {
+                  label: "Review mistakes",
+                  variant: "primary" as const,
+                  icon: "review" as const,
+                  onPress: () => router.replace("/review")
+                }
+              ]
+            : []),
           {
             label: "Play again",
-            variant: "primary" as const,
+            variant: missed ? "secondary" as const : "primary" as const,
             icon: "swap" as const,
             onPress: () =>
               router.replace({
@@ -221,7 +245,7 @@ export default function QuizScreen() {
                 params: { mode: params.mode ?? "lesson", topic, amode: arcadeMode }
               })
           },
-          { label: "Done", variant: "secondary" as const, onPress: () => router.back() }
+          { label: "Done", variant: "secondary" as const, onPress: () => dismiss() }
         ];
     return (
       <RoundResults
@@ -238,8 +262,8 @@ export default function QuizScreen() {
   return (
     <SafeAreaView className="flex-1 bg-paper" edges={["top", "bottom"]}>
       {/* Header: close + progress bar */}
-      <View className="flex-row items-center gap-3 px-5 pb-3 pt-1">
-        <Pressable onPress={() => router.back()} hitSlop={10}>
+      <View className="w-full max-w-[900px] self-center flex-row items-center gap-3 px-5 pb-3 pt-1 lg:px-8">
+        <Pressable onPress={() => dismiss()} hitSlop={10}>
           <Icon name="x" size={24} color={themeColor(theme, "muted")} />
         </Pressable>
         <View className="h-2.5 flex-1 overflow-hidden rounded-full bg-surface-2">
@@ -250,7 +274,7 @@ export default function QuizScreen() {
         </View>
       </View>
 
-      <View className="flex-row items-center justify-between px-5 pb-2">
+      <View className="w-full max-w-[900px] self-center flex-row items-center justify-between px-5 pb-2 lg:px-8">
         <Text className="text-[15px] font-bold text-muted">
           Question {index + 1} of {total}
         </Text>
@@ -260,28 +284,45 @@ export default function QuizScreen() {
         </View>
       </View>
 
-      <ScrollView contentContainerClassName="px-5 pb-3">
+      <ScrollView contentContainerClassName="w-full max-w-[900px] self-center px-5 pb-3 lg:px-8">
         <QuestionCard question={q} revealed={revealed} selectedKey={selectedKey} onSelect={select} />
       </ScrollView>
 
       {/* Footer: feedback + next */}
-      <View className="gap-3 border-t border-line bg-paper px-5 pb-1 pt-3">
-        <Text
-          className={`text-center text-[15px] font-bold ${revealed ? (wasCorrect ? "text-success" : "text-error") : "text-muted"}`}
-        >
-          {revealed
-            ? wasCorrect
-              ? "Correct!"
-              : `Answer: ${correctOption?.label ?? q.correctCountry.name}`
-            : "Tap the answer you think is right"}
-        </Text>
-        <PillButton
-          label={index + 1 >= total ? "See results" : "Next question"}
-          variant="primary"
-          iconRight="arrow-right"
-          onPress={next}
-          className={revealed ? "" : "opacity-40"}
-        />
+      <View className="border-t border-line bg-paper">
+        <View className="w-full max-w-[900px] self-center gap-3 px-5 pb-4 pt-3 lg:px-8">
+          {revealed ? (
+            <View className="flex-row items-center gap-3 rounded-2xl border border-line bg-surface px-3 py-2.5">
+              <View className="w-14">
+                <FlagImage code={q.correctCountry.code} width={120} className="rounded-lg" />
+              </View>
+              <View className="min-w-0 flex-1">
+                <Text className="text-[15px] font-black text-ink" numberOfLines={1}>
+                  {q.correctCountry.name}
+                </Text>
+                <Text className="text-[12px] font-semibold text-muted" numberOfLines={2}>
+                  {countryContext(q.correctCountry)}
+                </Text>
+              </View>
+            </View>
+          ) : null}
+          <Text
+            className={`text-center text-[15px] font-bold ${revealed ? (wasCorrect ? "text-success" : "text-error") : "text-muted"}`}
+          >
+            {revealed
+              ? wasCorrect
+                ? "Correct!"
+                : `Answer: ${correctOption?.label ?? q.correctCountry.name}`
+              : "Tap the answer you think is right"}
+          </Text>
+          <PillButton
+            label={index + 1 >= total ? "See results" : "Next question"}
+            variant="primary"
+            iconRight="arrow-right"
+            onPress={next}
+            className={revealed ? "" : "opacity-40"}
+          />
+        </View>
       </View>
     </SafeAreaView>
   );

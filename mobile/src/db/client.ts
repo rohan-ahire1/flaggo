@@ -1,49 +1,24 @@
 import { drizzle } from "drizzle-orm/expo-sqlite";
 import { openDatabaseSync } from "expo-sqlite";
+import { bootstrapDbSync, DATABASE_NAME } from "./bootstrap";
 import * as schema from "./schema";
 
-const expoDb = openDatabaseSync("worldly.db");
-
-export const db = drizzle(expoDb, { schema });
+const expoDb = openDatabaseSync(DATABASE_NAME);
+const db = drizzle(expoDb, { schema });
 
 let initialized = false;
 
-// Lightweight idempotent schema bootstrap. drizzle-kit (drizzle.config.ts) can
-// generate real migration files for CI, but creating the tables at first use
-// keeps the app self-contained and guarantees a valid DB on a fresh install.
-export function initDb(): void {
+function ensureInitialized(): void {
   if (initialized) return;
-  expoDb.execSync(`
-    CREATE TABLE IF NOT EXISTS progress (
-      id INTEGER PRIMARY KEY,
-      xp INTEGER NOT NULL DEFAULT 0,
-      coins INTEGER NOT NULL DEFAULT 0,
-      streak INTEGER NOT NULL DEFAULT 0,
-      last_lesson_date TEXT,
-      selected_topic TEXT NOT NULL DEFAULT 'flag',
-      total_correct INTEGER NOT NULL DEFAULT 0,
-      total_wrong INTEGER NOT NULL DEFAULT 0,
-      daily_last_date TEXT,
-      daily_streak INTEGER NOT NULL DEFAULT 0,
-      daily_best INTEGER NOT NULL DEFAULT 0,
-      completed_lesson_ids TEXT NOT NULL DEFAULT '[]',
-      daily_history TEXT NOT NULL DEFAULT '{}',
-      arcade TEXT NOT NULL DEFAULT '{}',
-      decks TEXT NOT NULL DEFAULT '[]',
-      updated_at TEXT,
-      user_id TEXT,
-      needs_merge INTEGER NOT NULL DEFAULT 0
-    );
-    CREATE TABLE IF NOT EXISTS review_items (
-      country_code TEXT PRIMARY KEY,
-      topic TEXT,
-      box INTEGER NOT NULL DEFAULT 0,
-      correct_count INTEGER NOT NULL DEFAULT 0,
-      wrong_count INTEGER NOT NULL DEFAULT 0,
-      last_seen_at TEXT,
-      next_review_at TEXT NOT NULL
-    );
-    INSERT OR IGNORE INTO progress (id) VALUES (1);
-  `);
+  bootstrapDbSync(expoDb);
   initialized = true;
+}
+
+export async function initDb(): Promise<void> {
+  ensureInitialized();
+}
+
+export function getDb() {
+  ensureInitialized();
+  return db;
 }

@@ -49,10 +49,10 @@ export default function StatsScreen() {
   return (
     <SafeAreaView className="flex-1 bg-paper" edges={["top", "bottom"]}>
       <ScreenHeader title="Stats" />
-      <ScrollView contentContainerClassName="px-5 pb-8 gap-5 pt-2">
+      <ScrollView contentContainerClassName="w-full max-w-[1120px] self-center px-5 pb-8 gap-5 pt-2 lg:px-8">
         <View className="flex-row flex-wrap justify-between gap-y-3">
           {stats.map((s) => (
-            <Card key={s.label} className="w-[48%] gap-1">
+            <Card key={s.label} className="w-[48%] gap-1 md:w-[23.5%]">
               <Icon name={s.icon} size={20} color={themeColor(theme, "primary")} />
               <Text className="text-[24px] font-black text-ink">{s.value}</Text>
               <Text className="text-[12px] font-bold uppercase tracking-wide text-muted">{s.label}</Text>

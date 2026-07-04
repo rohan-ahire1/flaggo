@@ -85,6 +85,7 @@ export default function TriviaScreen() {
     setRunning(false);
   }
   function continueNext() {
+    if (!feedback) return;
     setFeedback(null);
     if (index >= rounds.length - 1 || remaining <= 0) finish();
     else setIndex((v) => v + 1);
@@ -95,7 +96,7 @@ export default function TriviaScreen() {
     return (
       <SafeAreaView className="flex-1 bg-paper" edges={["top", "bottom"]}>
         <ScreenHeader title="Trivia" subtitle="Higher/lower, odd-one-out, true/false." />
-        <ScrollView contentContainerClassName="px-5 pb-8 gap-5 pt-2">
+        <ScrollView contentContainerClassName="w-full max-w-[960px] self-center px-5 pb-8 gap-5 pt-2 lg:px-8">
           {done ? (
             <Card className="items-center gap-1 py-6">
               <Text className="text-[44px] font-black text-success">{score}</Text>
@@ -132,7 +133,7 @@ export default function TriviaScreen() {
   // --- Running ---
   return (
     <SafeAreaView className="flex-1 bg-paper" edges={["top", "bottom"]}>
-      <View className="flex-row items-center gap-3 px-5 pb-2 pt-1">
+      <View className="w-full max-w-[960px] self-center flex-row items-center gap-3 px-5 pb-2 pt-1 lg:px-8">
         <Pressable onPress={() => finish()} hitSlop={10}>
           <Text className="text-[15px] font-bold text-muted">End</Text>
         </Pressable>
@@ -142,25 +143,27 @@ export default function TriviaScreen() {
         </View>
       </View>
 
-      <ScrollView contentContainerClassName="px-5 pb-3">
+      <ScrollView contentContainerClassName="w-full max-w-[960px] self-center px-5 pb-3 lg:px-8">
         <Animated.View key={round.id} entering={FadeIn.duration(200)} className="gap-4">
           <TriviaBody round={round} revealed={!!feedback} onAnswer={answer} />
         </Animated.View>
       </ScrollView>
 
-      <View className="gap-3 border-t border-line px-5 pb-1 pt-3">
-        <Text
-          className={`text-center text-[15px] font-bold ${feedback ? (feedback.ok ? "text-success" : "text-error") : "text-muted"}`}
-        >
-          {feedback ? `${feedback.ok ? "Correct!" : "Not quite."} Answer: ${answerLabel(feedback.round)}` : "Pick your answer"}
-        </Text>
-        <PillButton
-          label="Continue"
-          variant="primary"
-          iconRight="arrow-right"
-          onPress={continueNext}
-          className={feedback ? "" : "opacity-40"}
-        />
+      <View className="border-t border-line bg-paper">
+        <View className="w-full max-w-[960px] self-center gap-3 px-5 pb-4 pt-3 lg:px-8">
+          <Text
+            className={`text-center text-[15px] font-bold ${feedback ? (feedback.ok ? "text-success" : "text-error") : "text-muted"}`}
+          >
+            {feedback ? `${feedback.ok ? "Correct!" : "Not quite."} Answer: ${answerLabel(feedback.round)}` : "Pick your answer"}
+          </Text>
+          <PillButton
+            label="Continue"
+            variant="primary"
+            iconRight="arrow-right"
+            onPress={continueNext}
+            className={feedback ? "" : "opacity-40"}
+          />
+        </View>
       </View>
     </SafeAreaView>
   );

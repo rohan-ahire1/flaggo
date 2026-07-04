@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { View } from "react-native";
+import { Platform, View } from "react-native";
 import Svg, { Path, Rect } from "react-native-svg";
 import { geoEqualEarth, geoPath } from "d3-geo";
 import { feature } from "topojson-client";
@@ -113,9 +113,20 @@ export default function WorldMap({
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: tx.value }, { translateY: ty.value }, { scale: scale.value }]
   }));
+  const webWheelProps =
+    Platform.OS === "web"
+      ? ({
+          onWheel: (event: { preventDefault: () => void; deltaY: number }) => {
+            event.preventDefault();
+            const next = scale.value + (event.deltaY > 0 ? -0.25 : 0.25);
+            scale.value = Math.max(1, Math.min(6, next));
+          }
+        } as Record<string, unknown>)
+      : {};
 
   return (
     <View
+      {...webWheelProps}
       style={{ height, backgroundColor: ocean }}
       className="overflow-hidden rounded-[24px] border border-line"
     >
