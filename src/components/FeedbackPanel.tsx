@@ -7,12 +7,14 @@ export default function FeedbackPanel({
   country,
   xp,
   answerLabel,
+  selectedLabel,
   onContinue
 }: {
   correct: boolean;
   country: Country;
   xp: number;
   answerLabel?: string;
+  selectedLabel?: string;
   onContinue: () => void;
 }) {
   return (
@@ -30,15 +32,22 @@ export default function FeedbackPanel({
         </div>
         <div>
           <h2 className="font-display text-2xl font-black">{correct ? "Nice!" : "Not quite"}</h2>
-          <p className="flex items-center gap-1 font-bold">
-            {correct ? (
-              <>
-                <Icon name="bolt" size={16} /> +{xp} XP
-              </>
-            ) : (
-              <>Correct answer: {answerLabel ?? country.name}</>
-            )}
-          </p>
+          {correct ? (
+            <p className="flex items-center gap-1 font-bold">
+              <Icon name="bolt" size={16} /> +{xp} XP
+            </p>
+          ) : (
+            <div className="text-sm font-semibold leading-tight text-white/95">
+              {selectedLabel && (
+                <p>
+                  You picked <span className="font-black">{selectedLabel}</span>
+                </p>
+              )}
+              <p>
+                Correct answer <span className="font-black">{answerLabel ?? country.name}</span>
+              </p>
+            </div>
+          )}
         </div>
       </div>
       <button
