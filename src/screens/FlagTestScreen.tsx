@@ -107,7 +107,7 @@ export default function FlagTestScreen({
         </div>
       </header>
 
-      <section className="rounded-[28px] bg-white p-5 shadow-[0_8px_0_#e5e7eb]">
+      <section className="rounded-[28px] bg-white p-5 shadow-card-lg">
         <FlagImage code={country.code} name={country.name} src={country.flagUrl} className="aspect-[4/3] w-full rounded-[24px] p-4" />
 
         {mode === "recall" ? (
@@ -126,7 +126,7 @@ export default function FlagTestScreen({
                 disabled={revealed}
                 onClick={() => setSelectedValue(value)}
                 className={`rounded-2xl border-b-4 p-4 text-left font-display font-black transition active:translate-y-1 ${
-                  selectedValue === value ? "border-flaggo-blue bg-blue-50 text-flaggo-blue" : "border-slate-200 bg-slate-50 text-flaggo-text"
+                  selectedValue === value ? "border-primary bg-primary/10 text-primary" : "border-line bg-surface text-ink"
                 }`}
               >
                 {label}
@@ -137,7 +137,7 @@ export default function FlagTestScreen({
         )}
 
         {revealed ? (
-          <div className={`mt-5 rounded-[24px] p-4 ${graded === true ? "bg-green-50 text-flaggo-green" : graded === false ? "bg-red-50 text-flaggo-red" : "bg-blue-50 text-flaggo-blue"}`}>
+          <div className={`mt-5 rounded-[24px] p-4 ${graded === true ? "bg-success/10 text-success" : graded === false ? "bg-error/10 text-error" : "bg-primary/10 text-primary"}`}>
             <p className="font-display text-sm font-black uppercase">{graded === null ? "Answer" : graded ? "Marked right" : "Marked wrong"}</p>
             <p className="mt-1 font-display font-black text-flaggo-text">{answer}</p>
             {topic === "flag" && country.officialName && <p className="text-sm font-bold text-flaggo-muted">{country.officialName}</p>}

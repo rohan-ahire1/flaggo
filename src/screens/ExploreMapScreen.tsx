@@ -12,7 +12,7 @@ export default function ExploreMapScreen({ countries }: { countries: Country[] }
 
   return (
     <main className="p-5">
-      <h1 className="font-display text-3xl font-black">Explore</h1>
+      <h1 className="screen-title">Explore</h1>
       <p className="mt-1 font-bold text-flaggo-muted">Pan, zoom, and tap a country.</p>
       <div className="mt-5">
         <Suspense fallback={<div className="h-[68vh] min-h-[420px] animate-pulse rounded-[24px] bg-white shadow-card" />}>

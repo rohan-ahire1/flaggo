@@ -59,8 +59,34 @@ button {
 }
 
 @layer components {
+  /* ---- Buttons: one hierarchy across the app ----
+     .btn-primary   = the single main action (solid, 3D edge)
+     .btn-secondary = supporting action (tonal, flat)
+     .btn-ghost     = tertiary / low-commitment (text link)
+     `.flaggo-button` stays as an alias of the primary style so legacy
+     markup keeps working; new/updated screens use the semantic names. */
+  .btn-base {
+    @apply rounded-2xl px-5 py-4 text-center font-display font-semibold tracking-wide transition-all duration-150 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  .btn-primary {
+    @apply btn-base bg-primary text-white shadow-button active:translate-y-1 active:shadow-none;
+  }
+  .btn-secondary {
+    @apply btn-base border-2 border-line bg-surface text-ink active:translate-y-[1px];
+  }
+  .btn-ghost {
+    @apply font-display text-[15px] font-bold text-primary underline underline-offset-[3px];
+  }
   .flaggo-button {
     @apply rounded-2xl px-5 py-4 font-display font-semibold tracking-wide shadow-button transition-all duration-150 active:translate-y-1 active:shadow-none disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  /* ---- Screen chrome ---- */
+  .screen-title {
+    @apply font-display text-3xl font-semibold leading-none text-ink;
+  }
+  .section-label {
+    @apply text-xs font-bold uppercase tracking-[0.18em] text-muted;
   }
 
   .flaggo-card {

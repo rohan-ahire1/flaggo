@@ -107,14 +107,14 @@ export default function DailyChallengeScreen({
         </button>
         <section className="rounded-[28px] bg-white p-6 text-center shadow-card-lg">
           <Icon name="flame" size={44} className="mx-auto text-flaggo-red" />
-          <h1 className="mt-3 font-display text-3xl font-black">Daily complete</h1>
+          <h1 className="mt-3 screen-title">Daily complete</h1>
           <p className="mt-2 font-display text-5xl font-black text-flaggo-green">{correct}/{questions.length}</p>
           <p className="mt-1 font-bold text-flaggo-muted">Daily streak {currentProgress.daily.streak}</p>
           <div className="mt-5 grid gap-3">
-            <button onClick={share} className="flaggo-button bg-flaggo-green text-white">Share score</button>
-            <button onClick={onChallenge} className="flaggo-button bg-flaggo-blue text-white">Challenge a friend</button>
-            <button onClick={onOpenLeaderboard} className="flaggo-button bg-flaggo-blue text-white">Leaderboard</button>
-            {!user && <button onClick={onSignIn} className="font-display font-black text-flaggo-green underline">Sign in to compete</button>}
+            <button onClick={share} className="btn-primary">Share score</button>
+            <button onClick={onChallenge} className="btn-secondary">Challenge a friend</button>
+            <button onClick={onOpenLeaderboard} className="btn-secondary">Leaderboard</button>
+            {!user && <button onClick={onSignIn} className="btn-ghost mt-1">Sign in to compete</button>}
           </div>
         </section>
       </main>

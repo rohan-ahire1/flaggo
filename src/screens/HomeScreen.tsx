@@ -65,7 +65,7 @@ export default function HomeScreen({
       {/* header */}
       <header className="mb-5 flex items-start justify-between">
         <div>
-          <h1 className="font-display text-3xl font-semibold leading-none text-ink">Today</h1>
+          <h1 className="screen-title">Today</h1>
           <p className="mt-1 text-sm font-medium text-muted">
             {DOW[today.getDay()]}, {MON[today.getMonth()]} {today.getDate()}
           </p>

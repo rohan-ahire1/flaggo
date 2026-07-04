@@ -36,7 +36,7 @@ export default function LessonCompleteScreen({ result, onContinue, adSlot }: { r
         <div className="mx-auto mb-5 grid h-24 w-24 place-items-center rounded-full bg-gradient-to-br from-flaggo-yellow to-flaggo-orange text-white shadow-[0_8px_0_rgba(255,150,0,0.4)]">
           <Icon name="trophy" size={48} />
         </div>
-        <h1 className="font-display text-3xl font-black">Lesson Complete!</h1>
+        <h1 className="screen-title">Lesson Complete!</h1>
         {perfect && (
           <p className="mt-1 inline-flex items-center gap-1 font-display font-extrabold text-flaggo-orange">
             <Icon name="star" size={16} /> Perfect lesson!
