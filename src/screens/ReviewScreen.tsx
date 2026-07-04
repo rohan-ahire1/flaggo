@@ -26,7 +26,7 @@ export default function ReviewScreen({
   const practice = due.length ? due : weak.length ? weak : topicCountries.slice(0, 8);
   return (
     <main className="p-5">
-      <h1 className="font-display text-3xl font-black">Review</h1>
+      <h1 className="screen-title">Review</h1>
       <section className="mt-5 overflow-hidden rounded-[24px] border border-flaggo-border bg-white p-5 shadow-card-lg">
         <div className="flex items-center gap-3">
           <span className="grid h-14 w-14 place-items-center rounded-2xl bg-flaggo-blue/10 text-flaggo-blue">
@@ -37,14 +37,14 @@ export default function ReviewScreen({
             <p className="mt-1 font-bold text-flaggo-muted">{due.length ? `${label} due for review` : "No reviews due today."}</p>
           </div>
         </div>
-        <button onClick={() => onStart(practice)} className="flaggo-button mt-5 flex w-full items-center justify-center gap-2 bg-green-grad text-white shadow-button-green">
+        <button onClick={() => onStart(practice)} className="btn-primary mt-5 flex w-full items-center justify-center gap-2">
           <Icon name="bolt" size={20} /> Start Review
         </button>
       </section>
       <section className="mt-5 rounded-[24px] border border-flaggo-border bg-white p-5 shadow-card-lg">
         <h2 className="font-display text-2xl font-black">Map practice</h2>
         <p className="mt-1 font-bold text-flaggo-muted">Review country locations with the same spaced-repetition schedule.</p>
-        <button onClick={onOpenMapPractice} className="flaggo-button mt-5 flex w-full items-center justify-center gap-2 bg-green-grad text-white shadow-button-green">
+        <button onClick={onOpenMapPractice} className="btn-secondary mt-5 flex w-full items-center justify-center gap-2">
           <Icon name="globe" size={18} /> Start map practice
         </button>
       </section>
@@ -54,7 +54,7 @@ export default function ReviewScreen({
         </p>
         <h2 className="mt-2 font-display text-2xl font-black">50-country test</h2>
         <p className="mt-1 font-bold text-flaggo-muted">Choose Top 50, 51-100, and beyond. Practice with typed recall or answer choices.</p>
-        <button onClick={onOpenTest} className="flaggo-button mt-5 flex w-full items-center justify-center gap-2 bg-blue-grad text-white shadow-button-blue">
+        <button onClick={onOpenTest} className="btn-secondary mt-5 flex w-full items-center justify-center gap-2">
           <Icon name="target" size={18} /> Configure test
         </button>
       </section>

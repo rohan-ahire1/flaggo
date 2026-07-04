@@ -22,7 +22,7 @@ export default function PathsScreen({ lessons, progress, onOpenLesson, onBack }:
       <button onClick={region ? () => setRegion(null) : onBack} className="mb-4 grid h-10 w-10 place-items-center rounded-full bg-white text-flaggo-muted shadow-card" aria-label="Back">
         <Icon name="chevron" size={20} className="rotate-180" />
       </button>
-      <h1 className="font-display text-3xl font-black">{region ?? "Learning paths"}</h1>
+      <h1 className="screen-title">{region ?? "Learning paths"}</h1>
       {!region ? (
         <section className="mt-5 grid gap-3">
           {regions.map((item) => {

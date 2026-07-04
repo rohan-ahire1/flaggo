@@ -28,7 +28,7 @@ export default function ProfileScreen({ progress, onReset, userEmail, syncState,
         <div className="relative mx-auto grid h-24 w-24 place-items-center rounded-full bg-green-grad text-white shadow-button ring-4 ring-paper">
           <Icon name="user" size={48} />
         </div>
-        <h1 className="mt-4 font-display text-3xl font-black">{BRAND.name} learner</h1>
+        <h1 className="mt-4 screen-title">{BRAND.name} learner</h1>
         <p className="font-bold text-flaggo-muted">{userEmail ?? "Sign in to sync progress"}</p>
       </section>
 

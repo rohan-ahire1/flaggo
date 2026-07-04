@@ -134,7 +134,7 @@ export default function MatchScreen({
         <button onClick={onBack} className="mb-4 grid h-10 w-10 place-items-center rounded-full bg-white text-flaggo-muted shadow-card" aria-label="Back"><Icon name="chevron" className="rotate-180" /></button>
         <section className="rounded-[28px] bg-white p-6 text-center shadow-card-lg">
           <Icon name="trophy" size={44} className="mx-auto text-flaggo-blue" />
-          <h1 className="mt-3 font-display text-3xl font-black">Friend challenge</h1>
+          <h1 className="mt-3 screen-title">Friend challenge</h1>
           <p className="mt-2 font-bold text-flaggo-muted">
             {challenger ? `${challenger.display_name} scored ${challenger.score}/${challenger.total}.` : "Play the same seeded quiz and compare scores."}
           </p>

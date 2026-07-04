@@ -59,7 +59,7 @@ export default function DecksScreen({
   return (
     <main className="p-5">
       <button onClick={onBack} className="mb-4 grid h-10 w-10 place-items-center rounded-full bg-white text-flaggo-muted shadow-card" aria-label="Back"><Icon name="chevron" className="rotate-180" /></button>
-      <h1 className="font-display text-3xl font-black">Decks</h1>
+      <h1 className="screen-title">Decks</h1>
       <div className="mt-4 grid grid-cols-2 rounded-2xl bg-white p-1 shadow-card">
         {(["flag", "capital"] as const).map((item) => <button key={item} onClick={() => setTopic(item)} className={`rounded-xl px-4 py-2 font-display text-sm font-extrabold capitalize ${topic === item ? "bg-flaggo-green text-white" : "text-flaggo-muted"}`}>{item}</button>)}
       </div>
@@ -78,7 +78,7 @@ export default function DecksScreen({
               </div>
               <div className="mt-3 grid grid-cols-[1fr_auto] gap-2">
                 <button onClick={() => onPractice(deck)} disabled={!size} className="flaggo-button bg-flaggo-green text-white disabled:opacity-50">Practice</button>
-                <button onClick={() => removeDeck(deck)} className="grid h-12 w-12 place-items-center rounded-2xl bg-slate-100 text-flaggo-muted" aria-label="Delete deck"><Icon name="x" /></button>
+                <button onClick={() => removeDeck(deck)} className="grid h-12 w-12 place-items-center rounded-2xl bg-surface text-flaggo-muted" aria-label="Delete deck"><Icon name="x" /></button>
               </div>
             </div>
           );
