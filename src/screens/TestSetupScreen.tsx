@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import Icon from "../components/Icon";
 import type { Country } from "../types/country";
 import type { Topic } from "../types/topic";
 import { getPopularityGroups, type PopularityGroup } from "../utils/popularity";
@@ -8,11 +9,13 @@ export type TestMode = "recall" | "options";
 export default function TestSetupScreen({
   countries,
   selectedTopic,
-  onStart
+  onStart,
+  onBack
 }: {
   countries: Country[];
   selectedTopic: Topic;
   onStart: (group: PopularityGroup, mode: TestMode, topic: Topic) => void;
+  onBack: () => void;
 }) {
   const [topic, setTopic] = useState<Topic>(selectedTopic);
   const topicCountries = useMemo(() => topic === "capital" ? countries.filter((country) => country.capital?.trim()) : countries, [countries, topic]);
@@ -26,6 +29,9 @@ export default function TestSetupScreen({
 
   return (
     <main className="p-5">
+      <button onClick={onBack} className="mb-4 grid h-10 w-10 place-items-center rounded-full bg-white text-flaggo-muted shadow-card" aria-label="Back">
+        <Icon name="chevron" size={20} className="rotate-180" />
+      </button>
       <h1 className="screen-title">Custom test</h1>
       <p className="mt-1 font-bold text-flaggo-muted">Pick a 50-country tier, answer in your head, then self-grade after reveal.</p>
 

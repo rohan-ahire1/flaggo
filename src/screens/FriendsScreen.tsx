@@ -54,7 +54,7 @@ export default function FriendsScreen({
             <span className="font-display text-xl font-black text-flaggo-green">{row.wins}W</span>
           </div>
         ))}
-        {!rows.length && !error && <div className="rounded-[24px] bg-white p-6 text-center font-bold text-flaggo-muted shadow-card">No friend matches yet.</div>}
+        {!rows.length && !error && <div className="rounded-[24px] bg-white p-6 text-center font-bold text-flaggo-muted shadow-card">Challenge a friend to start your friends leaderboard.</div>}
       </section>
     </main>
   );

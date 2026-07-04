@@ -17,12 +17,13 @@ const WorldMap = lazy(() => import("../components/WorldMap"));
 
 function answerLabel(question: DailyQuestion) {
   if (question.topic === "location") return question.country.name;
-  if ("correctCurrency" in question.question) return question.question.correctCurrency;
-  if ("correctLanguage" in question.question) return question.question.correctLanguage;
-  if ("correctNeighbor" in question.question) return question.question.correctNeighbor.name;
-  if ("correctCapital" in question.question) return question.question.correctCapital;
-  if (question.question.type === "capital-true-false") return question.question.correctCountry.capital ?? question.question.correctCountry.name;
-  return question.question.correctCountry.name;
+  const q = question.question;
+  if (q.type === "guess-currency") return q.correctCurrency;
+  if (q.type === "guess-language") return q.correctLanguage;
+  if (q.type === "guess-capital" || q.type === "flag-to-capital") return q.correctCapital;
+  if (q.type === "capital-true-false") return q.correctCountry.capital ?? q.correctCountry.name;
+  if (q.type === "pick-neighbor" || q.type === "not-neighbor") return q.correctNeighbor.name;
+  return q.correctCountry.name;
 }
 
 export default function DailyChallengeScreen({

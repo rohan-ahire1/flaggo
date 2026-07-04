@@ -43,10 +43,13 @@ export default function LessonScreen({
   const [xp, setXp] = useState(0);
   const [feedback, setFeedback] = useState<{ ok: boolean; question: Question } | null>(null);
   const question = questions[index];
-  const correctAnswerLabel = (answeredQuestion: Question) => {
-    if ("correctCapital" in answeredQuestion) return answeredQuestion.correctCapital;
-    if (answeredQuestion.type === "capital-true-false") return answeredQuestion.correctCountry.capital ?? answeredQuestion.correctCountry.name;
-    return answeredQuestion.correctCountry.name;
+  const correctAnswerLabel = (q: Question) => {
+    if (q.type === "guess-currency") return q.correctCurrency;
+    if (q.type === "guess-language") return q.correctLanguage;
+    if (q.type === "guess-capital" || q.type === "flag-to-capital") return q.correctCapital;
+    if (q.type === "capital-true-false") return q.correctCountry.capital ?? q.correctCountry.name;
+    if (q.type === "pick-neighbor" || q.type === "not-neighbor") return q.correctNeighbor.name;
+    return q.correctCountry.name;
   };
 
   function answer(wasCorrect: boolean) {

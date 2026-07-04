@@ -3,10 +3,13 @@ import Icon from "../components/Icon";
 import LessonNode from "../components/LessonNode";
 import type { Lesson } from "../types/lesson";
 import type { AppProgress } from "../types/progress";
+import { PATH_TOPICS, type Topic } from "../types/topic";
 import { lessonsForTopic } from "../utils/lessonGenerator";
 import { trackEvent } from "../lib/analytics";
 
-export default function PathsScreen({ lessons, progress, onOpenLesson, onBack }: { lessons: Lesson[]; progress: AppProgress; onOpenLesson: (lesson: Lesson) => void; onBack: () => void }) {
+const TOPIC_LABELS: Record<string, string> = { flag: "Flags", capital: "Capitals" };
+
+export default function PathsScreen({ lessons, progress, onOpenLesson, onTopicChange, onBack }: { lessons: Lesson[]; progress: AppProgress; onOpenLesson: (lesson: Lesson) => void; onTopicChange: (topic: Topic) => void; onBack: () => void }) {
   const [region, setRegion] = useState<string | null>(null);
   const topicLessons = lessonsForTopic(lessons, progress.selectedTopic);
   const regions = useMemo(() => {
@@ -23,6 +26,23 @@ export default function PathsScreen({ lessons, progress, onOpenLesson, onBack }:
         <Icon name="chevron" size={20} className="rotate-180" />
       </button>
       <h1 className="screen-title">{region ?? "Learning paths"}</h1>
+      {!region && (
+        <div className="mt-3 flex gap-2">
+          {PATH_TOPICS.map((topic) => {
+            const active = progress.selectedTopic === topic;
+            return (
+              <button
+                key={topic}
+                onClick={() => onTopicChange(topic)}
+                className={`rounded-full px-4 py-1.5 font-display text-sm font-black transition ${active ? "bg-flaggo-green text-white shadow-card" : "border border-flaggo-border bg-white text-flaggo-muted"}`}
+              >
+                {TOPIC_LABELS[topic] ?? topic}
+              </button>
+            );
+          })}
+        </div>
+      )}
+      {region && <p className="mt-1 font-bold text-flaggo-muted">Learning path: {TOPIC_LABELS[progress.selectedTopic] ?? progress.selectedTopic}</p>}
       {!region ? (
         <section className="mt-5 grid gap-3">
           {regions.map((item) => {

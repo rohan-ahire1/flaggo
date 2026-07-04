@@ -5,13 +5,16 @@ import type { Country } from "../types/country";
 
 const WorldMap = lazy(() => import("../components/WorldMap"));
 
-export default function ExploreMapScreen({ countries }: { countries: Country[] }) {
+export default function ExploreMapScreen({ countries, onBack }: { countries: Country[]; onBack: () => void }) {
   const countryByCode = useMemo(() => new Map(countries.map((country) => [country.code, country])), [countries]);
   const [selectedCode, setSelectedCode] = useState<string | undefined>();
   const selected = selectedCode ? countryByCode.get(selectedCode) : undefined;
 
   return (
     <main className="p-5">
+      <button onClick={onBack} className="mb-4 grid h-10 w-10 place-items-center rounded-full bg-white text-flaggo-muted shadow-card" aria-label="Back">
+        <Icon name="chevron" size={20} className="rotate-180" />
+      </button>
       <h1 className="screen-title">Explore</h1>
       <p className="mt-1 font-bold text-flaggo-muted">Pan, zoom, and tap a country.</p>
       <div className="mt-5">

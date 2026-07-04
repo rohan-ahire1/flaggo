@@ -13,7 +13,7 @@ export type LessonResult = {
 
 const CONFETTI = ["#58CC02", "#1CB0F6", "#FFC800", "#FF9600", "#CE82FF", "#FF4B4B"];
 
-export default function LessonCompleteScreen({ result, onContinue, adSlot }: { result: LessonResult; onContinue: () => void; adSlot?: React.ReactNode }) {
+export default function LessonCompleteScreen({ result, onContinueLearning, onBackHome, adSlot }: { result: LessonResult; onContinueLearning: () => void; onBackHome: () => void; adSlot?: React.ReactNode }) {
   const perfect = result.correct === result.total;
   return (
     <main className="relative grid min-h-screen place-items-center overflow-hidden bg-hero-sky p-5">
@@ -57,8 +57,11 @@ export default function LessonCompleteScreen({ result, onContinue, adSlot }: { r
           <Stat icon="coin" label="Coins" value={`+${result.coinsEarned}`} tone="text-flaggo-yellow" />
         </div>
 
-        <button onClick={onContinue} className="flaggo-button mt-6 w-full bg-green-grad text-white shadow-button-green">
-          Continue
+        <button onClick={onContinueLearning} className="flaggo-button mt-6 w-full bg-green-grad text-white shadow-button-green">
+          Continue learning
+        </button>
+        <button onClick={onBackHome} className="btn-secondary mt-3 w-full">
+          Back to Today
         </button>
         {adSlot}
       </section>

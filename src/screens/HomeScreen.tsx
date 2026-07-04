@@ -9,9 +9,12 @@ const MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct
 
 export default function HomeScreen({
   progress,
-  onTopicChange,
+  lessons,
+  onOpenLesson,
+  onOpenPaths,
   onOpenMap,
   onOpenDaily,
+  onOpenReview,
   onOpenArcade,
   onOpenTrivia,
   onOpenDecks,
@@ -27,6 +30,7 @@ export default function HomeScreen({
   onTopicChange: (topic: Topic) => void;
   onOpenMap: () => void;
   onOpenDaily: () => void;
+  onOpenReview: () => void;
   onOpenPaths: () => void;
   onOpenArcade: () => void;
   onOpenTrivia: () => void;
@@ -46,14 +50,22 @@ export default function HomeScreen({
   const streak = progress.daily.streak;
   const hoursToReset = 24 - today.getHours();
 
+  const completed = new Set(progress.completedLessonIds);
+  const learnTopic: Topic = progress.selectedTopic === "capital" ? "capital" : "flag";
+  const topicLessons = lessons.filter((lesson) => lesson.topic === learnTopic);
+  const nextLesson =
+    topicLessons.find((lesson) => !completed.has(lesson.id)) ??
+    lessons.filter((lesson) => lesson.topic === "flag").find((lesson) => !completed.has(lesson.id));
+  const doneCount = topicLessons.filter((lesson) => completed.has(lesson.id)).length;
+
   const quick: { label: string; icon: IconName; onClick: () => void }[] = [
-    { label: "Flags", icon: "flag", onClick: () => { onTopicChange("flag"); onOpenArcade(); } },
-    { label: "Capitals", icon: "pin", onClick: () => { onTopicChange("capital"); onOpenArcade(); } },
+    { label: "Review due", icon: "review", onClick: onOpenReview },
     { label: "Find on map", icon: "globe", onClick: onOpenMap },
-    { label: "Trivia", icon: "sparkle", onClick: onOpenTrivia }
+    { label: "Arcade", icon: "bolt", onClick: onOpenArcade }
   ];
 
   const more: { label: string; icon: IconName; onClick: () => void }[] = [
+    { label: "Trivia", icon: "sparkle", onClick: onOpenTrivia },
     { label: "Leaderboard", icon: "trophy", onClick: onOpenLeaderboard },
     { label: "Flag library", icon: "library", onClick: onOpenLibrary },
     { label: "Decks", icon: "star", onClick: onOpenDecks },
@@ -76,31 +88,44 @@ export default function HomeScreen({
         </div>
       </header>
 
-      {/* hero daily card */}
+      {/* hero: continue learning */}
       <button
-        onClick={onOpenDaily}
+        onClick={() => (nextLesson ? onOpenLesson(nextLesson) : onOpenPaths())}
         className="relative mb-[18px] w-full overflow-hidden rounded-[26px] bg-primary p-5 text-left shadow-card-lg"
       >
         <span className="wl-dots absolute inset-0 opacity-90" />
         <span className="relative block">
-          <span className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-[0.12em] text-white/80">Daily Challenge</span>
-            <span className="rounded-[20px] bg-white/15 px-2.5 py-1 text-xs font-semibold text-white/80">resets in {hoursToReset}h</span>
+          <span className="text-xs font-bold uppercase tracking-[0.12em] text-white/80">
+            {nextLesson ? "Continue learning" : "Learning paths"}
           </span>
-          <span className="mt-2.5 block font-display text-[34px] font-semibold leading-tight text-white">Today's Challenge</span>
-          <span className="block text-[15px] text-white/80">{total} mixed questions · same for everyone</span>
-          <span className="my-4 flex gap-1.5">
-            {Array.from({ length: total }).map((_, i) => (
-              <span
-                key={i}
-                className={`h-[7px] flex-1 rounded ${played && i < score ? "bg-white" : "bg-white/30"}`}
-              />
-            ))}
+          <span className="mt-2.5 block font-display text-[30px] font-semibold leading-tight text-white">
+            {nextLesson ? nextLesson.title : "All caught up!"}
           </span>
-          <span className="block rounded-2xl bg-white py-3.5 text-center font-display text-xl font-semibold text-primary shadow-[0_4px_12px_rgba(0,0,0,0.18)]">
-            {played ? `Done ${score}/${total} · play again →` : "Play today's challenge →"}
+          <span className="mt-1 block text-[15px] text-white/80">
+            {nextLesson ? `${nextLesson.region} · ${doneCount}/${topicLessons.length} lessons done` : "You've finished every lesson in this path"}
+          </span>
+          <span className="mt-4 block rounded-2xl bg-white py-3.5 text-center font-display text-xl font-semibold text-primary shadow-[0_4px_12px_rgba(0,0,0,0.18)]">
+            {nextLesson ? "Start next lesson →" : "Browse learning paths →"}
           </span>
         </span>
+      </button>
+
+      {/* today's practice (daily) */}
+      <button
+        onClick={onOpenDaily}
+        className="mb-4 flex w-full items-center gap-3.5 rounded-[20px] border-[1.5px] border-line bg-surface p-3.5 text-left"
+      >
+        <span className="grid h-[46px] w-[46px] flex-none place-items-center rounded-[14px] bg-primary text-white">
+          <Icon name="flame" size={24} />
+        </span>
+        <span className="flex-1">
+          <span className="block font-display text-[18px] font-medium text-ink">Today's practice</span>
+          <span className="block text-[13px] text-muted">
+            {played ? `Done ${score}/${total} · play again` : `${total} mixed questions · keeps your streak alive`}
+          </span>
+        </span>
+        <span className="flex-none text-[12px] font-semibold text-muted">resets in {hoursToReset}h</span>
+        <Icon name="chevron" size={20} className="text-muted" />
       </button>
 
       {/* challenge a friend */}
