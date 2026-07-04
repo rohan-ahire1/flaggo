@@ -82,7 +82,7 @@ export default function MapPlayScreen({
   }
 
   return (
-    <main className="min-h-screen bg-flaggo-bg p-5">
+    <main className={mode === "locate" ? "flex h-dvh flex-col overflow-hidden bg-flaggo-bg p-5" : "min-h-screen bg-flaggo-bg p-5"}>
       <header className="mb-4">
         <div className="mb-3 flex items-center gap-3">
           <button
@@ -110,7 +110,7 @@ export default function MapPlayScreen({
         </div>
       </header>
 
-      <Suspense fallback={<div className="h-[360px] animate-pulse rounded-[24px] bg-white shadow-card" />}>
+      <Suspense fallback={<div className={mode === "locate" ? "min-h-0 flex-1 animate-pulse rounded-[24px] bg-white shadow-card" : "h-[360px] animate-pulse rounded-[24px] bg-white shadow-card"} />}>
         <WorldMap
           countries={countries}
           highlightCode={isIdentify ? question.targetCode : undefined}
@@ -118,6 +118,7 @@ export default function MapPlayScreen({
           wrongCode={feedback?.wrongCode}
           interactive={!feedback && mode === "locate"}
           onCountryTap={answer}
+          mapClassName={mode === "locate" ? "min-h-0 flex-1 w-full" : "h-[400px] w-full"}
         />
       </Suspense>
 
@@ -148,6 +149,7 @@ export default function MapPlayScreen({
           country={feedback.country}
           xp={10}
           answerLabel={feedback.country.name}
+          selectedLabel={feedback.wrongCode ? countryByCode.get(feedback.wrongCode)?.name : undefined}
           onContinue={continueNext}
         />
       )}
