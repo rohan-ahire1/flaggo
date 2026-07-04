@@ -1,11 +1,11 @@
 import type { Screen } from "../App";
 import Icon, { type IconName } from "./Icon";
 
-// Flaggo IA: the daily habit and the social/compete loop lead; the learning
-// spine is depth. Each tab maps to an existing top-level screen.
+// Worldly IA: structured learning is the spine (Learn), with Today's habit loop
+// and the social/compete loop supporting retention. Each tab maps to a screen.
 const tabs: { screen: Screen; label: string; icon: IconName }[] = [
   { screen: "home", label: "Today", icon: "today" },
-  { screen: "review", label: "Play", icon: "play" },
+  { screen: "review", label: "Practice", icon: "play" },
   { screen: "friends", label: "Challenge", icon: "flag" },
   { screen: "paths", label: "Learn", icon: "book" },
   { screen: "profile", label: "You", icon: "user" }

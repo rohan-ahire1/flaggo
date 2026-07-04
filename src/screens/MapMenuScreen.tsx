@@ -11,11 +11,13 @@ type PickerMode = "tier" | "region";
 export default function MapMenuScreen({
   countries,
   onStart,
-  onExplore
+  onExplore,
+  onBack
 }: {
   countries: Country[];
   onStart: (mode: MapMode, countries: Country[]) => void;
   onExplore: () => void;
+  onBack: () => void;
 }) {
   const mapCountries = useMemo(() => mapPresentCountries(countries, world110m), [countries]);
   const groups = useMemo(() => getPopularityGroups(mapCountries), [mapCountries]);
@@ -34,6 +36,9 @@ export default function MapMenuScreen({
 
   return (
     <main className="p-5">
+      <button onClick={onBack} className="mb-4 grid h-10 w-10 place-items-center rounded-full bg-white text-flaggo-muted shadow-card" aria-label="Back">
+        <Icon name="chevron" size={20} className="rotate-180" />
+      </button>
       <h1 className="screen-title">World Map</h1>
       <p className="mt-1 font-bold text-flaggo-muted">Practice uses countries present in the offline world map.</p>
 

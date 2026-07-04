@@ -14,12 +14,13 @@ const WorldMap = lazy(() => import("../components/WorldMap"));
 
 function answerLabel(question: MatchQuestion) {
   if (question.topic === "location") return question.country.name;
-  if ("correctCurrency" in question.question) return question.question.correctCurrency;
-  if ("correctLanguage" in question.question) return question.question.correctLanguage;
-  if ("correctNeighbor" in question.question) return question.question.correctNeighbor.name;
-  if ("correctCapital" in question.question) return question.question.correctCapital;
-  if (question.question.type === "capital-true-false") return question.question.correctCountry.capital ?? question.question.correctCountry.name;
-  return question.question.correctCountry.name;
+  const q = question.question;
+  if (q.type === "guess-currency") return q.correctCurrency;
+  if (q.type === "guess-language") return q.correctLanguage;
+  if (q.type === "guess-capital" || q.type === "flag-to-capital") return q.correctCapital;
+  if (q.type === "capital-true-false") return q.correctCountry.capital ?? q.correctCountry.name;
+  if (q.type === "pick-neighbor" || q.type === "not-neighbor") return q.correctNeighbor.name;
+  return q.correctCountry.name;
 }
 
 export default function MatchScreen({
@@ -138,7 +139,8 @@ export default function MatchScreen({
           <p className="mt-2 font-bold text-flaggo-muted">
             {challenger ? `${challenger.display_name} scored ${challenger.score}/${challenger.total}.` : "Play the same seeded quiz and compare scores."}
           </p>
-          <button onClick={onSignIn} className="flaggo-button mt-5 w-full bg-flaggo-green text-white">Sign in to accept</button>
+          <p className="mt-2 font-medium text-flaggo-muted">Sign in to accept this challenge and save your score to the leaderboard.</p>
+          <button onClick={onSignIn} className="flaggo-button mt-5 w-full bg-flaggo-green text-white">Sign in to accept &amp; save your score</button>
         </section>
       </main>
     );
@@ -155,6 +157,7 @@ export default function MatchScreen({
   return (
     <main className="min-h-screen bg-flaggo-bg">
       <header className="sticky top-0 z-20 bg-flaggo-bg/85 p-4 backdrop-blur-md">
+        <p className="mb-2.5 text-center font-display text-[13px] font-extrabold uppercase tracking-wide text-flaggo-muted">Friend Challenge</p>
         <div className="flex items-center gap-3">
           <button onClick={onBack} aria-label="Close match" className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-white text-flaggo-muted shadow-card">
             <Icon name="close" size={20} />

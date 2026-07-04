@@ -25,7 +25,7 @@ export default function FeedbackPanel({
     >
       <div className="mb-4 flex items-center gap-4">
         <div className="relative shrink-0">
-          <FlagImage code={country.code} name={country.name} src={country.flagUrl} className="h-20 w-28 rounded-[18px] bg-white/95 p-2" />
+          <FlagImage code={country.code} name={country.name} src={country.flagUrl} fit="natural" className="w-28 rounded-[18px]" />
           <span className="absolute -bottom-2 -right-2 grid h-9 w-9 place-items-center rounded-full bg-white shadow-md">
             <Icon name={correct ? "check" : "x"} size={20} className={correct ? "text-flaggo-green" : "text-flaggo-red"} />
           </span>
