@@ -1,8 +1,8 @@
-# Plan: Rewrite Worldly as a React Native (Expo) app — Core MVP (iOS + Android)
+# Plan: Rewrite Flaggo as a React Native (Expo) app — Core MVP (iOS + Android)
 
 ## Context
 
-Worldly (`flaggo`) is a Vite + React 18 **web** PWA. The user wants a full native rewrite
+Flaggo (`flaggo`) is a Vite + React 18 **web** PWA. The user wants a full native rewrite
 to reach **both iOS and Android** (something TWA/PWA can't do — Apple blocks TWA). Chosen
 stack: **React Native + Expo**, chosen scope: **Core MVP first** (prove the stack with the
 central loop, then expand to full parity later).
@@ -87,7 +87,7 @@ progress `types`, `useSyncedProgress`, `storage`→AsyncStorage, `supabase`, aut
 
 1. **Scaffold Expo app** — create a TypeScript Expo project in a new `mobile/` folder in the
    repo (keeps web app untouched, separate Metro build). Enable **expo-router**. Configure
-   `app.config.ts` with name/slug "Worldly", scheme `worldly`, iOS bundle id + Android
+   `app.config.ts` with name/slug "Flaggo", scheme `worldly`, iOS bundle id + Android
    package (e.g. `app.worldly`), icon/splash from the existing 512 PNG + `#faf6ee` background.
 2. **Install deps** — `expo-router`, `nativewind` + `tailwindcss`, `react-native-svg`,
    `expo-image`, `@supabase/supabase-js`, `expo-auth-session`/`expo-web-browser`,

@@ -1,4 +1,4 @@
-// Worldly theme palettes (from the "Worldly Hi-Fi" design).
+// Flaggo theme palettes (from the "Flaggo Hi-Fi" design).
 // Stored as "R G B" channel strings so Tailwind's `rgb(var(--x) / <alpha-value>)`
 // tokens keep working with opacity utilities (e.g. bg-primary/10).
 

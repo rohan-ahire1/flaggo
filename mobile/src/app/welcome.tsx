@@ -19,7 +19,7 @@ export default function WelcomeScreen() {
         <View className="h-28 w-28 items-center justify-center rounded-full bg-primary lg:h-32 lg:w-32">
           <Icon name="globe" size={56} color="#ffffff" />
         </View>
-        <Text className="text-[40px] font-black text-ink lg:text-[56px]">Worldly</Text>
+        <Text className="text-[40px] font-black text-ink lg:text-[56px]">Flaggo</Text>
         <Text className="text-center text-[13px] font-extrabold uppercase tracking-[2px] text-accent">
           Geography, but make it a daily duel
         </Text>

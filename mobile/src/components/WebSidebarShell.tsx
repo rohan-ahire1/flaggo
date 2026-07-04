@@ -50,7 +50,7 @@ export default function WebSidebarShell({ children }: { children: ReactNode }) {
       >
         <View className="gap-6">
           <View className="gap-1 px-2">
-            <Text className="text-[28px] font-black text-ink">Worldly</Text>
+            <Text className="text-[28px] font-black text-ink">Flaggo</Text>
             <Text className="text-[12px] font-extrabold uppercase tracking-[2px] text-muted">Daily geography</Text>
           </View>
 

@@ -1,6 +1,6 @@
-# Worldly Mobile (React Native + Expo)
+# Flaggo Mobile (React Native + Expo)
 
-Native iOS + Android rewrite of the Worldly web app. Core-MVP scope: Home (topic
+Native iOS + Android rewrite of the Flaggo web app. Core-MVP scope: Home (topic
 pick), a lesson/quiz flow, Arcade, and Profile — sharing the web app's game logic.
 
 ## Stack

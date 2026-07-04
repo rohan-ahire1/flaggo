@@ -120,7 +120,7 @@ export default function RootLayout() {
                   textAlign: "center"
                 }}
               >
-                Worldly could not open its local database.
+                Flaggo could not open its local database.
               </Text>
               <Text
                 style={{

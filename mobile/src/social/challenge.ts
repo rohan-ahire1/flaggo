@@ -22,7 +22,7 @@ export function challengeConfig(): MatchConfig {
   });
 }
 
-// Deep link that reopens the app straight into the match (worldly://match/<id>).
+// Deep link that reopens the app straight into the match (flaggo://match/<id>).
 export function matchDeepLink(id: string) {
   return Linking.createURL(`/match/${id}`);
 }
@@ -30,13 +30,13 @@ export function matchDeepLink(id: string) {
 export async function shareChallenge(match: Match, score?: number) {
   const link = matchDeepLink(match.id);
   const scoreLine = typeof score === "number" ? `I scored ${score}/${match.config.questionCount}. ` : "";
-  const message = `${scoreLine}Can you beat me on this Worldly round? ${link}`;
+  const message = `${scoreLine}Can you beat me on this Flaggo round? ${link}`;
 
   if (Platform.OS === "web") {
     const nav = typeof navigator !== "undefined" ? navigator : undefined;
     if (nav?.share) {
       try {
-        await nav.share({ title: "Worldly challenge", text: message });
+        await nav.share({ title: "Flaggo challenge", text: message });
         return;
       } catch {
         // user dismissed the share sheet or it failed — fall through to copy
@@ -47,7 +47,7 @@ export async function shareChallenge(match: Match, score?: number) {
     return;
   }
 
-  await Share.share({ title: "Worldly challenge", message });
+  await Share.share({ title: "Flaggo challenge", message });
 }
 
 // Create a match on Supabase then open the native share sheet. Throws if the

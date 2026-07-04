@@ -1,7 +1,7 @@
 import type { Screen } from "../App";
 import Icon, { type IconName } from "./Icon";
 
-// Worldly IA: the daily habit and the social/compete loop lead; the learning
+// Flaggo IA: the daily habit and the social/compete loop lead; the learning
 // spine is depth. Each tab maps to an existing top-level screen.
 const tabs: { screen: Screen; label: string; icon: IconName }[] = [
   { screen: "home", label: "Today", icon: "today" },

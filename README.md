@@ -1,8 +1,8 @@
-# Worldly
+# Flaggo
 
-Worldly — master world geography, one round at a time.
+Flaggo — master world geography, one round at a time.
 
-![Worldly social preview](public/og-image.svg)
+![Flaggo social preview](public/og-image.svg)
 
 ## Features
 

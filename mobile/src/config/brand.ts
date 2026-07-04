@@ -1,7 +1,7 @@
 export const BRAND = {
-  name: "Worldly",
+  name: "Flaggo",
   tagline: "Master the world, one round at a time.",
-  shortName: "Worldly",
-  url: "https://worldly.app",
+  shortName: "Flaggo",
+  url: "https://playflaggo.netlify.app",
   handlePrefix: "@"
 };

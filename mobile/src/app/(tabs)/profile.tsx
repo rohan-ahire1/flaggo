@@ -25,7 +25,7 @@ export default function ProfileScreen() {
     progress.totalCorrect + progress.totalWrong > 0
       ? Math.round((progress.totalCorrect / (progress.totalCorrect + progress.totalWrong)) * 100)
       : 0;
-  const name = displayName ?? (user ? "Worldly learner" : "Guest");
+  const name = displayName ?? (user ? "Flaggo learner" : "Guest");
 
   async function google() {
     setBusy(true);

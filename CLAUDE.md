@@ -1,10 +1,10 @@
-# CLAUDE.md — Worldly (repo: `flaggo`)
+# CLAUDE.md — Flaggo (repo: `flaggo`)
 
 Codebase guide for Claude Code sessions. Keep it current as the app evolves.
 
 ## Overview
 
-Worldly (internal repo name `flaggo`, brand "Worldly", tagline "Master the world,
+Flaggo (internal repo name `flaggo`, brand "Flaggo", tagline "Master the world,
 one round at a time") is a flags/geography learning game. Players learn and test
 themselves on countries across topics — flags, capitals, map locations, currencies,
 languages, and bordering neighbors — through lessons, a daily challenge, an arcade

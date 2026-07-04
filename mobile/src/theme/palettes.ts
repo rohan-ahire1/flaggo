@@ -1,4 +1,4 @@
-// Worldly theme palettes, ported from the web app. Channel strings ("R G B")
+// Flaggo theme palettes, ported from the web app. Channel strings ("R G B")
 // feed NativeWind's rgb(var(--x) / <alpha-value>) tokens so opacity utilities
 // (bg-primary/10 etc.) keep working, exactly like the web CSS-variable setup.
 

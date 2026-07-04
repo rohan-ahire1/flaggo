@@ -69,7 +69,7 @@ export default function MatchScreen() {
                 <Icon name="users" size={30} color="#ffffff" />
               </View>
               <Text className="text-center text-[26px] font-black text-white">
-                {creator?.display_name ?? "A friend"} challenged you on Worldly
+                {creator?.display_name ?? "A friend"} challenged you on Flaggo
               </Text>
               <Text className="text-center text-[15px] font-semibold text-white/80">
                 {creator ? `They scored ${creator.score}/${creator.total}. ` : ""}You'll get the exact same{" "}
