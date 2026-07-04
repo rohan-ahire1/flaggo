@@ -26,7 +26,8 @@ export default function ReviewScreen({
   const practice = due.length ? due : weak.length ? weak : topicCountries.slice(0, 8);
   return (
     <main className="p-5">
-      <h1 className="screen-title">Review</h1>
+      <h1 className="screen-title">Practice</h1>
+      <p className="mt-1 font-bold text-flaggo-muted">Spaced repetition brings back {label} right before you'd forget them.</p>
       <section className="mt-5 overflow-hidden rounded-[24px] border border-flaggo-border bg-white p-5 shadow-card-lg">
         <div className="flex items-center gap-3">
           <span className="grid h-14 w-14 place-items-center rounded-2xl bg-flaggo-blue/10 text-flaggo-blue">

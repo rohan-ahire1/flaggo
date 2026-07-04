@@ -8,7 +8,7 @@ import { parseReviewKey, reviewKey } from "../types/topic";
 import { lessonsForTopic } from "../utils/lessonGenerator";
 import { getMasteredCountries, getWeakCountries } from "../utils/spacedRepetition";
 
-export default function StatsScreen({ progress, countries, lessons }: { progress: AppProgress; countries: Country[]; lessons: Lesson[] }) {
+export default function StatsScreen({ progress, countries, lessons, onBack }: { progress: AppProgress; countries: Country[]; lessons: Lesson[]; onBack: () => void }) {
   const total = progress.totalCorrect + progress.totalWrong;
   const topic = progress.selectedTopic;
   const topicCountries = topic === "capital" ? countries.filter((country) => country.capital?.trim()) : countries;
@@ -37,6 +37,9 @@ export default function StatsScreen({ progress, countries, lessons }: { progress
 
   return (
     <main className="p-5">
+      <button onClick={onBack} className="mb-4 grid h-10 w-10 place-items-center rounded-full bg-white text-flaggo-muted shadow-card" aria-label="Back">
+        <Icon name="chevron" size={20} className="rotate-180" />
+      </button>
       <h1 className="screen-title">Stats</h1>
       <div className="mt-5 grid grid-cols-2 gap-3 md:grid-cols-4">
         <StatCard label="Total XP" value={progress.xp} tone="blue" icon="bolt" />

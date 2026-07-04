@@ -67,6 +67,7 @@ export default function App() {
   const [mapMode, setMapMode] = useState<MapMode>("locate");
   const [result, setResult] = useState<LessonResult | null>(null);
   const [activeMatchId, setActiveMatchId] = useState<string | null>(null);
+  const [exploreFrom, setExploreFrom] = useState<Screen>("mapMenu");
   const lessons = useMemo(() => generateLessons(countries), []);
 
   useEffect(() => preloadFlags(countries), []);
@@ -110,6 +111,21 @@ export default function App() {
     if (!completed.has(lesson.id) && index !== Math.max(0, firstOpen)) return;
     setActiveLesson(lesson);
     setScreen("lesson");
+  }
+
+  function firstOpenLesson(topic: Topic): Lesson | undefined {
+    const completed = new Set(progress.completedLessonIds);
+    return lessonsForTopic(lessons, topic).find((item) => !completed.has(item.id));
+  }
+
+  function nextLearningLesson(topic: Topic): Lesson | undefined {
+    return firstOpenLesson(topic) ?? firstOpenLesson("flag") ?? firstOpenLesson("capital");
+  }
+
+  function startLearning(topic: Topic = progress.selectedTopic) {
+    const next = nextLearningLesson(topic);
+    if (next) openLesson(next);
+    else setScreen("paths");
   }
 
   function switchTopic(topic: Topic) {
@@ -230,7 +246,7 @@ export default function App() {
             <div className="h-3 w-32 animate-pulse rounded-full bg-slate-200" />
           </div>
         )}
-        {screen === "welcome" && <WelcomeScreen onStart={() => setScreen("home")} onExplore={() => setScreen("library")} />}
+        {screen === "welcome" && <WelcomeScreen onStartLearning={() => startLearning("flag")} onDaily={() => setScreen("daily")} />}
         {screen === "home" && (
           <HomeScreen
             progress={progress}
@@ -239,6 +255,7 @@ export default function App() {
             onTopicChange={switchTopic}
             onOpenMap={() => setScreen("mapMenu")}
             onOpenDaily={() => setScreen("daily")}
+            onOpenReview={() => setScreen("review")}
             onOpenPaths={() => setScreen("paths")}
             onOpenArcade={() => setScreen("arcade")}
             onOpenTrivia={() => setScreen("trivia")}
@@ -263,14 +280,25 @@ export default function App() {
             onHome={() => setScreen("home")}
           />
         )}
-        {screen === "complete" && result && <LessonCompleteScreen result={result} onContinue={() => setScreen("home")} />}
+        {screen === "complete" && result && (
+          <LessonCompleteScreen
+            result={result}
+            onContinueLearning={() => {
+              const next = nextLearningLesson(result.topic);
+              if (next) openLesson(next);
+              else setScreen("home");
+            }}
+            onBackHome={() => setScreen("home")}
+          />
+        )}
         {screen === "library" && (
           <FlagsLibraryScreen
             countries={countries}
             progress={progress}
             onProgress={updateProgress}
             onPractice={(country) => startReview([country], progress.selectedTopic)}
-            onExploreMap={() => setScreen("exploreMap")}
+            onExploreMap={() => { setExploreFrom("library"); setScreen("exploreMap"); }}
+            onBack={() => setScreen("home")}
           />
         )}
         {screen === "daily" && (
@@ -280,7 +308,7 @@ export default function App() {
         )}
         {screen === "paths" && (
           <Suspense fallback={<div className="p-5"><div className="h-96 animate-pulse rounded-[24px] bg-white shadow-card" /></div>}>
-            <PathsScreen lessons={lessons} progress={progress} onOpenLesson={openLesson} onBack={() => setScreen("home")} />
+            <PathsScreen lessons={lessons} progress={progress} onOpenLesson={openLesson} onTopicChange={switchTopic} onBack={() => setScreen("home")} />
           </Suspense>
         )}
         {screen === "arcade" && (
@@ -319,7 +347,7 @@ export default function App() {
           </Suspense>
         )}
         {screen === "review" && <ReviewScreen countries={countries} progress={progress} onStart={startReview} onOpenTest={() => setScreen("testSetup")} onOpenMapPractice={startMapReview} />}
-        {screen === "testSetup" && <TestSetupScreen countries={countries} selectedTopic={progress.selectedTopic} onStart={startFlagTest} />}
+        {screen === "testSetup" && <TestSetupScreen countries={countries} selectedTopic={progress.selectedTopic} onStart={startFlagTest} onBack={() => setScreen("review")} />}
         {screen === "flagTest" && (
           <FlagTestScreen
             countries={testCountries}
@@ -333,7 +361,7 @@ export default function App() {
         )}
         {screen === "mapMenu" && (
           <Suspense fallback={<div className="p-5"><div className="h-40 animate-pulse rounded-[24px] bg-white shadow-card" /></div>}>
-            <MapMenuScreen countries={countries} onStart={startMapPractice} onExplore={() => setScreen("exploreMap")} />
+            <MapMenuScreen countries={countries} onStart={startMapPractice} onExplore={() => { setExploreFrom("mapMenu"); setScreen("exploreMap"); }} onBack={() => setScreen("home")} />
           </Suspense>
         )}
         {screen === "mapPlay" && (
@@ -350,11 +378,11 @@ export default function App() {
         )}
         {screen === "exploreMap" && (
           <Suspense fallback={<div className="p-5"><div className="h-96 animate-pulse rounded-[24px] bg-white shadow-card" /></div>}>
-            <ExploreMapScreen countries={countries} />
+            <ExploreMapScreen countries={countries} onBack={() => setScreen(exploreFrom)} />
           </Suspense>
         )}
         {screen === "stats" && (
-          <StatsScreen countries={countries} lessons={lessons} progress={progress} />
+          <StatsScreen countries={countries} lessons={lessons} progress={progress} onBack={() => setScreen("home")} />
         )}
         {screen === "profile" && (
           <ProfileScreen

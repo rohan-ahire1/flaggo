@@ -11,13 +11,15 @@ export default function FlagsLibraryScreen({
   progress,
   onProgress,
   onPractice,
-  onExploreMap
+  onExploreMap,
+  onBack
 }: {
   countries: Country[];
   progress: AppProgress;
   onProgress: (progress: AppProgress) => void;
   onPractice: (country: Country) => void;
   onExploreMap: () => void;
+  onBack: () => void;
 }) {
   const [query, setQuery] = useState("");
   const [continent, setContinent] = useState("All");
@@ -45,6 +47,9 @@ export default function FlagsLibraryScreen({
 
   return (
     <main className="p-5">
+      <button onClick={onBack} className="mb-4 grid h-10 w-10 place-items-center rounded-full bg-white text-flaggo-muted shadow-card" aria-label="Back">
+        <Icon name="chevron" size={20} className="rotate-180" />
+      </button>
       <h1 className="screen-title">Flag library</h1>
       <div className="mt-4 grid grid-cols-2 rounded-2xl bg-white p-1 shadow-card">
         <button className="rounded-xl bg-flaggo-green px-4 py-2 font-display text-sm font-extrabold text-white shadow-sm">Flags</button>

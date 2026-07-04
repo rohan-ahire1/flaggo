@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import Icon from "../components/Icon";
-import ResultCard from "../components/ResultCard";
 import { BRAND } from "../config/brand";
 import { createMatch, getMatch, getMatchResults, matchUrl, winnerFromResults, buildRematchConfig, type Match, type MatchResult } from "../lib/matches";
 
@@ -60,44 +59,29 @@ export default function MatchResultScreen({
     }
   }
 
-  const praise =
-    outcome?.type === "winner" ? `${outcome.winner?.display_name} wins with ${outcome.topScore}` : outcome?.type === "tie" ? `Tie at ${outcome.topScore}` : "Waiting for another player";
-  const topScore = outcome?.topScore;
-
   return (
-    <main className="grid min-h-screen place-items-center bg-hero-sky p-5">
-      <div className="w-full max-w-md">
-        <button onClick={onBack} className="mb-4 grid h-10 w-10 place-items-center rounded-full bg-white text-flaggo-muted shadow-card" aria-label="Back"><Icon name="chevron" className="rotate-180" /></button>
-        <ResultCard
-          icon="trophy"
-          title="Match results"
-          praise={praise}
-          praiseTone="text-flaggo-muted"
-          actions={[
-            { label: working ? "Creating..." : "Rematch", onClick: rematch, disabled: working },
-            ...(matchId ? [{ label: "Share challenge", onClick: () => void shareMatch(matchId), kind: "secondary" as const }] : [])
-          ]}
-        >
-          {error && <div className="mt-4 rounded-2xl bg-error/10 p-4 font-bold text-error">{error}</div>}
-          <div className="mt-5 grid gap-3 text-left">
-            {results.map((result) => {
-              const isTop = topScore != null && result.score === topScore;
-              return (
-                <div
-                  key={result.user_id}
-                  className={`grid grid-cols-[1fr_auto] items-center gap-3 rounded-2xl border-2 p-4 ${isTop ? "border-flaggo-green bg-flaggo-green/5" : "border-flaggo-border bg-white"}`}
-                >
-                  <span className="flex min-w-0 items-center gap-1.5 truncate font-display text-xl font-black">
-                    {isTop && <Icon name="trophy" size={16} className="shrink-0 text-flaggo-green" />}
-                    {result.display_name}
-                  </span>
-                  <span className={`font-display text-2xl font-black ${isTop ? "text-flaggo-green" : "text-flaggo-muted"}`}>{result.score}/{result.total}</span>
-                </div>
-              );
-            })}
-            {!results.length && <div className="rounded-[24px] bg-white p-6 text-center font-bold text-flaggo-muted shadow-card">No results yet.</div>}
+    <main className="p-5">
+      <button onClick={onBack} className="mb-4 grid h-10 w-10 place-items-center rounded-full bg-white text-flaggo-muted shadow-card" aria-label="Back"><Icon name="chevron" className="rotate-180" /></button>
+      <section className="rounded-[28px] bg-white p-6 text-center shadow-card-lg">
+        <Icon name="trophy" size={44} className="mx-auto text-flaggo-green" />
+        <h1 className="mt-3 screen-title">Match results</h1>
+        <p className="mt-2 font-bold text-flaggo-muted">
+          {outcome?.type === "winner" ? `${outcome.winner?.display_name} wins with ${outcome.topScore}.` : outcome?.type === "tie" ? `Tie at ${outcome.topScore}.` : "Waiting for another player."}
+        </p>
+      </section>
+      {error && <div className="mt-4 rounded-2xl bg-error/10 p-4 font-bold text-error">{error}</div>}
+      <section className="mt-5 grid gap-3">
+        {results.map((result) => (
+          <div key={result.user_id} className="grid grid-cols-[1fr_auto] items-center gap-3 rounded-2xl border border-flaggo-border bg-white p-4 shadow-card">
+            <span className="truncate font-display text-xl font-black">{result.display_name}</span>
+            <span className="font-display text-2xl font-black text-flaggo-green">{result.score}/{result.total}</span>
           </div>
-        </ResultCard>
+        ))}
+        {!results.length && <div className="rounded-[24px] bg-white p-6 text-center font-bold text-flaggo-muted shadow-card">No results yet.</div>}
+      </section>
+      <div className="mt-5 grid gap-3">
+        <button onClick={rematch} disabled={working} className="btn-primary">{working ? "Creating..." : "Rematch"}</button>
+        {matchId && <button onClick={() => void shareMatch(matchId)} className="btn-secondary">Share challenge</button>}
       </div>
     </main>
   );

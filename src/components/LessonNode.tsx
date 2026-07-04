@@ -1,48 +1,84 @@
 import type { Lesson } from "../types/lesson";
 import Icon from "./Icon";
 
-export type LessonNodeState = "locked" | "current" | "completed" | "review-needed";
+export type LessonNodeState = "locked" | "current" | "completed" | "review-needed" | "upcoming";
 
 export default function LessonNode({
   lesson,
   state,
   index,
+  total,
   onClick
 }: {
   lesson: Lesson;
   state: LessonNodeState;
   index: number;
+  total?: number;
   onClick: () => void;
 }) {
   const unlocked = state !== "locked";
-  const offset = index % 2 === 0 ? "self-start ml-6" : "self-end mr-6";
-  const colors = {
-    locked: "bg-slate-100 text-slate-400 border-slate-200",
-    current: "bg-green-grad text-white border-flaggo-greenDark animate-pulse-node",
-    completed: "bg-blue-grad text-white border-flaggo-blueDark",
-    "review-needed": "bg-flaggo-yellow text-flaggo-text border-flaggo-orange"
-  };
+  const isFirst = index === 0;
+  const isLast = total ? index === total - 1 : false;
+  const done = state === "completed";
+  const current = state === "current";
+  const review = state === "review-needed";
+
+  // Rail segments above/below the node fill in as progress is made.
+  const railAbove = isFirst ? "bg-transparent" : done || current || review ? "bg-primary" : "bg-line";
+  const railBelow = isLast ? "bg-transparent" : done ? "bg-primary" : "bg-line";
+
+  const circle = done
+    ? "bg-primary text-white"
+    : current
+      ? "bg-primary text-white ring-4 ring-primary/20"
+      : review
+        ? "bg-accent text-white"
+        : "bg-surface2 text-muted";
+
+  const card = current
+    ? "border-2 border-primary bg-paper shadow-card"
+    : done || review
+      ? "border border-line bg-paper"
+      : "border border-line bg-paper opacity-70";
 
   const badge = () => {
-    if (state === "completed") return <Icon name="check" size={26} />;
-    if (state === "locked") return <Icon name="lock" size={22} />;
-    if (lesson.isTerritoryLesson) return <Icon name="star" size={24} />;
-    return <span className="font-display text-xl font-black">{index + 1}</span>;
+    if (done) return <Icon name="check" size={22} />;
+    if (state === "locked") return <Icon name="lock" size={18} />;
+    if (lesson.isTerritoryLesson) return <Icon name="star" size={20} />;
+    return <span className="font-display text-lg font-black">{index + 1}</span>;
   };
 
+  const countLabel = lesson.topic === "capital" ? "capitals" : "flags";
+
   return (
-    <button
-      onClick={onClick}
-      disabled={!unlocked}
-      className={`relative z-10 flex w-52 items-center gap-3 rounded-[26px] border-b-[6px] p-3 text-left shadow-sm transition-all duration-150 active:translate-y-1 active:border-b-2 disabled:active:translate-y-0 ${offset} ${colors[state]}`}
-    >
-      <span className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-white/25 shadow-inner ring-1 ring-white/30">
-        {badge()}
-      </span>
-      <span className="min-w-0">
-        <span className="block truncate text-sm font-display font-extrabold leading-tight">{lesson.title}</span>
-        <span className="block text-xs font-bold opacity-80">{lesson.countryCodes.length} {lesson.topic === "capital" ? "capitals" : "flags"}</span>
-      </span>
-    </button>
+    <div className="flex items-stretch gap-3.5">
+      {/* connector rail + node */}
+      <div className="flex w-12 flex-col items-center">
+        <span className={`w-[3px] flex-1 ${railAbove}`} />
+        <span className={`z-10 grid h-12 w-12 shrink-0 place-items-center rounded-full ${circle}`}>{badge()}</span>
+        <span className={`w-[3px] flex-1 ${railBelow}`} />
+      </div>
+
+      {/* lesson card */}
+      <button
+        onClick={onClick}
+        disabled={!unlocked}
+        className={`my-2 flex flex-1 items-center gap-3 rounded-2xl p-4 text-left transition-all duration-150 active:translate-y-[1px] disabled:active:translate-y-0 ${card}`}
+      >
+        <span className="min-w-0 flex-1">
+          <span className="block truncate font-display text-[16px] font-extrabold leading-tight text-ink">{lesson.title}</span>
+          <span className="block text-[13px] font-semibold text-muted">{lesson.countryCodes.length} {countLabel}</span>
+        </span>
+        {current ? (
+          <span className="shrink-0 rounded-full bg-primary px-3.5 py-1.5 font-display text-xs font-extrabold text-white">Start</span>
+        ) : done ? (
+          <Icon name="check" size={20} className="shrink-0 text-primary" />
+        ) : review ? (
+          <Icon name="sparkle" size={18} className="shrink-0 text-accent" />
+        ) : (
+          <Icon name="chevron" size={18} className="shrink-0 text-muted" />
+        )}
+      </button>
+    </div>
   );
 }
