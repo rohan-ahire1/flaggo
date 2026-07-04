@@ -34,7 +34,7 @@ export default function LibraryScreen() {
   return (
     <SafeAreaView className="flex-1 bg-paper" edges={["top", "bottom"]}>
       <ScreenHeader title="Flag library" subtitle={`${filtered.length} countries`} />
-      <View className="gap-3 px-5 pb-2 pt-2">
+      <View className="w-full max-w-[1120px] self-center gap-3 px-5 pb-2 pt-2 lg:px-8">
         <View className="flex-row items-center gap-2 rounded-2xl border-2 border-line bg-paper px-3.5 py-2.5">
           <Icon name="search" size={18} color={themeColor(theme, "muted")} />
           <TextInput
@@ -61,18 +61,18 @@ export default function LibraryScreen() {
         </ScrollView>
       </View>
 
-      <ScrollView contentContainerClassName="px-5 pb-8 pt-1">
+      <ScrollView contentContainerClassName="w-full max-w-[1120px] self-center px-5 pb-8 pt-1 lg:px-8">
         <View className="flex-row flex-wrap justify-between gap-y-4">
           {filtered.map((c) => {
             const starred = isStarred(progress, c.code, topic);
             return (
-              <View key={c.code} className="w-[31%]">
+              <View key={c.code} className="w-[31%] md:w-[18.5%] lg:w-[13.5%]">
                 <View className="relative">
                   <FlagImage code={c.code} width={160} />
                   <Pressable
                     onPress={() => setProgress(toggleStarredDeck(progress, c.code, topic))}
                     hitSlop={8}
-                    className={`absolute right-1 top-1 h-7 w-7 items-center justify-center rounded-full ${starred ? "bg-accent" : "bg-black/30"}`}
+                    className={`absolute right-1 top-1 h-7 w-7 items-center justify-center rounded-full ${starred ? "bg-accent" : "bg-ink/45"}`}
                   >
                     <Icon name="star" size={13} color="#ffffff" />
                   </Pressable>

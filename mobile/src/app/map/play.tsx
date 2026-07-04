@@ -1,7 +1,8 @@
 import { useMemo, useState } from "react";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { Platform, Pressable, ScrollView, Text, View, useWindowDimensions } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router, useLocalSearchParams } from "expo-router";
+import { dismiss } from "@/utils/nav";
 import FlagImage from "@/components/FlagImage";
 import WorldMap from "@/components/WorldMap";
 import RoundResults, { type RoundResultItem } from "@/components/RoundResults";
@@ -15,6 +16,8 @@ export default function MapPlayScreen() {
   const params = useLocalSearchParams<{ mode?: string; codes?: string }>();
   const mode = (params.mode as MapMode) ?? "locate";
   const { progress, setProgress } = useProgress();
+  const { width } = useWindowDimensions();
+  const isWideWeb = Platform.OS === "web" && width >= 1024;
 
   const pool = useMemo(() => {
     const codes = new Set((params.codes ?? "").split(",").filter(Boolean));
@@ -40,7 +43,7 @@ export default function MapPlayScreen() {
         total={questions.length}
         items={results}
         caption={mode === "locate" ? "Locate" : "Identify"}
-        actions={[{ label: "Done", variant: "primary", icon: "check", onPress: () => router.back() }]}
+        actions={[{ label: "Done", variant: "primary", icon: "check", onPress: () => dismiss() }]}
       />
     );
   }
@@ -53,7 +56,11 @@ export default function MapPlayScreen() {
     if (ok) setScore((s) => s + 1);
     setResults((r) => [
       ...r,
-      { label: `Locate ${target.name}`, correct: ok, chosen: ok ? undefined : byCode.get(code)?.name }
+      {
+        label: `${question.type === "identify-country" ? "Identify" : "Locate"} ${target.name}`,
+        correct: ok,
+        chosen: ok ? undefined : byCode.get(code)?.name
+      }
     ]);
     setFeedback({ ok, wrongCode: ok ? undefined : code });
   }
@@ -68,8 +75,8 @@ export default function MapPlayScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-paper" edges={["top", "bottom"]}>
-      <View className="flex-row items-center gap-3 px-5 pb-2 pt-1">
-        <Pressable onPress={() => router.back()} hitSlop={10}>
+      <View className="w-full max-w-[1120px] self-center flex-row items-center gap-3 px-5 pb-2 pt-1 lg:px-8">
+        <Pressable onPress={() => dismiss()} hitSlop={10}>
           <Text className="text-[15px] font-bold text-muted">Exit</Text>
         </Pressable>
         <View className="h-2.5 flex-1 overflow-hidden rounded-full bg-surface-2">
@@ -78,7 +85,7 @@ export default function MapPlayScreen() {
         <Pill icon="check" label={String(score)} tone="success" />
       </View>
 
-      <ScrollView contentContainerClassName="px-5 pb-3 gap-4">
+      <ScrollView contentContainerClassName="w-full max-w-[1120px] self-center px-5 pb-3 gap-4 lg:px-8">
         <View className="rounded-2xl border border-line bg-surface p-4">
           <Text className="text-[12px] font-extrabold uppercase tracking-wide text-primary">
             {mode === "locate" ? "Locate" : "Identify"}
@@ -95,63 +102,69 @@ export default function MapPlayScreen() {
           )}
         </View>
 
-        <WorldMap
-          countries={countries}
-          highlightCode={isIdentify ? question.targetCode : undefined}
-          correctCode={feedback ? target.code : undefined}
-          wrongCode={feedback?.wrongCode}
-          interactive={!feedback && mode === "locate"}
-          onCountryTap={answer}
-          height={340}
-        />
-
-        {isIdentify ? (
-          <View className="gap-2.5">
-            {question.options.map((c, i) => {
-              const st = !feedback
-                ? "idle"
-                : c.code === target.code
-                  ? "correct"
-                  : c.code === feedback.wrongCode
-                    ? "wrong"
-                    : "idle";
-              const cls =
-                st === "correct"
-                  ? "border-success bg-success/15"
-                  : st === "wrong"
-                    ? "border-error bg-error/15"
-                    : feedback
-                      ? "border-line bg-paper opacity-45"
-                      : "border-line bg-paper";
-              return (
-                <Pressable
-                  key={c.code}
-                  disabled={!!feedback}
-                  onPress={() => answer(c.code)}
-                  className={`flex-row items-center gap-3.5 rounded-2xl border-2 px-4 py-3.5 ${cls}`}
-                >
-                  <Badge letter={["A", "B", "C", "D"][i]} state={st} />
-                  <Text className="flex-1 text-[18px] font-bold text-ink">{c.name}</Text>
-                </Pressable>
-              );
-            })}
+        <View className={isIdentify ? "gap-4 lg:flex-row lg:items-start" : "gap-4"}>
+          <View className="lg:flex-1">
+            <WorldMap
+              countries={countries}
+              highlightCode={isIdentify ? question.targetCode : undefined}
+              correctCode={feedback ? target.code : undefined}
+              wrongCode={feedback?.wrongCode}
+              interactive={!feedback && mode === "locate"}
+              onCountryTap={answer}
+              height={isWideWeb ? 500 : 340}
+            />
           </View>
-        ) : null}
+
+          {isIdentify ? (
+            <View className="gap-2.5 md:flex-row md:flex-wrap md:justify-between md:gap-y-3 lg:w-[340px] lg:flex-col lg:flex-nowrap">
+              {question.options.map((c, i) => {
+                const st = !feedback
+                  ? "idle"
+                  : c.code === target.code
+                    ? "correct"
+                    : c.code === feedback.wrongCode
+                      ? "wrong"
+                      : "idle";
+                const cls =
+                  st === "correct"
+                    ? "border-success bg-success/15"
+                    : st === "wrong"
+                      ? "border-error bg-error/15"
+                      : feedback
+                        ? "border-line bg-paper opacity-45"
+                        : "border-line bg-paper";
+                return (
+                  <Pressable
+                    key={c.code}
+                    disabled={!!feedback}
+                    onPress={() => answer(c.code)}
+                    className={`flex-row items-center gap-3.5 rounded-2xl border-2 px-4 py-3.5 md:w-[48.5%] lg:w-full ${cls}`}
+                  >
+                    <Badge letter={["A", "B", "C", "D"][i]} state={st} />
+                    <Text className="flex-1 text-[18px] font-bold text-ink">{c.name}</Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+          ) : null}
+        </View>
       </ScrollView>
 
-      <View className="gap-2 border-t border-line px-5 pb-1 pt-3">
-        <Text
-          className={`text-center text-[15px] font-bold ${feedback ? (feedback.ok ? "text-success" : "text-error") : "text-muted"}`}
-        >
-          {feedback ? (feedback.ok ? "Correct!" : `Answer: ${target.name}`) : mode === "locate" ? "Tap the country on the map" : "Pick the country"}
-        </Text>
-        <PillButton
-          label={index + 1 >= questions.length ? "See results" : "Next"}
-          variant="primary"
-          iconRight="arrow-right"
-          onPress={() => feedback && next()}
-          className={feedback ? "" : "opacity-40"}
-        />
+      <View className="border-t border-line bg-paper">
+        <View className="w-full max-w-[1120px] self-center gap-2 px-5 pb-4 pt-3 lg:px-8">
+          <Text
+            className={`text-center text-[15px] font-bold ${feedback ? (feedback.ok ? "text-success" : "text-error") : "text-muted"}`}
+          >
+            {feedback ? (feedback.ok ? "Correct!" : `Answer: ${target.name}`) : mode === "locate" ? "Tap the country on the map" : "Pick the country"}
+          </Text>
+          <PillButton
+            label={index + 1 >= questions.length ? "See results" : "Next"}
+            variant="primary"
+            iconRight="arrow-right"
+            onPress={() => feedback && next()}
+            className={feedback ? "" : "opacity-40"}
+          />
+        </View>
       </View>
     </SafeAreaView>
   );

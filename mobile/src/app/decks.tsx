@@ -60,7 +60,7 @@ export default function DecksScreen() {
   return (
     <SafeAreaView className="flex-1 bg-paper" edges={["top", "bottom"]}>
       <ScreenHeader title="Decks" subtitle="Build & drill your own sets." />
-      <ScrollView contentContainerClassName="px-5 pb-8 gap-5 pt-2" keyboardShouldPersistTaps="handled">
+      <ScrollView contentContainerClassName="w-full max-w-[1120px] self-center px-5 pb-8 gap-5 pt-2 lg:px-8" keyboardShouldPersistTaps="handled">
         <View className="flex-row rounded-2xl bg-surface p-1">
           {(["flag", "capital"] as Topic[]).map((t) => (
             <Pressable
@@ -76,10 +76,11 @@ export default function DecksScreen() {
         {decks.length ? (
           <View className="gap-3">
             <SectionLabel>Your decks</SectionLabel>
+            <View className="gap-3 md:flex-row md:flex-wrap md:justify-between">
             {decks.map((deck) => {
               const size = deckCountries(deck, countries).length;
               return (
-                <Card key={`${deck.id}-${deck.topic}`} className="gap-3">
+                <Card key={`${deck.id}-${deck.topic}`} className="gap-3 md:w-[48.5%]">
                   <View className="flex-row items-center gap-3">
                     <View className="h-12 w-12 items-center justify-center rounded-2xl bg-accent/20">
                       <Icon name={deck.id === STARRED_DECK_ID ? "star" : "layers"} size={22} color={themeColor(theme, "accent")} />
@@ -105,6 +106,7 @@ export default function DecksScreen() {
                 </Card>
               );
             })}
+            </View>
           </View>
         ) : null}
 
@@ -120,15 +122,18 @@ export default function DecksScreen() {
             }}
           />
           <View className="flex-row flex-wrap justify-between gap-y-2">
-            {REGIONS.map((r) => (
-              <Pressable
-                key={r}
-                onPress={() => addDeck(createDeck(r, countryCodesByRegion(countries, r), topic))}
-                className="w-[48%] items-center rounded-2xl border-2 border-line bg-paper py-3"
-              >
-                <Text className="text-[15px] font-black text-ink">{r}</Text>
-              </Pressable>
-            ))}
+            {REGIONS.map((r, index) => {
+              const fillsLastMobileRow = index === REGIONS.length - 1 && REGIONS.length % 2 === 1;
+              return (
+                <Pressable
+                  key={r}
+                  onPress={() => addDeck(createDeck(r, countryCodesByRegion(countries, r), topic))}
+                  className={`${fillsLastMobileRow ? "w-full" : "w-[48%]"} items-center rounded-2xl border-2 border-line bg-paper py-3 md:w-[18.5%]`}
+                >
+                  <Text className="text-[15px] font-black text-ink">{r}</Text>
+                </Pressable>
+              );
+            })}
           </View>
         </View>
 

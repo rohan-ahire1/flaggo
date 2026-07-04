@@ -61,19 +61,21 @@ export default function MatchScreen() {
   if (!played) {
     return (
       <SafeAreaView className="flex-1 bg-primary" edges={["top", "bottom"]}>
-        <View className="flex-1 justify-between p-6">
+        <View className="w-full max-w-[560px] flex-1 self-center justify-between p-6 lg:py-12">
           <View />
-          <Animated.View entering={FadeInDown} className="items-center gap-3">
-            <View className="h-16 w-16 items-center justify-center rounded-full bg-white/15">
-              <Icon name="users" size={30} color="#ffffff" />
+          <Animated.View entering={FadeInDown}>
+            <View className="items-center gap-3">
+              <View className="h-16 w-16 items-center justify-center rounded-full bg-white/15">
+                <Icon name="users" size={30} color="#ffffff" />
+              </View>
+              <Text className="text-center text-[26px] font-black text-white">
+                {creator?.display_name ?? "A friend"} challenged you on Worldly
+              </Text>
+              <Text className="text-center text-[15px] font-semibold text-white/80">
+                {creator ? `They scored ${creator.score}/${creator.total}. ` : ""}You'll get the exact same{" "}
+                {total}-question round.
+              </Text>
             </View>
-            <Text className="text-center text-[26px] font-black text-white">
-              {creator?.display_name ?? "A friend"} challenged you on Worldly
-            </Text>
-            <Text className="text-center text-[15px] font-semibold text-white/80">
-              {creator ? `They scored ${creator.score}/${creator.total}. ` : ""}You'll get the exact same{" "}
-              {total}-question round.
-            </Text>
           </Animated.View>
           <View className="gap-3">
             <PillButton
@@ -103,48 +105,52 @@ export default function MatchScreen() {
   const banner = iWon ? "You won! 🎉" : outcome?.type === "tie" ? "It's a tie!" : opponent ? "So close!" : "Round complete";
   return (
     <SafeAreaView className="flex-1 bg-paper" edges={["top", "bottom"]}>
-      <ScrollView contentContainerClassName="p-5 gap-5">
+      <ScrollView contentContainerClassName="w-full max-w-[960px] self-center p-5 gap-5 lg:p-8">
         <View className="items-center gap-1 pt-2">
           <SectionLabel>Head to head</SectionLabel>
           <Text className="text-[28px] font-black text-ink">{banner}</Text>
         </View>
 
-        <View className="flex-row gap-3">
-          <ScoreCard name="You" score={myScore} total={total} highlight={iWon} />
-          <ScoreCard
-            name={opponent?.display_name ?? "Waiting…"}
-            score={opponent?.score ?? null}
-            total={opponent?.total ?? total}
-            highlight={outcome?.type === "winner" && !iWon}
-          />
-        </View>
+        <View className="gap-5 lg:flex-row lg:items-start">
+          <View className="gap-5 lg:flex-1">
+            <View className="flex-row gap-3">
+              <ScoreCard name="You" score={myScore} total={total} highlight={iWon} />
+              <ScoreCard
+                name={opponent?.display_name ?? "Waiting…"}
+                score={opponent?.score ?? null}
+                total={opponent?.total ?? total}
+                highlight={outcome?.type === "winner" && !iWon}
+              />
+            </View>
 
-        {!user ? (
-          <Card className="flex-row items-center gap-3">
-            <Icon name="user" size={22} color={themeColor(theme, "accent")} />
-            <Text className="flex-1 font-semibold text-muted">Sign in to save your score and compare with friends.</Text>
-          </Card>
-        ) : null}
+            {!user ? (
+              <Card className="flex-row items-center gap-3">
+                <Icon name="user" size={22} color={themeColor(theme, "accent")} />
+                <Text className="flex-1 font-semibold text-muted">Sign in to save your score and compare with friends.</Text>
+              </Card>
+            ) : null}
+          </View>
 
-        <View className="gap-3">
-          <PillButton
-            label="Rematch"
-            variant="primary"
-            icon="swap"
-            onPress={() =>
-              router.replace({
-                pathname: "/quiz",
-                params: { mode: "match", matchId: id, seed: match.seed, config: JSON.stringify(match.config) }
-              })
-            }
-          />
-          <PillButton
-            label="Share result card"
-            variant="secondary"
-            icon="share"
-            onPress={() => void shareChallenge(match, myScore ?? undefined)}
-          />
-          <PillButton label="Back to Today" variant="secondary" onPress={() => router.replace("/")} />
+          <View className="gap-3 lg:w-[320px]">
+            <PillButton
+              label="Rematch"
+              variant="primary"
+              icon="swap"
+              onPress={() =>
+                router.replace({
+                  pathname: "/quiz",
+                  params: { mode: "match", matchId: id, seed: match.seed, config: JSON.stringify(match.config) }
+                })
+              }
+            />
+            <PillButton
+              label="Share result card"
+              variant="secondary"
+              icon="share"
+              onPress={() => void shareChallenge(match, myScore ?? undefined)}
+            />
+            <PillButton label="Back to Today" variant="secondary" onPress={() => router.replace("/")} />
+          </View>
         </View>
       </ScrollView>
     </SafeAreaView>

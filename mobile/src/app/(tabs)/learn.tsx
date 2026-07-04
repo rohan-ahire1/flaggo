@@ -45,7 +45,7 @@ export default function LearnScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-paper" edges={["top"]}>
-      <ScrollView contentContainerClassName="p-5 pb-8 gap-5">
+      <ScrollView contentContainerClassName="w-full max-w-[1120px] self-center p-5 pb-8 gap-5 lg:p-8">
         <View className="flex-row items-center gap-3">
           {region ? (
             <Pressable onPress={() => setRegion(null)} hitSlop={10} className="h-10 w-10 items-center justify-center rounded-full bg-surface">
@@ -75,12 +75,12 @@ export default function LearnScreen() {
               })}
             </View>
 
-            <View className="gap-3">
+            <View className="gap-3 md:flex-row md:flex-wrap md:justify-between">
               {regions.map((r) => {
                 const done = r.lessons.filter((l) => progress.completedLessonIds.includes(l.id)).length;
                 const pct = Math.round((done / r.lessons.length) * 100);
                 return (
-                  <Card key={r.name} onPress={() => setRegion(r.name)} className="flex-row items-center gap-4">
+                  <Card key={r.name} onPress={() => setRegion(r.name)} className="flex-row items-center gap-4 md:w-[48.5%] xl:w-[32%]">
                     <View className="h-14 w-14 items-center justify-center rounded-full bg-success/15">
                       <Text className="text-[15px] font-black text-success">{pct}%</Text>
                     </View>
@@ -97,11 +97,11 @@ export default function LearnScreen() {
             </View>
           </View>
         ) : (
-          <View className="gap-3">
+          <View className="gap-3 md:flex-row md:flex-wrap md:justify-between">
             {visible.map((lesson, i) => {
               const completed = progress.completedLessonIds.includes(lesson.id);
               return (
-                <Card key={lesson.id} onPress={() => openLesson(lesson)} className="flex-row items-center gap-3">
+                <Card key={lesson.id} onPress={() => openLesson(lesson)} className="flex-row items-center gap-3 md:w-[48.5%]">
                   <View
                     className={`h-12 w-12 items-center justify-center rounded-2xl ${completed ? "bg-primary" : "bg-surface"}`}
                   >

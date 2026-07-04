@@ -1,5 +1,5 @@
 import { eq } from "drizzle-orm";
-import { db, initDb } from "../db/client";
+import { getDb, initDb } from "../db/client";
 import { progress as progressTable, reviewItems, type ProgressRow } from "../db/schema";
 import { defaultProgress, type AppProgress, type ReviewState } from "../types/progress";
 import type { Topic } from "../types/topic";
@@ -45,11 +45,15 @@ function rowToProgress(row: ProgressRow, review: Record<string, ReviewState>): A
 }
 
 async function readRow(): Promise<ProgressRow | undefined> {
+  await initDb();
+  const db = getDb();
   const rows = await db.select().from(progressTable).where(eq(progressTable.id, 1)).limit(1);
   return rows[0];
 }
 
 async function readReview(): Promise<Record<string, ReviewState>> {
+  await initDb();
+  const db = getDb();
   const rows = await db.select().from(reviewItems);
   const map: Record<string, ReviewState> = {};
   for (const r of rows) {
@@ -67,7 +71,7 @@ async function readReview(): Promise<Record<string, ReviewState>> {
 }
 
 export async function loadProgress(): Promise<AppProgress> {
-  initDb();
+  await initDb();
   const row = await readRow();
   if (!row) return defaultProgress;
   const review = await readReview();
@@ -75,7 +79,8 @@ export async function loadProgress(): Promise<AppProgress> {
 }
 
 async function writeRow(progress: AppProgress, meta: ProgressMeta, needsMerge: boolean): Promise<void> {
-  initDb();
+  await initDb();
+  const db = getDb();
   await db
     .update(progressTable)
     .set({
@@ -126,7 +131,8 @@ export async function saveSyncedProgress(progress: AppProgress, meta: ProgressMe
 }
 
 export async function resetProgress(): Promise<void> {
-  initDb();
+  await initDb();
+  const db = getDb();
   await db.delete(reviewItems);
   await db.update(progressTable).set({
     xp: 0,
@@ -150,19 +156,20 @@ export async function resetProgress(): Promise<void> {
 }
 
 export async function loadProgressMeta(): Promise<ProgressMeta> {
-  initDb();
+  await initDb();
   const row = await readRow();
   return { updatedAt: row?.updatedAt ?? null, userId: row?.userId ?? null };
 }
 
 export async function needsAnonymousMerge(): Promise<boolean> {
-  initDb();
+  await initDb();
   const row = await readRow();
   return Boolean(row?.needsMerge);
 }
 
 export async function clearAnonymousMergeMarker(): Promise<void> {
-  initDb();
+  await initDb();
+  const db = getDb();
   await db.update(progressTable).set({ needsMerge: 0 }).where(eq(progressTable.id, 1));
 }
 

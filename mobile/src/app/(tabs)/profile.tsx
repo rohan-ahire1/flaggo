@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Alert, ScrollView, Text, TextInput, View } from "react-native";
+import { Alert, Platform, ScrollView, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import Icon, { type IconName } from "@/components/Icon";
@@ -44,6 +44,13 @@ export default function ProfileScreen() {
   }
 
   function confirmReset() {
+    // Alert.alert is a no-op on react-native-web, so use window.confirm there.
+    if (Platform.OS === "web") {
+      if (typeof window !== "undefined" && window.confirm("Reset progress?\n\nThis clears your local progress.")) {
+        void resetAllProgress();
+      }
+      return;
+    }
     Alert.alert("Reset progress?", "This clears your local progress.", [
       { text: "Cancel", style: "cancel" },
       { text: "Reset", style: "destructive", onPress: () => void resetAllProgress() }
@@ -52,7 +59,7 @@ export default function ProfileScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-paper" edges={["top"]}>
-      <ScrollView contentContainerClassName="p-5 pb-8 gap-5">
+      <ScrollView contentContainerClassName="w-full max-w-[1120px] self-center p-5 pb-8 gap-5 lg:p-8">
         <Text className="text-[32px] font-black text-ink">You</Text>
 
         {/* Identity */}
@@ -64,7 +71,10 @@ export default function ProfileScreen() {
             <View className="flex-1">
               <Text className="text-[19px] font-black text-ink">{name}</Text>
               <Text className="text-[13px] font-semibold text-muted">
-                {user?.email ?? "Sign in to sync progress"}
+                {user?.email ??
+                  (hasSupabaseConfig
+                    ? "Sign in to sync progress"
+                    : "Playing locally · progress saved on this device")}
               </Text>
             </View>
             <View className="rounded-full border border-line bg-surface px-3 py-1">
@@ -72,44 +82,36 @@ export default function ProfileScreen() {
             </View>
           </View>
 
-          {!user ? (
+          {user ? (
+            <PillButton label="Sign out" variant="secondary" onPress={() => void signOut()} />
+          ) : hasSupabaseConfig ? (
             <View className="gap-3">
-              {hasSupabaseConfig ? (
-                <>
-                  <PillButton label="Continue with Google" variant="primary" onPress={google} />
-                  <TextInput
-                    value={email}
-                    onChangeText={setEmail}
-                    placeholder="you@email.com"
-                    placeholderTextColor={themeColor(theme, "muted")}
-                    autoCapitalize="none"
-                    keyboardType="email-address"
-                    editable={!busy}
-                    className="rounded-2xl border-2 border-line bg-paper px-4 py-3 text-[16px] font-semibold text-ink"
-                  />
-                  <PillButton label="Email me a sign-in link" variant="secondary" onPress={magicLink} />
-                </>
-              ) : (
-                <Text className="font-semibold text-muted">
-                  Sign-in isn't configured yet (set Supabase keys in app.json).
-                </Text>
-              )}
+              <PillButton label="Continue with Google" variant="primary" onPress={google} />
+              <TextInput
+                value={email}
+                onChangeText={setEmail}
+                placeholder="you@email.com"
+                placeholderTextColor={themeColor(theme, "muted")}
+                autoCapitalize="none"
+                keyboardType="email-address"
+                editable={!busy}
+                className="rounded-2xl border-2 border-line bg-paper px-4 py-3 text-[16px] font-semibold text-ink"
+              />
+              <PillButton label="Email me a sign-in link" variant="secondary" onPress={magicLink} />
               {notice ? <Text className="font-bold text-primary">{notice}</Text> : null}
             </View>
-          ) : (
-            <PillButton label="Sign out" variant="secondary" onPress={() => void signOut()} />
-          )}
+          ) : null}
         </Card>
 
         {/* Stats */}
-        <View className="flex-row gap-3">
+        <View className="flex-row gap-3 lg:w-[48%]">
           <Stat label="Accuracy" value={`${accuracy}%`} />
           <Stat label="Mastered" value={`${mastered}`} />
           <Stat label="XP" value={`${progress.xp}`} />
         </View>
 
         {/* Social */}
-        <View className="gap-3">
+        <View className="gap-3 lg:w-[48%]">
           <SectionLabel>Compete</SectionLabel>
           <LinkRow icon="users" label="Friends" sub="Head-to-head standings" onPress={() => router.push("/friends")} />
           <LinkRow icon="trophy" label="Leaderboard" sub="Daily & all-time XP" onPress={() => router.push("/leaderboard")} />

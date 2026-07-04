@@ -1,6 +1,16 @@
-import { Alert, Share } from "react-native";
+import { Alert, Platform, Share } from "react-native";
 import * as Linking from "expo-linking";
 import { createMatch, normalizeMatchConfig, type Match, type MatchConfig } from "@/lib/matches";
+
+// Alert.alert is a no-op on react-native-web, so notices from web silently
+// vanish. Route through window.alert on web, native Alert otherwise.
+function notify(title: string, message: string) {
+  if (Platform.OS === "web") {
+    if (typeof window !== "undefined") window.alert(`${title}\n\n${message}`);
+    return;
+  }
+  Alert.alert(title, message);
+}
 
 // A challenge is today's daily-style round, trimmed to 5 questions to match the
 // "Today's Five" framing on Home.
@@ -20,10 +30,24 @@ export function matchDeepLink(id: string) {
 export async function shareChallenge(match: Match, score?: number) {
   const link = matchDeepLink(match.id);
   const scoreLine = typeof score === "number" ? `I scored ${score}/${match.config.questionCount}. ` : "";
-  await Share.share({
-    title: "Worldly challenge",
-    message: `${scoreLine}Can you beat me on this Worldly round? ${link}`
-  });
+  const message = `${scoreLine}Can you beat me on this Worldly round? ${link}`;
+
+  if (Platform.OS === "web") {
+    const nav = typeof navigator !== "undefined" ? navigator : undefined;
+    if (nav?.share) {
+      try {
+        await nav.share({ title: "Worldly challenge", text: message });
+        return;
+      } catch {
+        // user dismissed the share sheet or it failed — fall through to copy
+      }
+    }
+    if (nav?.clipboard) await nav.clipboard.writeText(link);
+    notify("Challenge link copied", message);
+    return;
+  }
+
+  await Share.share({ title: "Worldly challenge", message });
 }
 
 // Create a match on Supabase then open the native share sheet. Throws if the
@@ -41,6 +65,6 @@ export async function promptChallenge(score?: number): Promise<void> {
     await createAndShareChallenge(score);
   } catch (error) {
     const message = error instanceof Error ? error.message : "Sign in to challenge a friend.";
-    Alert.alert("Challenge a friend", message);
+    notify("Challenge a friend", message);
   }
 }

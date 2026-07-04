@@ -1,4 +1,4 @@
-import { Text, TextInput } from "react-native";
+import { StyleSheet, Text, TextInput } from "react-native";
 import {
   Figtree_400Regular,
   Figtree_500Medium,
@@ -51,14 +51,14 @@ export function applyFigtreeDefault() {
     Comp.render = function render(...args: any[]) {
       const el = original.apply(this, args);
       const incoming = el.props?.style;
-      const flat = Array.isArray(incoming) ? Object.assign({}, ...incoming.filter(Boolean)) : incoming;
+      const flat = StyleSheet.flatten(incoming);
       const family = familyForWeight(flat?.fontWeight);
       return {
         ...el,
         props: {
           ...el.props,
           // Family wins so Figtree always applies; leftover fontWeight is harmless.
-          style: [incoming, { fontFamily: family }]
+          style: { ...flat, fontFamily: family }
         }
       };
     };

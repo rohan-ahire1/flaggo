@@ -14,20 +14,19 @@ type ClientEnv = {
 
 const extra = (Constants.expoConfig?.extra ?? {}) as Record<string, unknown>;
 
-function read(extraKey: string, envKey: string): string {
-  const fromEnv = process.env[envKey];
+function read(extraKey: string, fromEnv: string | undefined): string {
   if (fromEnv) return String(fromEnv);
   const fromExtra = extra[extraKey];
   return fromExtra ? String(fromExtra) : "";
 }
 
 export const env: ClientEnv = {
-  supabaseUrl: read("supabaseUrl", "EXPO_PUBLIC_SUPABASE_URL"),
-  supabaseAnonKey: read("supabaseAnonKey", "EXPO_PUBLIC_SUPABASE_ANON_KEY"),
-  sentryDsn: read("sentryDsn", "EXPO_PUBLIC_SENTRY_DSN"),
-  siteUrl: read("siteUrl", "EXPO_PUBLIC_SITE_URL") || BRAND.url,
+  supabaseUrl: read("supabaseUrl", process.env.EXPO_PUBLIC_SUPABASE_URL),
+  supabaseAnonKey: read("supabaseAnonKey", process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY),
+  sentryDsn: read("sentryDsn", process.env.EXPO_PUBLIC_SENTRY_DSN),
+  siteUrl: read("siteUrl", process.env.EXPO_PUBLIC_SITE_URL) || BRAND.url,
   monetizationEnabled:
-    read("monetizationEnabled", "EXPO_PUBLIC_MONETIZATION_ENABLED").toLowerCase() === "true"
+    read("monetizationEnabled", process.env.EXPO_PUBLIC_MONETIZATION_ENABLED).toLowerCase() === "true"
 };
 
 export const MONETIZATION_ENABLED = env.monetizationEnabled;

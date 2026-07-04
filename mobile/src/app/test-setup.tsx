@@ -26,7 +26,7 @@ export default function TestSetupScreen() {
   return (
     <SafeAreaView className="flex-1 bg-paper" edges={["top", "bottom"]}>
       <ScreenHeader title="Custom test" subtitle="Pick a tier, answer in your head, self-grade." />
-      <ScrollView contentContainerClassName="px-5 pb-8 gap-5 pt-2">
+      <ScrollView contentContainerClassName="w-full max-w-[960px] self-center px-5 pb-8 gap-5 pt-2 lg:px-8">
         <View className="gap-2">
           <SectionLabel>Topic</SectionLabel>
           <View className="flex-row gap-3">
@@ -48,14 +48,14 @@ export default function TestSetupScreen() {
 
         <View className="gap-2">
           <SectionLabel>Country set</SectionLabel>
-          <View className="gap-2">
+          <View className="gap-2 md:flex-row md:flex-wrap md:justify-between">
             {groups.map((g) => {
               const on = g.id === groupId;
               return (
                 <Pressable
                   key={g.id}
                   onPress={() => setGroupId(g.id)}
-                  className={`rounded-2xl border-2 px-4 py-3.5 ${on ? "border-primary bg-primary/10" : "border-line bg-paper"}`}
+                  className={`rounded-2xl border-2 px-4 py-3.5 md:w-[48.5%] ${on ? "border-primary bg-primary/10" : "border-line bg-paper"}`}
                 >
                   <Text className={`text-[16px] font-black ${on ? "text-primary" : "text-ink"}`}>
                     {g.title} countries
@@ -87,14 +87,16 @@ export default function TestSetupScreen() {
           </View>
         </View>
 
-        <PillButton
-          label="Start test"
-          variant="primary"
-          icon="target"
-          onPress={() =>
-            selected && router.push({ pathname: "/test", params: { groupId: selected.id, mode, topic } })
-          }
-        />
+        <View className="lg:w-[320px] lg:self-end">
+          <PillButton
+            label="Start test"
+            variant="primary"
+            icon="target"
+            onPress={() =>
+              selected && router.push({ pathname: "/test", params: { groupId: selected.id, mode, topic } })
+            }
+          />
+        </View>
       </ScrollView>
     </SafeAreaView>
   );

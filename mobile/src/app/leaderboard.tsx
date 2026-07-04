@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ActivityIndicator, Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
+import { dismiss } from "@/utils/nav";
 import { useQuery } from "@tanstack/react-query";
 import Icon from "@/components/Icon";
 import { Card, SectionLabel } from "@/components/ui";
@@ -22,13 +23,13 @@ export default function LeaderboardScreen() {
   return (
     <SafeAreaView className="flex-1 bg-paper" edges={["top", "bottom"]}>
       <View className="flex-row items-center gap-3 px-5 py-3">
-        <Pressable onPress={() => router.back()} hitSlop={10}>
+        <Pressable onPress={() => dismiss()} hitSlop={10}>
           <Icon name="x" size={24} color={themeColor(theme, "muted")} />
         </Pressable>
         <Text className="text-[22px] font-black text-ink">Leaderboard</Text>
       </View>
 
-      <View className="mx-5 mb-3 flex-row rounded-2xl bg-surface p-1">
+      <View className="mx-5 mb-3 flex-row rounded-2xl bg-surface p-1 lg:mx-auto lg:w-full lg:max-w-[720px]">
         {(["daily", "xp"] as Tab[]).map((t) => (
           <Pressable
             key={t}
@@ -42,7 +43,7 @@ export default function LeaderboardScreen() {
         ))}
       </View>
 
-      <ScrollView contentContainerClassName="px-5 pb-8 gap-4">
+      <ScrollView contentContainerClassName="w-full max-w-[720px] self-center px-5 pb-8 gap-4 lg:px-8">
         <SectionLabel>{tab === "daily" ? "Today's five" : "Total XP"}</SectionLabel>
         {q.isLoading ? (
           <ActivityIndicator color={themeColor(theme, "primary")} />

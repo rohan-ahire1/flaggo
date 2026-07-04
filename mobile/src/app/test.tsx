@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router, useLocalSearchParams } from "expo-router";
+import { dismiss } from "@/utils/nav";
 import Animated, { FadeIn } from "react-native-reanimated";
 import FlagImage from "@/components/FlagImage";
 import RoundResults, { type RoundResultItem } from "@/components/RoundResults";
@@ -53,7 +54,7 @@ export default function TestScreen() {
         items={results}
         caption={`${topic === "capital" ? "Capitals" : "Flags"} test`}
         actions={[
-          { label: "Done", variant: "primary", icon: "check", onPress: () => router.back() }
+          { label: "Done", variant: "primary", icon: "check", onPress: () => dismiss() }
         ]}
       />
     );
@@ -65,7 +66,7 @@ export default function TestScreen() {
     setProgress({ ...next, xp: next.xp + (ok ? 5 : 0) });
     setResults((r) => [
       ...r,
-      { label: topic === "capital" ? `Capital of ${country.name}` : `Flag of ${country.name}`, correct: ok, chosen: ok ? undefined : chosenLabel }
+      { label: topic === "capital" ? `Capital of ${country.name}` : `Flag of ${country.name}`, correct: ok, chosen: ok ? undefined : chosenLabel, answer: ok ? undefined : answer }
     ]);
   }
 
@@ -100,8 +101,8 @@ export default function TestScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-paper" edges={["top", "bottom"]}>
-      <View className="flex-row items-center gap-3 px-5 pb-2 pt-1">
-        <Pressable onPress={() => router.back()} hitSlop={10}>
+      <View className="w-full max-w-[900px] self-center flex-row items-center gap-3 px-5 pb-2 pt-1 lg:px-8">
+        <Pressable onPress={() => dismiss()} hitSlop={10}>
           <Text className="text-[15px] font-bold text-muted">Exit</Text>
         </Pressable>
         <View className="h-2.5 flex-1 overflow-hidden rounded-full bg-surface-2">
@@ -110,8 +111,9 @@ export default function TestScreen() {
         <Pill icon="check" label={String(score)} tone="success" />
       </View>
 
-      <ScrollView contentContainerClassName="px-5 pb-3">
-        <Animated.View key={country.code} entering={FadeIn.duration(200)} className="gap-4">
+      <ScrollView contentContainerClassName="w-full max-w-[900px] self-center px-5 pb-3 lg:px-8">
+        <Animated.View key={country.code} entering={FadeIn.duration(200)}>
+          <View className="gap-4">
           <Text className="text-[15px] font-bold text-muted">
             {topic === "capital" ? "Capital" : "Flag"} {index + 1} of {questions.length}
           </Text>
@@ -127,7 +129,7 @@ export default function TestScreen() {
               {revealed ? <Text className="mt-1 text-[22px] font-black text-primary">{answer}</Text> : null}
             </View>
           ) : (
-            <View className="gap-2.5">
+            <View className="gap-2.5 md:flex-row md:flex-wrap md:justify-between md:gap-y-3">
               {options.map((o, i) => {
                 const st = optionState(o);
                 const cls =
@@ -143,7 +145,7 @@ export default function TestScreen() {
                     key={o}
                     disabled={revealed}
                     onPress={() => pickOption(o)}
-                    className={`flex-row items-center gap-3.5 rounded-2xl border-2 px-4 py-3.5 ${cls}`}
+                    className={`flex-row items-center gap-3.5 rounded-2xl border-2 px-4 py-3.5 md:w-[48.5%] ${cls}`}
                   >
                     <Badge letter={LETTERS[i]} state={st} />
                     <Text className="flex-1 text-[18px] font-bold text-ink">{o}</Text>
@@ -152,32 +154,35 @@ export default function TestScreen() {
               })}
             </View>
           )}
+          </View>
         </Animated.View>
       </ScrollView>
 
-      <View className="gap-3 border-t border-line px-5 pb-1 pt-3">
-        {isRecall ? (
-          revealed ? (
-            <View className="flex-row gap-3">
-              <View className="flex-1">
-                <PillButton label="Missed it" variant="secondary" icon="x" onPress={() => gradeRecall(false)} />
+      <View className="border-t border-line bg-paper">
+        <View className="w-full max-w-[900px] self-center gap-3 px-5 pb-4 pt-3 lg:px-8">
+          {isRecall ? (
+            revealed ? (
+              <View className="flex-row gap-3">
+                <View className="flex-1">
+                  <PillButton label="Missed it" variant="secondary" icon="x" onPress={() => gradeRecall(false)} />
+                </View>
+                <View className="flex-1">
+                  <PillButton label="Got it" variant="primary" icon="check" onPress={() => gradeRecall(true)} />
+                </View>
               </View>
-              <View className="flex-1">
-                <PillButton label="Got it" variant="primary" icon="check" onPress={() => gradeRecall(true)} />
-              </View>
-            </View>
+            ) : (
+              <PillButton label="Reveal answer" variant="primary" onPress={() => setRevealed(true)} />
+            )
           ) : (
-            <PillButton label="Reveal answer" variant="primary" onPress={() => setRevealed(true)} />
-          )
-        ) : (
-          <PillButton
-            label={index + 1 >= questions.length ? "See results" : "Next"}
-            variant="primary"
-            iconRight="arrow-right"
-            onPress={() => revealed && advance()}
-            className={revealed ? "" : "opacity-40"}
-          />
-        )}
+            <PillButton
+              label={index + 1 >= questions.length ? "See results" : "Next"}
+              variant="primary"
+              iconRight="arrow-right"
+              onPress={() => revealed && advance()}
+              className={revealed ? "" : "opacity-40"}
+            />
+          )}
+        </View>
       </View>
     </SafeAreaView>
   );

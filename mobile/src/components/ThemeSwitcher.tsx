@@ -14,6 +14,8 @@ export default function ThemeSwitcher() {
         return (
           <Pressable
             key={key}
+            accessibilityRole="button"
+            accessibilityState={{ selected: on }}
             onPress={() => setTheme(key)}
             className={`flex-row items-center gap-3 rounded-2xl border-2 p-3 ${on ? "border-primary" : "border-line"}`}
           >
@@ -21,7 +23,7 @@ export default function ThemeSwitcher() {
               {(["primary", "accent", "surface2"] as const).map((token) => (
                 <View
                   key={token}
-                  className="h-6 w-6 rounded-full border border-black/10"
+                  className="h-6 w-6 rounded-full border border-line"
                   style={{ backgroundColor: `rgb(${meta.channels[token]})`, marginLeft: token === "primary" ? 0 : -6 }}
                 />
               ))}

@@ -8,29 +8,24 @@ import { useEffect } from "react";
 import { useProgress } from "@/state/ProgressProvider";
 import { useOnboardStore } from "@/state/onboarding";
 import { promptChallenge } from "@/social/challenge";
+import { countries } from "@/data/countries";
 import { dateKey } from "@/utils/dailyChallenge";
+import { getDueCountries, getMasteredCountries, getWeakCountries } from "@/utils/spacedRepetition";
 import { themeColor } from "@/theme/palettes";
 import { useThemeStore } from "@/theme/store";
 import type { Topic } from "@/types/topic";
 
-const QUICK: { key: string; label: string; icon: IconName; topic?: Topic; route?: string }[] = [
-  { key: "flag", label: "Flags", icon: "flag", topic: "flag" },
-  { key: "capital", label: "Capitals", icon: "map-pin", topic: "capital" },
-  { key: "map", label: "Find on map", icon: "globe", route: "/map" },
-  { key: "trivia", label: "Trivia", icon: "sparkle", route: "/trivia" }
+const CORE_ACTIONS: { key: string; label: string; desc: string; icon: IconName; topic?: Topic; route?: string }[] = [
+  { key: "review", label: "Review due", desc: "Lock in weak flags", icon: "review", route: "/review" },
+  { key: "flag", label: "Flag sprint", desc: "Fast country recall", icon: "flag", topic: "flag" },
+  { key: "capital", label: "Capital sprint", desc: "Place names faster", icon: "map-pin", topic: "capital" }
 ];
 
 const MORE: { key: string; label: string; icon: IconName; route: string }[] = [
-  { key: "leaderboard", label: "Leaderboard", icon: "trophy", route: "/leaderboard" },
-  { key: "library", label: "Flag library", icon: "library", route: "/library" },
-  { key: "decks", label: "Decks", icon: "layers", route: "/decks" },
+  { key: "map", label: "Map", icon: "globe", route: "/map" },
+  { key: "trivia", label: "Trivia", icon: "sparkle", route: "/trivia" },
+  { key: "library", label: "Library", icon: "library", route: "/library" },
   { key: "stats", label: "Stats", icon: "stats", route: "/stats" }
-];
-
-const FRIEND_AVATARS = [
-  { name: "Mia", color: "#c9b79a" },
-  { name: "Leo", color: "#a9bcc4" },
-  { name: "Ada", color: "#cdb9c4" }
 ];
 
 function hoursToMidnight() {
@@ -52,8 +47,22 @@ export default function HomeScreen() {
   const today = dateKey();
   const doneToday = progress.daily.lastDate === today ? progress.daily.history[today] : undefined;
   const dateLabel = new Date().toLocaleDateString(undefined, { weekday: "long", month: "short", day: "numeric" });
+  const focusTopic: Topic = progress.selectedTopic === "location" ? "flag" : progress.selectedTopic;
+  const focusCountries = focusTopic === "capital" ? countries.filter((c) => c.capital?.trim()) : countries;
+  const dueCount = getDueCountries(progress, focusCountries, focusTopic).length;
+  const weak = getWeakCountries(progress, focusCountries, focusTopic).slice(0, 3);
+  const masteredCount = getMasteredCountries(progress, focusCountries, focusTopic).length;
+  const masteryPct = Math.round((masteredCount / Math.max(1, focusCountries.length)) * 100);
+  const answered = progress.totalCorrect + progress.totalWrong;
+  const accuracyPct = answered ? Math.round((progress.totalCorrect / answered) * 100) : 0;
+  const nextLabel = dueCount ? "Start review" : weak.length ? "Practice weak spots" : "Start quick round";
+  const nextText = dueCount
+    ? `${dueCount} due in ${focusTopic === "capital" ? "capitals" : focusTopic}`
+    : weak.length
+      ? weak.map((country) => country.name).join(", ")
+      : "Build today's first memory";
 
-  function quickPlay(item: (typeof QUICK)[number]) {
+  function quickPlay(item: (typeof CORE_ACTIONS)[number]) {
     if (item.route) {
       router.push(item.route as never);
     } else if (item.topic) {
@@ -63,7 +72,7 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-paper" edges={["top"]}>
-      <ScrollView contentContainerClassName="p-5 pb-8 gap-5">
+      <ScrollView contentContainerClassName="w-full max-w-[1120px] self-center p-5 pb-8 gap-5 lg:p-8">
         {/* Header */}
         <View className="flex-row items-start justify-between">
           <View>
@@ -109,6 +118,35 @@ export default function HomeScreen() {
           </Text>
         </View>
 
+        {/* Progress pulse */}
+        <Card className="gap-4">
+          <View className="flex-row items-center justify-between gap-3">
+            <View className="flex-1">
+              <SectionLabel>Next best action</SectionLabel>
+              <Text className="mt-1 text-[24px] font-black text-ink">{nextLabel}</Text>
+              <Text className="mt-1 text-[14px] font-semibold text-muted">{nextText}</Text>
+            </View>
+            <View className="h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
+              <Text className="text-[24px] font-black text-primary">{masteryPct}%</Text>
+              <Text className="text-[10px] font-extrabold uppercase text-primary">mastered</Text>
+            </View>
+          </View>
+          <View className="flex-row gap-2">
+            <Pill icon="review" label={`${dueCount} due`} tone={dueCount ? "accent" : "muted"} />
+            <Pill icon="target" label={answered ? `${accuracyPct}% accuracy` : "New learner"} tone="success" />
+          </View>
+          <PillButton
+            label={nextLabel}
+            variant="primary"
+            iconRight="arrow-right"
+            onPress={() =>
+              dueCount || weak.length
+                ? router.push("/review")
+                : router.push({ pathname: "/quiz", params: { mode: "lesson", topic: focusTopic } })
+            }
+          />
+        </Card>
+
         {/* Challenge a friend */}
         <Card onPress={() => void promptChallenge()} className="flex-row items-center gap-3">
           <View className="h-11 w-11 items-center justify-center rounded-2xl bg-accent">
@@ -123,45 +161,22 @@ export default function HomeScreen() {
 
         {/* Quick play */}
         <View className="gap-3">
-          <SectionLabel>Quick play</SectionLabel>
+          <SectionLabel>Core loop</SectionLabel>
           <View className="flex-row flex-wrap justify-between gap-y-3">
-            {QUICK.map((item) => (
+            {CORE_ACTIONS.map((item) => (
               <Pressable
                 key={item.key}
                 onPress={() => quickPlay(item)}
                 style={softShadow}
-                className="w-[48%] rounded-[20px] border border-line bg-paper p-4"
+                className="w-full rounded-[20px] border border-line bg-paper p-4 md:w-[32%]"
               >
                 <View className="h-10 w-10 items-center justify-center rounded-xl bg-surface">
                   <Icon name={item.icon} size={22} color={themeColor(theme, "primary")} />
                 </View>
                 <Text className="mt-3 text-[17px] font-black text-ink">{item.label}</Text>
+                <Text className="mt-1 text-[13px] font-semibold text-muted">{item.desc}</Text>
               </Pressable>
             ))}
-          </View>
-        </View>
-
-        {/* Friends today */}
-        <View className="gap-3">
-          <View className="flex-row items-center justify-between">
-            <SectionLabel>Friends</SectionLabel>
-            <Pressable onPress={() => router.push("/leaderboard")} hitSlop={8}>
-              <Text className="text-[13px] font-extrabold text-primary">See all</Text>
-            </Pressable>
-          </View>
-          <View className="flex-row gap-4">
-            {FRIEND_AVATARS.map((f) => (
-              <Pressable key={f.name} onPress={() => router.push("/friends")} className="items-center gap-1.5">
-                <View className="h-[52px] w-[52px] rounded-full border-2 border-line" style={{ backgroundColor: f.color }} />
-                <Text className="text-[12px] font-bold text-ink">{f.name}</Text>
-              </Pressable>
-            ))}
-            <Pressable onPress={() => void promptChallenge()} className="items-center gap-1.5">
-              <View className="h-[52px] w-[52px] items-center justify-center rounded-full border-2 border-dashed border-muted">
-                <Icon name="plus" size={22} color={themeColor(theme, "muted")} />
-              </View>
-              <Text className="text-[12px] font-bold text-muted">Invite</Text>
-            </Pressable>
           </View>
         </View>
 
@@ -170,7 +185,7 @@ export default function HomeScreen() {
           <SectionLabel>More</SectionLabel>
           <View className="flex-row flex-wrap justify-between gap-y-3">
             {MORE.map((item) => (
-              <Card key={item.key} onPress={() => router.push(item.route as never)} className="w-[48%] flex-row items-center gap-2.5">
+              <Card key={item.key} onPress={() => router.push(item.route as never)} className="w-[48%] flex-row items-center gap-2.5 md:w-[23.5%]">
                 <Icon name={item.icon} size={22} color={themeColor(theme, "muted")} />
                 <Text className="text-[15px] font-black text-ink">{item.label}</Text>
               </Card>

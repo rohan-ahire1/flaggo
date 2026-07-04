@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
-import { env } from "../config/env";
+import { getAuthRedirectUrl } from "./actions";
 import { supabase } from "../lib/supabase";
 import { trackEvent } from "../lib/analytics";
 
@@ -19,7 +19,7 @@ export default function SignInModal({ open, onClose }: { open: boolean; onClose:
     setBusy(true);
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: `${env.siteUrl}/auth/callback` }
+      options: { redirectTo: getAuthRedirectUrl() }
     });
     if (error) {
       setStatus(error.message);
@@ -38,7 +38,7 @@ export default function SignInModal({ open, onClose }: { open: boolean; onClose:
     setBusy(true);
     const { error } = await supabase.auth.signInWithOtp({
       email,
-      options: { emailRedirectTo: `${env.siteUrl}/auth/callback` }
+      options: { emailRedirectTo: getAuthRedirectUrl() }
     });
     setBusy(false);
     if (error) {

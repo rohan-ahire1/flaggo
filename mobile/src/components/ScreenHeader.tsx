@@ -17,7 +17,7 @@ export default function ScreenHeader({
 }) {
   const theme = useThemeStore((s) => s.theme);
   return (
-    <View className="flex-row items-center gap-3 px-5 pb-2 pt-1">
+    <View className="w-full max-w-[1120px] self-center flex-row items-center gap-3 px-5 pb-2 pt-1 lg:px-8">
       <Pressable
         onPress={() => (router.canGoBack() ? router.back() : router.replace("/"))}
         hitSlop={12}
