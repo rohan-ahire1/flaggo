@@ -48,11 +48,24 @@ export default function PathsScreen({ lessons, progress, onOpenLesson, onBack }:
           })}
         </section>
       ) : (
-        <section className="mt-5 grid gap-3">
-          {visibleLessons.map((lesson, index) => {
-            const state = progress.completedLessonIds.includes(lesson.id) ? "completed" : "current";
-            return <LessonNode key={lesson.id} lesson={lesson} index={index} state={state} onClick={() => onOpenLesson(lesson)} />;
-          })}
+        <section className="mt-6 flex flex-col">
+          {(() => {
+            const firstIncomplete = visibleLessons.findIndex((lesson) => !progress.completedLessonIds.includes(lesson.id));
+            return visibleLessons.map((lesson, index) => {
+              const completed = progress.completedLessonIds.includes(lesson.id);
+              const state = completed ? "completed" : index === firstIncomplete ? "current" : "upcoming";
+              return (
+                <LessonNode
+                  key={lesson.id}
+                  lesson={lesson}
+                  index={index}
+                  total={visibleLessons.length}
+                  state={state}
+                  onClick={() => onOpenLesson(lesson)}
+                />
+              );
+            });
+          })()}
         </section>
       )}
     </main>

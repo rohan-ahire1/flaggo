@@ -14,15 +14,14 @@ export default function LearningPath({
   const completed = new Set(progress.completedLessonIds);
   const currentIndex = lessons.findIndex((lesson) => !completed.has(lesson.id));
   return (
-    <div className="relative flex flex-col gap-5 px-4 pb-8 pt-4">
-      <div className="absolute bottom-10 left-1/2 top-8 w-2 -translate-x-1/2 rounded-full bg-slate-200" />
+    <div className="flex flex-col px-4 pb-8 pt-4">
       {lessons.map((lesson, index) => {
         const state: LessonNodeState = completed.has(lesson.id)
           ? "completed"
           : index === Math.max(0, currentIndex)
             ? "current"
-            : "locked";
-        return <LessonNode key={lesson.id} lesson={lesson} state={state} index={index} onClick={() => onOpenLesson(lesson)} />;
+            : "upcoming";
+        return <LessonNode key={lesson.id} lesson={lesson} state={state} index={index} total={lessons.length} onClick={() => onOpenLesson(lesson)} />;
       })}
     </div>
   );
