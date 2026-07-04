@@ -34,7 +34,7 @@ export default function MapMenuScreen({
 
   return (
     <main className="p-5">
-      <h1 className="font-display text-3xl font-black">World Map</h1>
+      <h1 className="screen-title">World Map</h1>
       <p className="mt-1 font-bold text-flaggo-muted">Practice uses countries present in the offline world map.</p>
 
       <section className="mt-5 grid gap-3">
@@ -48,7 +48,7 @@ export default function MapMenuScreen({
             className={`flaggo-tile bg-white p-4 text-left ${mode === value ? "border-flaggo-green text-flaggo-text" : "border-flaggo-border text-flaggo-muted"}`}
           >
             <span className="flex items-center gap-3">
-              <span className={`grid h-11 w-11 place-items-center rounded-2xl ${mode === value ? "bg-flaggo-green/15 text-flaggo-green" : "bg-slate-100"}`}>
+              <span className={`grid h-11 w-11 place-items-center rounded-2xl ${mode === value ? "bg-flaggo-green/15 text-flaggo-green" : "bg-surface"}`}>
                 <Icon name={value === "locate" ? "target" : "globe"} size={22} />
               </span>
               <span>
@@ -89,13 +89,13 @@ export default function MapMenuScreen({
         </select>
         <button
           onClick={() => onStart(mode, selectedCountries)}
-          className="flaggo-button mt-4 flex w-full items-center justify-center gap-2 bg-green-grad text-white shadow-button-green"
+          className="btn-primary mt-4 flex w-full items-center justify-center gap-2"
         >
           <Icon name="bolt" size={20} /> Start map practice
         </button>
       </section>
 
-      <button onClick={onExplore} className="flaggo-button mt-5 flex w-full items-center justify-center gap-2 bg-blue-grad text-white shadow-button-blue">
+      <button onClick={onExplore} className="btn-secondary mt-5 flex w-full items-center justify-center gap-2">
         <Icon name="globe" size={20} /> Explore map
       </button>
     </main>

@@ -37,7 +37,7 @@ export default function StatsScreen({ progress, countries, lessons }: { progress
 
   return (
     <main className="p-5">
-      <h1 className="font-display text-3xl font-black">Stats</h1>
+      <h1 className="screen-title">Stats</h1>
       <div className="mt-5 grid grid-cols-2 gap-3 md:grid-cols-4">
         <StatCard label="Total XP" value={progress.xp} tone="blue" icon="bolt" />
         <StatCard label="Current streak" value={progress.streak} tone="orange" icon="flame" />
@@ -56,7 +56,7 @@ export default function StatsScreen({ progress, countries, lessons }: { progress
           <div key={country.code} className="mt-3 flex items-center gap-3">
             <img src={country.flagUrl} alt="" className="h-9 w-12 rounded-md border border-flaggo-border object-contain" />
             <span className="font-bold">{country.name}</span>
-            <span className="ml-auto rounded-full bg-red-50 px-2.5 py-1 text-xs font-display font-extrabold text-flaggo-red">{progress.review[reviewKey(country.code, topic)]?.wrongCount ?? 0} misses</span>
+            <span className="ml-auto rounded-full bg-error/10 px-2.5 py-1 text-xs font-display font-extrabold text-error">{progress.review[reviewKey(country.code, topic)]?.wrongCount ?? 0} misses</span>
           </div>
         )) : <p className="mt-3 font-bold text-flaggo-muted">No weak {topicLabel.toLowerCase()} yet.</p>}
       </section>
@@ -75,7 +75,7 @@ export default function StatsScreen({ progress, countries, lessons }: { progress
                   <span>{region}</span>
                   <span className="text-flaggo-muted">{done}/{group.length}</span>
                 </div>
-                <div className="mt-1 h-2 overflow-hidden rounded-full bg-slate-100">
+                <div className="mt-1 h-2 overflow-hidden rounded-full bg-surface">
                   <div className="h-full rounded-full bg-flaggo-green transition-all duration-500" style={{ width: `${pct}%` }} />
                 </div>
               </div>

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import Icon from "../components/Icon";
+import Icon, { type IconName } from "../components/Icon";
 import { TriviaCard } from "../components/QuestionCard";
 import type { Country } from "../types/country";
 import type { AppProgress } from "../types/progress";
@@ -8,13 +8,18 @@ import { hashStringToSeed, mulberry32 } from "../utils/seededRandom";
 import { buildTrivia, type TriviaMode, type TriviaRound } from "../utils/trivia";
 import { trackEvent } from "../lib/analytics";
 
-const MODES: { mode: TriviaMode; label: string }[] = [
-  { mode: "higher-lower", label: "Higher/Lower" },
-  { mode: "odd-one-out", label: "Odd one out" },
-  { mode: "true-false", label: "True/False" }
+const MODES: { mode: TriviaMode; label: string; desc: string; icon: IconName }[] = [
+  { mode: "higher-lower", label: "Higher / Lower", desc: "Pick which country ranks higher.", icon: "stats" },
+  { mode: "odd-one-out", label: "Odd one out", desc: "Spot the one that doesn't belong.", icon: "search" },
+  { mode: "true-false", label: "True / False", desc: "Decide if the claim holds up.", icon: "check" }
 ];
 
 type RunMode = "timed" | "sudden";
+
+const FORMATS: { mode: RunMode; label: string; icon: IconName }[] = [
+  { mode: "timed", label: "Timed", icon: "bolt" },
+  { mode: "sudden", label: "Sudden death", icon: "flame" }
+];
 
 const triviaKey = (mode: TriviaMode) => `trivia-${mode}`;
 
@@ -105,34 +110,78 @@ export default function TriviaScreen({
 
   if (!running) {
     return (
-      <main className="p-5">
-        <button onClick={onBack} className="mb-4 grid h-10 w-10 place-items-center rounded-full bg-white text-flaggo-muted shadow-card" aria-label="Back">
-          <Icon name="chevron" className="rotate-180" />
-        </button>
-        <h1 className="font-display text-3xl font-black">Trivia</h1>
+      <main className="flex min-h-full flex-col p-5">
+        <div className="flex items-center gap-3">
+          <button onClick={onBack} className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-white text-flaggo-muted shadow-card" aria-label="Back">
+            <Icon name="chevron" className="rotate-180" />
+          </button>
+          <div>
+            <h1 className="screen-title">Trivia</h1>
+            <p className="mt-1 text-sm font-semibold text-flaggo-muted">Quick-fire rounds to test your instincts.</p>
+          </div>
+        </div>
+
         {done && (
-          <section className="mt-4 rounded-[24px] bg-white p-5 text-center shadow-card">
-            <p className="font-display text-5xl font-black text-flaggo-green">{score}</p>
-            <p className="font-bold text-flaggo-muted">Best {Math.max(best, score)}</p>
+          <section className="mt-5 rounded-[24px] bg-green-grad p-6 text-center text-white shadow-glow">
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-white/70">You scored</p>
+            <p className="font-display text-6xl font-black leading-none">{score}</p>
+            <p className="mt-1 font-bold text-white/80">Best {Math.max(best, score)}</p>
           </section>
         )}
-        <section className="mt-5 grid gap-4">
-          <div className="grid grid-cols-2 rounded-2xl bg-white p-1 shadow-card">
-            {(["timed", "sudden"] as const).map((item) => (
-              <button key={item} onClick={() => setRunMode(item)} className={`rounded-xl px-2 py-2 font-display text-xs font-extrabold capitalize ${runMode === item ? "bg-flaggo-green text-white" : "text-flaggo-muted"}`}>
-                {item}
-              </button>
-            ))}
-          </div>
-          <div className="grid grid-cols-3 rounded-2xl bg-white p-1 shadow-card">
-            {MODES.map((item) => (
-              <button key={item.mode} onClick={() => setMode(item.mode)} className={`rounded-xl px-2 py-2 font-display text-xs font-extrabold ${mode === item.mode ? "bg-flaggo-blue text-white" : "text-flaggo-muted"}`}>
-                {item.label}
-              </button>
-            ))}
-          </div>
-          <button onClick={start} className="flaggo-button bg-flaggo-green text-white">Start trivia</button>
-        </section>
+
+        <div className="mt-7 flex flex-1 flex-col gap-7">
+          <section className="grid gap-3">
+            <h2 className="section-label">Mode</h2>
+            {MODES.map((item) => {
+              const on = mode === item.mode;
+              const modeBest = progress.arcade[triviaKey(item.mode)] ?? 0;
+              return (
+                <button
+                  key={item.mode}
+                  onClick={() => setMode(item.mode)}
+                  aria-pressed={on}
+                  className={`flex items-center gap-3.5 rounded-2xl border-2 p-3.5 text-left transition-all ${on ? "border-flaggo-green bg-flaggo-green text-white shadow-button-green" : "border-line bg-white text-ink shadow-card"}`}
+                >
+                  <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-xl ${on ? "bg-white/15 text-white" : "bg-surface text-flaggo-green"}`}>
+                    <Icon name={item.icon} size={22} />
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block font-display text-[17px] font-black">{item.label}</span>
+                    <span className={`block text-[12.5px] font-semibold ${on ? "text-white/80" : "text-flaggo-muted"}`}>{item.desc}</span>
+                  </span>
+                  <span className="shrink-0 pl-1 text-right">
+                    <span className={`block text-[10px] font-bold uppercase tracking-wide ${on ? "text-white/70" : "text-flaggo-muted"}`}>Best</span>
+                    <span className="block font-display text-lg font-black leading-none">{modeBest}</span>
+                  </span>
+                </button>
+              );
+            })}
+          </section>
+
+          <section className="grid gap-3">
+            <h2 className="section-label">Format</h2>
+            <div className="grid grid-cols-2 gap-2.5">
+              {FORMATS.map((item) => {
+                const on = runMode === item.mode;
+                return (
+                  <button
+                    key={item.mode}
+                    onClick={() => setRunMode(item.mode)}
+                    aria-pressed={on}
+                    className={`flex items-center gap-2.5 rounded-2xl border-2 px-3.5 py-3 transition-all ${on ? "border-flaggo-blue bg-flaggo-blue text-white shadow-button-blue" : "border-line bg-white text-ink shadow-card"}`}
+                  >
+                    <Icon name={item.icon} size={19} className={on ? "text-white" : "text-flaggo-blue"} />
+                    <span className="font-display text-[15px] font-extrabold">{item.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+        </div>
+
+        <div className="mt-7">
+          <button onClick={start} className="flaggo-button w-full bg-flaggo-green text-white">Start trivia</button>
+        </div>
       </main>
     );
   }
