@@ -1,20 +1,26 @@
+import { useEffect, useState } from "react";
 import { ActivityIndicator, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router, useLocalSearchParams } from "expo-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import Icon from "@/components/Icon";
 import { Card, PillButton, SectionLabel } from "@/components/ui";
 import { useAuth } from "@/auth/AuthProvider";
 import { shareChallenge } from "@/social/challenge";
 import { getMatch, getMatchResults, winnerFromResults } from "@/lib/matches";
+import { readPendingMatch, type PendingMatchResult } from "@/lib/pendingMatch";
+import { supabase } from "@/lib/supabase";
 import { themeColor } from "@/theme/palettes";
 import { useThemeStore } from "@/theme/store";
 
 export default function MatchScreen() {
   const { id, my } = useLocalSearchParams<{ id: string; my?: string }>();
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const theme = useThemeStore((s) => s.theme);
+  const [pending, setPending] = useState<PendingMatchResult | null>(null);
+  const [subscribed, setSubscribed] = useState(false);
 
   const matchQ = useQuery({ queryKey: ["match", id], queryFn: () => getMatch(id), enabled: !!id });
   const resultsQ = useQuery({
@@ -25,7 +31,48 @@ export default function MatchScreen() {
 
   const match = matchQ.data;
   const results = resultsQ.data ?? [];
-  const myScore = my != null ? Number(my) : results.find((r) => r.user_id === user?.id)?.score ?? null;
+  const refetchResults = resultsQ.refetch;
+
+  useEffect(() => {
+    let active = true;
+    void readPendingMatch().then((next) => {
+      if (active) setPending(next?.matchId === id ? next : null);
+    });
+    return () => {
+      active = false;
+    };
+  }, [id]);
+
+  useEffect(() => {
+    const client = supabase;
+    if (!client || !id) return;
+    let poll: ReturnType<typeof setInterval> | null = null;
+    let isSubscribed = false;
+    const fallback = setTimeout(() => {
+      if (!isSubscribed) poll = setInterval(() => void refetchResults(), 10_000);
+    }, 5_000);
+    const channel = client
+      .channel(`match-${id}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "match_results", filter: `match_id=eq.${id}` }, () => {
+        void queryClient.invalidateQueries({ queryKey: ["match-results", id] });
+      })
+      .subscribe((status) => {
+        if (status === "SUBSCRIBED") {
+          isSubscribed = true;
+          setSubscribed(true);
+          clearTimeout(fallback);
+          if (poll) clearInterval(poll);
+        }
+      });
+    return () => {
+      setSubscribed(false);
+      clearTimeout(fallback);
+      if (poll) clearInterval(poll);
+      void client.removeChannel(channel);
+    };
+  }, [id, queryClient, refetchResults]);
+
+  const myScore = pending?.score ?? (my != null ? Number(my) : results.find((r) => r.user_id === user?.id)?.score ?? null);
   const played = myScore != null;
 
   if (matchQ.isLoading) {
@@ -114,16 +161,23 @@ export default function MatchScreen() {
         <View className="gap-5 lg:flex-row lg:items-start">
           <View className="gap-5 lg:flex-1">
             <View className="flex-row gap-3">
-              <ScoreCard name="You" score={myScore} total={total} highlight={iWon} />
+              <ScoreCard name={pending ? "You (not saved)" : "You"} score={myScore} total={pending?.total ?? total} highlight={iWon} />
               <ScoreCard
-                name={opponent?.display_name ?? "Waiting…"}
+                name={opponent?.display_name ?? (subscribed ? "Waiting live..." : "Waiting...")}
                 score={opponent?.score ?? null}
                 total={opponent?.total ?? total}
                 highlight={outcome?.type === "winner" && !iWon}
+                live={subscribed && !opponent}
               />
             </View>
 
-            {!user ? (
+            {pending ? (
+              <Card className="flex-row items-center gap-3">
+                <View className={subscribed ? "h-2 w-2 animate-pulse rounded-full bg-success" : "h-2 w-2 rounded-full bg-muted"} />
+                <Text className="flex-1 font-semibold text-muted">Your score is saved on this device.</Text>
+                <PillButton label="Sign in to save" variant="primary" onPress={() => router.replace("/profile")} className="w-40" />
+              </Card>
+            ) : !user ? (
               <Card className="flex-row items-center gap-3">
                 <Icon name="user" size={22} color={themeColor(theme, "accent")} />
                 <Text className="flex-1 font-semibold text-muted">Sign in to save your score and compare with friends.</Text>
@@ -161,18 +215,23 @@ function ScoreCard({
   name,
   score,
   total,
-  highlight
+  highlight,
+  live
 }: {
   name: string;
   score: number | null;
   total: number;
   highlight?: boolean;
+  live?: boolean;
 }) {
   return (
     <Card className={`flex-1 items-center gap-1 ${highlight ? "border-2 border-primary" : ""}`}>
-      <Text className="text-[15px] font-extrabold text-muted" numberOfLines={1}>
-        {name}
-      </Text>
+      <View className="max-w-full flex-row items-center gap-2">
+        {live ? <View className="h-2 w-2 animate-pulse rounded-full bg-success" /> : null}
+        <Text className="shrink text-[15px] font-extrabold text-muted" numberOfLines={1}>
+          {name}
+        </Text>
+      </View>
       <Text className="text-[34px] font-black text-ink">
         {score == null ? "—" : `${score}/${total}`}
       </Text>

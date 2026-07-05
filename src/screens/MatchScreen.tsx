@@ -1,4 +1,5 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../auth/AuthProvider";
 import { useNameClaim } from "../components/NameClaimProvider";
@@ -10,6 +11,7 @@ import QuestionCard from "../components/QuestionCard";
 import type { RoundResultItem } from "../components/RoundResults";
 import { answerLabel, answerLabelForWrapper } from "@flaggo/core/game/answerLabel";
 import { getMatch, getMatchResults, buildMatchQuestions, submitMatchResult, type Match, type MatchQuestion, type MatchResult } from "../lib/matches";
+import { writePendingMatch } from "../lib/pendingMatch";
 import { trackEvent } from "../lib/analytics";
 import { useGame } from "../state/GameProvider";
 
@@ -20,36 +22,32 @@ export default function MatchScreen() {
   const { id: matchId = null } = useParams();
   const { user } = useAuth();
   const { ensureName } = useNameClaim();
-  const { countries, openSignIn } = useGame();
-  const [match, setMatch] = useState<Match | null>(null);
-  const [results, setResults] = useState<MatchResult[]>([]);
+  const { countries } = useGame();
   const [error, setError] = useState<string | null>(null);
   const [index, setIndex] = useState(0);
   const [correct, setCorrect] = useState(0);
   const [feedback, setFeedback] = useState<{ ok: boolean; question: MatchQuestion; scoreAfter: number; wrongCode?: string } | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [items, setItems] = useState<RoundResultItem[]>([]);
+  const matchQuery = useQuery<{ match: Match | null; results: MatchResult[] }, Error>({
+    queryKey: ["match", matchId],
+    enabled: Boolean(matchId),
+    queryFn: async () => {
+      if (!matchId) return { match: null, results: [] };
+      const [match, results] = await Promise.all([getMatch(matchId), getMatchResults(matchId)]);
+      return { match, results };
+    }
+  });
+  const match = matchQuery.data?.match ?? null;
+  const results = matchQuery.data?.results ?? [];
   const questions = useMemo(() => (match ? buildMatchQuestions(match.seed, match.config, countries) : []), [countries, match]);
   const question = questions[index];
 
   useEffect(() => {
-    if (!matchId) return;
-    let active = true;
-    setError(null);
-    Promise.all([getMatch(matchId), getMatchResults(matchId)])
-      .then(([nextMatch, nextResults]) => {
-        if (!active) return;
-        setMatch(nextMatch);
-        setResults(nextResults);
-        if (!nextMatch) setError("Match not found.");
-      })
-      .catch((err: Error) => {
-        if (active) setError(err.message);
-      });
-    return () => {
-      active = false;
-    };
-  }, [matchId]);
+    if (matchQuery.error) setError(matchQuery.error.message);
+    else if (matchQuery.isSuccess && !match) setError("Match not found.");
+    else setError(null);
+  }, [match, matchQuery.error, matchQuery.isSuccess]);
 
   useEffect(() => {
     if (matchId && user) trackEvent("match_accept", { id: matchId });
@@ -75,13 +73,18 @@ export default function MatchScreen() {
 
   async function finish(finalScore = correct) {
     if (!matchId || submitting) return;
-    const name = await ensureName();
-    if (!name) {
-      openSignIn();
+    if (!user) {
+      writePendingMatch({ matchId, score: finalScore, total: questions.length, at: Date.now() });
+      navigate(`/match/${matchId}/result`, { state: { items, guestScore: finalScore, guestTotal: questions.length } });
       return;
     }
     setSubmitting(true);
     try {
+      const name = await ensureName();
+      if (!name) {
+        setSubmitting(false);
+        return;
+      }
       await submitMatchResult(matchId, finalScore, questions.length, name);
       navigate(`/match/${matchId}/result`, { state: { items } });
     } catch (err) {
@@ -112,24 +115,6 @@ export default function MatchScreen() {
 
   if (!match) {
     return <main className="p-5"><div className="h-96 animate-pulse rounded-[24px] bg-paper shadow-card" /></main>;
-  }
-
-  if (!user) {
-    const challenger = results[0];
-    return (
-      <main className="p-5">
-        <button onClick={() => navigate("/")} className="mb-4 grid h-10 w-10 place-items-center rounded-full bg-paper text-muted shadow-card" aria-label="Back"><Icon name="chevron" className="rotate-180" /></button>
-        <section className="rounded-[28px] bg-paper p-6 text-center shadow-card-lg">
-          <Icon name="trophy" size={44} className="mx-auto text-primary" />
-          <h1 className="mt-3 screen-title">Friend challenge</h1>
-          <p className="mt-2 font-bold text-muted">
-            {challenger ? `${challenger.display_name} scored ${challenger.score}/${challenger.total}.` : "Play the same seeded quiz and compare scores."}
-          </p>
-          <p className="mt-2 font-medium text-muted">Sign in to accept this challenge and save your score to the leaderboard.</p>
-          <button onClick={openSignIn} className="btn-primary mt-5 w-full bg-primary text-white">Sign in to accept &amp; save your score</button>
-        </section>
-      </main>
-    );
   }
 
   if (!question) {

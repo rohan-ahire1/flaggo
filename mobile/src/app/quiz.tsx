@@ -27,6 +27,8 @@ import { countries } from "@flaggo/core/data/countries";
 import { buildDailyQuiz, dateKey, applyDailyResult } from "@flaggo/core/utils/dailyChallenge";
 import { buildMatchQuestions, normalizeMatchConfig, submitMatchResult, type MatchConfig } from "@/lib/matches";
 import { arcadeBoard, dailyBoard, submitScore } from "@/lib/leaderboard";
+import { writePendingMatch } from "@/lib/pendingMatch";
+import { syncStreakReminder } from "@/lib/streakReminder";
 import { persistArcadeBest } from "@flaggo/core/utils/arcade";
 import { updateStreak } from "@flaggo/core/utils/date";
 import { updateReviewState } from "@flaggo/core/utils/spacedRepetition";
@@ -72,7 +74,7 @@ export default function QuizScreen() {
   const arcadeLimit = arcadeMode === "hard" ? 45 : 60;
 
   const { progress, setProgress } = useProgress();
-  const { user, displayName } = useAuth();
+  const { user } = useAuth();
   const { ensureName } = useNameClaim();
   const theme = useThemeStore((s) => s.theme);
   const draft = useRef<AppProgress>(progress);
@@ -111,6 +113,7 @@ export default function QuizScreen() {
   const [score, setScore] = useState(0);
   const [results, setResults] = useState<RoundResultItem[]>([]);
   const [finished, setFinished] = useState(false);
+  const [notice, setNotice] = useState<string | null>(null);
   const [startedAt] = useState(() => Date.now());
   const [now, setNow] = useState(() => Date.now());
 
@@ -194,16 +197,30 @@ export default function QuizScreen() {
     }
   }
 
-  function finish() {
+  async function finish() {
     if (finishing.current) return;
     finishing.current = true;
     let done = draft.current;
     if (isMatch) {
       draft.current = done;
       setProgress(done);
-      // Submit the result (best-effort — needs sign-in) then show the compare screen.
       if (params.matchId) {
-        void submitMatchResult(params.matchId, scoreRef.current, total, displayName ?? "Player").catch(() => undefined);
+        if (user) {
+          try {
+            const name = await ensureName();
+            if (!name) {
+              finishing.current = false;
+              return;
+            }
+            await submitMatchResult(params.matchId, scoreRef.current, total, name);
+          } catch (error) {
+            setNotice(error instanceof Error ? error.message : "Could not save your challenge score.");
+            finishing.current = false;
+            return;
+          }
+        } else {
+          await writePendingMatch({ matchId: params.matchId, score: scoreRef.current, total, at: Date.now() });
+        }
         router.replace({ pathname: "/match/[id]", params: { id: params.matchId, my: String(scoreRef.current) } });
       }
       return;
@@ -222,6 +239,7 @@ export default function QuizScreen() {
     draft.current = done;
     setProgress(done);
     setFinished(true);
+    if (isDaily) void syncStreakReminder(done).catch(() => undefined);
     if (user && isDaily) {
       void ensureName()
         .then((name) => {
@@ -343,6 +361,7 @@ export default function QuizScreen() {
       {/* Footer: feedback + next */}
       <View className="border-t border-line bg-paper">
         <View className="w-full max-w-[900px] self-center gap-3 px-5 pb-4 pt-3 lg:px-8">
+          {notice ? <Text className="text-center text-[13px] font-bold text-error">{notice}</Text> : null}
           {revealed ? (
             <View className="flex-row items-center gap-3 rounded-2xl border border-line bg-surface px-3 py-2.5">
               <View className="w-14">

@@ -1,6 +1,6 @@
 import { supabase } from "./supabase";
 import { trackEvent } from "./analytics";
-export { arcadeBoard, dailyBoard, xpBoard } from "@flaggo/core/game/boards";
+export { arcadeBoard, dailyBoard, triviaBoard, xpBoard } from "@flaggo/core/game/boards";
 
 export type LeaderboardRow = {
   rank: number;

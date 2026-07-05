@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../auth/AuthProvider";
 import Icon, { type IconName } from "../components/Icon";
 import FeedbackPanel from "../components/FeedbackPanel";
 import { TriviaCard } from "../components/QuestionCard";
@@ -8,7 +9,10 @@ import { useConfirm } from "../components/ConfirmDialog";
 import { arcadeScore } from "@flaggo/core/utils/arcade";
 import { hashStringToSeed, mulberry32 } from "@flaggo/core/utils/seededRandom";
 import { buildTrivia, type TriviaMode, type TriviaRound } from "@flaggo/core/utils/trivia";
+import { triviaBoard } from "@flaggo/core/game/boards";
+import { useNameClaim } from "../components/NameClaimProvider";
 import { trackEvent } from "../lib/analytics";
+import { submitScore } from "../lib/leaderboard";
 import { useGame } from "../state/GameProvider";
 
 const MODES: { mode: TriviaMode; label: string; desc: string; icon: IconName }[] = [
@@ -24,7 +28,7 @@ const FORMATS: { mode: RunMode; label: string; icon: IconName }[] = [
   { mode: "sudden", label: "Sudden death", icon: "flame" }
 ];
 
-const triviaKey = (mode: TriviaMode) => `trivia-${mode}`;
+const triviaKey = triviaBoard;
 
 function answerLabel(round: TriviaRound) {
   if (round.mode === "higher-lower") return round.correctCountry.name;
@@ -39,6 +43,8 @@ function roundCountry(round: TriviaRound) {
 export default function TriviaScreen() {
   const navigate = useNavigate();
   const confirm = useConfirm();
+  const { user } = useAuth();
+  const { ensureName } = useNameClaim();
   const { countries, progress, setProgress } = useGame();
   const [mode, setMode] = useState<TriviaMode>("higher-lower");
   const [runMode, setRunMode] = useState<RunMode>("timed");
@@ -118,6 +124,14 @@ export default function TriviaScreen() {
     setDone(true);
     setRunning(false);
     trackEvent("trivia_complete", { mode, runMode, score: finalScore });
+    if (user) {
+      const bestScore = Math.max(progress.arcade[key] ?? 0, finalScore);
+      void ensureName()
+        .then((name) => {
+          if (name) return submitScore(triviaBoard(mode), bestScore, name);
+        })
+        .catch(() => undefined);
+    }
   }
 
   function continueNext() {

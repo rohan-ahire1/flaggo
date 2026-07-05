@@ -8,7 +8,11 @@ import ScreenHeader from "@/components/ScreenHeader";
 import { Badge, Card, PillButton, Pill, SectionLabel } from "@/components/ui";
 import { countries } from "@flaggo/core/data/countries";
 import { useProgress } from "@/state/ProgressProvider";
+import { useAuth } from "@/auth/AuthProvider";
+import { useNameClaim } from "@/components/NameClaimProvider";
+import { submitScore } from "@/lib/leaderboard";
 import { arcadeScore } from "@flaggo/core/utils/arcade";
+import { triviaBoard } from "@flaggo/core/game/boards";
 import { hashStringToSeed, mulberry32 } from "@flaggo/core/utils/seededRandom";
 import { buildTrivia, type TriviaMode, type TriviaRound } from "@flaggo/core/utils/trivia";
 
@@ -18,7 +22,7 @@ const MODES: { mode: TriviaMode; label: string }[] = [
   { mode: "true-false", label: "True/False" }
 ];
 type RunMode = "timed" | "sudden";
-const triviaKey = (mode: TriviaMode) => `trivia-${mode}`;
+const triviaKey = triviaBoard;
 
 function formatMetric(value: number, metric: "population" | "area") {
   return metric === "area" ? `${value.toLocaleString()} km²` : value.toLocaleString();
@@ -30,6 +34,8 @@ function answerLabel(round: TriviaRound) {
 
 export default function TriviaScreen() {
   const { progress, setProgress } = useProgress();
+  const { user } = useAuth();
+  const { ensureName } = useNameClaim();
   const [mode, setMode] = useState<TriviaMode>("higher-lower");
   const [runMode, setRunMode] = useState<RunMode>("timed");
   const [running, setRunning] = useState(false);
@@ -83,6 +89,14 @@ export default function TriviaScreen() {
     });
     setDone(true);
     setRunning(false);
+    if (user) {
+      const bestScore = Math.max(progress.arcade[key] ?? 0, finalScore);
+      void ensureName()
+        .then((name) => {
+          if (name) return submitScore(triviaBoard(mode), bestScore, name);
+        })
+        .catch(() => undefined);
+    }
   }
   function continueNext() {
     if (!feedback) return;
