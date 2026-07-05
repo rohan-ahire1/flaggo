@@ -1,18 +1,21 @@
 import { lazy, Suspense, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import FlagImage from "../components/FlagImage";
 import Icon from "../components/Icon";
-import type { Country } from "@flaggo/core/types/country";
+import { useGame } from "../state/GameProvider";
 
 const WorldMap = lazy(() => import("../components/WorldMap"));
 
-export default function ExploreMapScreen({ countries, onBack }: { countries: Country[]; onBack: () => void }) {
+export default function ExploreMapScreen() {
+  const navigate = useNavigate();
+  const { countries } = useGame();
   const countryByCode = useMemo(() => new Map(countries.map((country) => [country.code, country])), [countries]);
   const [selectedCode, setSelectedCode] = useState<string | undefined>();
   const selected = selectedCode ? countryByCode.get(selectedCode) : undefined;
 
   return (
     <main className="p-5">
-      <button onClick={onBack} className="mb-4 grid h-10 w-10 place-items-center rounded-full bg-white text-flaggo-muted shadow-card" aria-label="Back">
+      <button onClick={() => navigate(-1)} className="mb-4 grid h-10 w-10 place-items-center rounded-full bg-white text-flaggo-muted shadow-card" aria-label="Back">
         <Icon name="chevron" size={20} className="rotate-180" />
       </button>
       <h1 className="screen-title">Explore</h1>

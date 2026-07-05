@@ -1,32 +1,27 @@
 import { lazy, Suspense, useMemo, useState } from "react";
+import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import FeedbackPanel from "../components/FeedbackPanel";
 import FlagImage from "../components/FlagImage";
 import Icon from "../components/Icon";
 import ProgressBar from "../components/ProgressBar";
 import type { Country } from "@flaggo/core/types/country";
-import type { AppProgress } from "@flaggo/core/types/progress";
 import { updateStreak } from "@flaggo/core/utils/date";
 import { generateMapQuestions, type MapMode, type MapQuestion } from "@flaggo/core/utils/quiz";
 import { updateReviewState } from "@flaggo/core/utils/spacedRepetition";
-import type { LessonResult } from "./LessonCompleteScreen";
+import { useGame } from "../state/GameProvider";
 
 const WorldMap = lazy(() => import("../components/WorldMap"));
 
-export default function MapPlayScreen({
-  countries,
-  mode,
-  progress,
-  onProgress,
-  onComplete,
-  onExit
-}: {
-  countries: Country[];
-  mode: MapMode;
-  progress: AppProgress;
-  onProgress: (progress: AppProgress) => void;
-  onComplete: (result: LessonResult) => void;
-  onExit: () => void;
-}) {
+type MapRouteState = { mode: MapMode; countryCodes: string[] } | null;
+
+export default function MapPlayScreen() {
+  const navigate = useNavigate();
+  const { state } = useLocation();
+  const { countries: allCountries, progress, setProgress, completeLesson } = useGame();
+  const routeState = state as MapRouteState;
+  const countries = routeState?.countryCodes.map((code) => allCountries.find((country) => country.code === code)).filter((country): country is Country => Boolean(country)) ?? [];
+  const mode = routeState?.mode ?? "locate";
+  const onExit = () => navigate("/map");
   const questions = useMemo(() => generateMapQuestions(countries, mode), [countries, mode]);
   const countryByCode = useMemo(() => new Map(countries.map((country) => [country.code, country])), [countries]);
   const [currentProgress, setCurrentProgress] = useState(progress);
@@ -45,7 +40,7 @@ export default function MapPlayScreen({
     const next = updateReviewState(target.code, "location", ok, currentProgress);
     const withXp = { ...next, xp: next.xp + earned };
     setCurrentProgress(withXp);
-    onProgress(withXp);
+    setProgress(withXp);
     setCorrect((value) => value + (ok ? 1 : 0));
     setXp((value) => value + earned);
     setFeedback({ ok, country: target, wrongCode: ok ? undefined : selectedCode });
@@ -55,8 +50,8 @@ export default function MapPlayScreen({
     const total = questions.length || 1;
     const bonusXp = 10;
     const next = updateStreak({ ...currentProgress, xp: currentProgress.xp + bonusXp });
-    onProgress(next);
-    onComplete({
+    setProgress(next);
+    completeLesson({
       xpEarned: xp + bonusXp,
       accuracy: Math.round((correct / total) * 100),
       correct,
@@ -72,6 +67,8 @@ export default function MapPlayScreen({
     if (index >= questions.length - 1) complete();
     else setIndex((value) => value + 1);
   }
+
+  if (!routeState) return <Navigate to="/map" replace />;
 
   if (!question || !target) {
     return (

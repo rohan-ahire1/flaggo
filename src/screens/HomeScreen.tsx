@@ -1,46 +1,15 @@
+import { useNavigate } from "react-router-dom";
 import Icon, { type IconName } from "../components/Icon";
 import { DAILY_QUESTION_COUNT } from "@flaggo/core/utils/dailyChallenge";
-import type { Lesson } from "@flaggo/core/types/lesson";
-import type { AppProgress } from "@flaggo/core/types/progress";
 import type { Topic } from "@flaggo/core/types/topic";
+import { useGame } from "../state/GameProvider";
 
 const DOW = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 const MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-export default function HomeScreen({
-  progress,
-  lessons,
-  onOpenLesson,
-  onOpenPaths,
-  onOpenMap,
-  onOpenDaily,
-  onOpenReview,
-  onOpenArcade,
-  onOpenTrivia,
-  onOpenDecks,
-  onOpenLeaderboard,
-  onOpenFriends,
-  onOpenLibrary,
-  onOpenStats,
-  onChallenge
-}: {
-  progress: AppProgress;
-  lessons: Lesson[];
-  onOpenLesson: (lesson: Lesson) => void;
-  onTopicChange: (topic: Topic) => void;
-  onOpenMap: () => void;
-  onOpenDaily: () => void;
-  onOpenReview: () => void;
-  onOpenPaths: () => void;
-  onOpenArcade: () => void;
-  onOpenTrivia: () => void;
-  onOpenDecks: () => void;
-  onOpenLeaderboard: () => void;
-  onOpenFriends: () => void;
-  onOpenLibrary: () => void;
-  onOpenStats: () => void;
-  onChallenge: () => void;
-}) {
+export default function HomeScreen() {
+  const navigate = useNavigate();
+  const { progress, lessons, openLesson, createAndShareChallenge } = useGame();
   const today = new Date();
   const todayKey = today.toISOString().slice(0, 10);
   const dailyResult = progress.daily.history[todayKey];
@@ -59,17 +28,17 @@ export default function HomeScreen({
   const doneCount = topicLessons.filter((lesson) => completed.has(lesson.id)).length;
 
   const quick: { label: string; icon: IconName; onClick: () => void }[] = [
-    { label: "Review due", icon: "review", onClick: onOpenReview },
-    { label: "Find on map", icon: "globe", onClick: onOpenMap },
-    { label: "Arcade", icon: "bolt", onClick: onOpenArcade }
+    { label: "Review due", icon: "review", onClick: () => navigate("/review") },
+    { label: "Find on map", icon: "globe", onClick: () => navigate("/map") },
+    { label: "Arcade", icon: "bolt", onClick: () => navigate("/arcade") }
   ];
 
   const more: { label: string; icon: IconName; onClick: () => void }[] = [
-    { label: "Trivia", icon: "sparkle", onClick: onOpenTrivia },
-    { label: "Leaderboard", icon: "trophy", onClick: onOpenLeaderboard },
-    { label: "Flag library", icon: "library", onClick: onOpenLibrary },
-    { label: "Decks", icon: "star", onClick: onOpenDecks },
-    { label: "Stats", icon: "stats", onClick: onOpenStats }
+    { label: "Trivia", icon: "sparkle", onClick: () => navigate("/trivia") },
+    { label: "Leaderboard", icon: "trophy", onClick: () => navigate("/leaderboard") },
+    { label: "Flag library", icon: "library", onClick: () => navigate("/library") },
+    { label: "Decks", icon: "star", onClick: () => navigate("/decks") },
+    { label: "Stats", icon: "stats", onClick: () => navigate("/stats") }
   ];
 
   return (
@@ -90,7 +59,7 @@ export default function HomeScreen({
 
       {/* hero: continue learning */}
       <button
-        onClick={onOpenPaths}
+        onClick={() => navigate("/learn")}
         className="relative mb-[18px] w-full overflow-hidden rounded-[26px] bg-primary p-5 text-left shadow-card-lg"
       >
         <span className="wl-dots absolute inset-0 opacity-90" />
@@ -109,8 +78,8 @@ export default function HomeScreen({
             tabIndex={0}
             onClick={(e) => {
               e.stopPropagation();
-              if (nextLesson) onOpenLesson(nextLesson);
-              else onOpenPaths();
+              if (nextLesson) openLesson(nextLesson);
+              else navigate("/learn");
             }}
             className="mt-4 block rounded-2xl bg-white py-3.5 text-center font-display text-xl font-semibold text-primary shadow-[0_4px_12px_rgba(0,0,0,0.18)]"
           >
@@ -121,7 +90,7 @@ export default function HomeScreen({
 
       {/* today's practice (daily) */}
       <button
-        onClick={onOpenDaily}
+        onClick={() => navigate("/daily")}
         className="mb-4 flex w-full items-center gap-3.5 rounded-[20px] border-[1.5px] border-line bg-surface p-3.5 text-left"
       >
         <span className="grid h-[46px] w-[46px] flex-none place-items-center rounded-[14px] bg-primary text-white">
@@ -139,7 +108,7 @@ export default function HomeScreen({
 
       {/* challenge a friend */}
       <button
-        onClick={onChallenge}
+        onClick={() => void createAndShareChallenge()}
         className="mb-6 flex w-full items-center gap-3.5 rounded-[20px] border-[1.5px] border-line bg-surface p-3.5 text-left"
       >
         <span className="grid h-[46px] w-[46px] flex-none place-items-center rounded-[14px] bg-accent text-white">
@@ -168,7 +137,7 @@ export default function HomeScreen({
       </div>
 
       <button
-        onClick={onOpenFriends}
+        onClick={() => navigate("/friends")}
         className="mb-7 flex w-full items-center gap-3.5 rounded-[20px] border-[1.5px] border-line bg-surface p-3.5 text-left"
       >
         <span className="grid h-[46px] w-[46px] flex-none place-items-center rounded-[14px] bg-accent text-white">

@@ -1,23 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Icon from "../components/Icon";
-import type { Country } from "@flaggo/core/types/country";
 import type { Topic } from "@flaggo/core/types/topic";
-import { getPopularityGroups, type PopularityGroup } from "@flaggo/core/utils/popularity";
+import { getPopularityGroups } from "@flaggo/core/utils/popularity";
+import { useGame } from "../state/GameProvider";
 
 export type TestMode = "recall" | "options";
 
-export default function TestSetupScreen({
-  countries,
-  selectedTopic,
-  onStart,
-  onBack
-}: {
-  countries: Country[];
-  selectedTopic: Topic;
-  onStart: (group: PopularityGroup, mode: TestMode, topic: Topic) => void;
-  onBack: () => void;
-}) {
-  const [topic, setTopic] = useState<Topic>(selectedTopic);
+export default function TestSetupScreen() {
+  const navigate = useNavigate();
+  const { countries, progress, startFlagTest } = useGame();
+  const [topic, setTopic] = useState<Topic>(progress.selectedTopic);
   const topicCountries = useMemo(() => topic === "capital" ? countries.filter((country) => country.capital?.trim()) : countries, [countries, topic]);
   const groups = useMemo(() => getPopularityGroups(topicCountries), [topicCountries]);
   const [groupId, setGroupId] = useState(groups[0]?.id ?? "");
@@ -29,7 +22,7 @@ export default function TestSetupScreen({
 
   return (
     <main className="p-5">
-      <button onClick={onBack} className="mb-4 grid h-10 w-10 place-items-center rounded-full bg-white text-flaggo-muted shadow-card" aria-label="Back">
+      <button onClick={() => navigate("/review")} className="mb-4 grid h-10 w-10 place-items-center rounded-full bg-white text-flaggo-muted shadow-card" aria-label="Back">
         <Icon name="chevron" size={20} className="rotate-180" />
       </button>
       <h1 className="screen-title">Custom test</h1>
@@ -93,7 +86,7 @@ export default function TestSetupScreen({
           <p className="mt-1 font-display font-black">{selected?.countries.slice(0, 6).map((country) => country.name).join(", ")}...</p>
         </div>
 
-        <button onClick={() => selected && onStart(selected, mode, topic)} className="btn-primary mt-5 w-full">
+        <button onClick={() => selected && startFlagTest(selected, mode, topic)} className="btn-primary mt-5 w-full">
           Start test
         </button>
       </section>

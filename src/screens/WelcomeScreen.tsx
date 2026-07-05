@@ -2,7 +2,12 @@ import Icon from "../components/Icon";
 import { BRAND } from "../config/brand";
 
 // Cold open — a no-login first session. One primary action: start the first guided lesson.
-export default function WelcomeScreen({ onStartLearning, onDaily }: { onStartLearning: () => void; onDaily: () => void }) {
+import { useNavigate } from "react-router-dom";
+import { useGame } from "../state/GameProvider";
+
+export default function WelcomeScreen() {
+  const navigate = useNavigate();
+  const { startLearning } = useGame();
   return (
     <main className="grid min-h-screen place-items-center bg-paper p-8">
       <section className="flex w-full max-w-sm animate-pop-in flex-col items-center gap-6 text-center">
@@ -23,13 +28,13 @@ export default function WelcomeScreen({ onStartLearning, onDaily }: { onStartLea
         </p>
 
         <button
-          onClick={onStartLearning}
+          onClick={() => startLearning("flag")}
           className="w-full rounded-2xl bg-primary py-4 font-display text-xl font-semibold text-white shadow-card-lg transition active:translate-y-0.5"
         >
           Start learning →
         </button>
         <p className="text-[15px] font-medium text-muted">no sign-up · about 2 minutes</p>
-        <button onClick={onDaily} className="text-[15px] font-bold text-primary underline">
+        <button onClick={() => navigate("/daily")} className="text-[15px] font-bold text-primary underline">
           Try today's challenge
         </button>
       </section>

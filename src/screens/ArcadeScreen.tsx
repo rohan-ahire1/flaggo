@@ -1,4 +1,5 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import FeedbackPanel from "../components/FeedbackPanel";
 import FlagImage from "../components/FlagImage";
 import Icon, { type IconName } from "../components/Icon";
@@ -8,7 +9,6 @@ import { useNameClaim } from "../components/NameClaimProvider";
 import type { ArcadeMode } from "@flaggo/core/types/arcade";
 import { ARCADE_MODES, arcadeKey } from "@flaggo/core/types/arcade";
 import type { Country } from "@flaggo/core/types/country";
-import type { AppProgress } from "@flaggo/core/types/progress";
 import type { Topic } from "@flaggo/core/types/topic";
 import { TOPICS } from "@flaggo/core/types/topic";
 import { arcadePool, arcadeScore, persistArcadeBest } from "@flaggo/core/utils/arcade";
@@ -18,6 +18,7 @@ import { seededShuffle, hashStringToSeed, mulberry32 } from "@flaggo/core/utils/
 import { answerLabelForWrapper } from "@flaggo/core/game/answerLabel";
 import { trackEvent } from "../lib/analytics";
 import { arcadeBoard, submitScore } from "../lib/leaderboard";
+import { useGame } from "../state/GameProvider";
 
 const WorldMap = lazy(() => import("../components/WorldMap"));
 
@@ -40,25 +41,11 @@ type ArcadeQuestion =
   | { topic: Exclude<Topic, "location">; country: Country; question: Question }
   | { topic: "location"; country: Country; question: MapQuestion };
 
-export default function ArcadeScreen({
-  countries,
-  progress,
-  onProgress,
-  onBack,
-  onOpenLeaderboard,
-  onSignIn,
-  onChallenge
-}: {
-  countries: Country[];
-  progress: AppProgress;
-  onProgress: (progress: AppProgress) => void;
-  onBack: () => void;
-  onOpenLeaderboard: () => void;
-  onSignIn: () => void;
-  onChallenge: () => void;
-}) {
+export default function ArcadeScreen() {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const { ensureName } = useNameClaim();
+  const { countries, progress, setProgress, openSignIn, createAndShareChallenge } = useGame();
   const [mode, setMode] = useState<ArcadeMode>("timed");
   const [topic, setTopic] = useState<Topic>(progress.selectedTopic);
   const [running, setRunning] = useState(false);
@@ -103,7 +90,7 @@ export default function ArcadeScreen({
     if (!question || feedback || done) return;
     const next = updateReviewState(question.country.code, topic, ok, currentProgress);
     setCurrentProgress(next);
-    onProgress(next);
+    setProgress(next);
     setAnswers((value) => [...value, ok]);
     setFeedback({ ok, question, wrongCode });
     if (mode === "sudden" && !ok) window.setTimeout(() => void finish([...answers, ok]), 250);
@@ -114,7 +101,7 @@ export default function ArcadeScreen({
     const finalScore = arcadeScore(mode, finalAnswers);
     const next = persistArcadeBest(currentProgress, mode, topic, finalScore);
     setCurrentProgress(next);
-    onProgress(next);
+    setProgress(next);
     setDone(true);
     setRunning(false);
     trackEvent("arcade_complete", { mode, topic, score: finalScore });
@@ -132,7 +119,7 @@ export default function ArcadeScreen({
     return (
       <main className="flex min-h-full flex-col p-5">
         <div className="flex items-center gap-3">
-          <button onClick={onBack} className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-white text-flaggo-muted shadow-card" aria-label="Back"><Icon name="chevron" className="rotate-180" /></button>
+          <button onClick={() => navigate("/")} className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-white text-flaggo-muted shadow-card" aria-label="Back"><Icon name="chevron" className="rotate-180" /></button>
           <div>
             <h1 className="screen-title">Arcade</h1>
             <p className="mt-1 text-sm font-semibold text-flaggo-muted">Endless rounds, three ways.</p>
@@ -145,8 +132,8 @@ export default function ArcadeScreen({
             <p className="font-display text-6xl font-black leading-none">{score}</p>
             <p className="mt-1 font-bold text-white/80">Best {Math.max(best, score)}</p>
             <div className="mt-5 grid gap-3">
-              <button onClick={onChallenge} className="flaggo-button bg-white text-flaggo-green shadow-none">Challenge a friend</button>
-              <button onClick={onOpenLeaderboard} className="font-display font-black text-white underline">View leaderboard</button>
+              <button onClick={() => void createAndShareChallenge()} className="flaggo-button bg-white text-flaggo-green shadow-none">Challenge a friend</button>
+              <button onClick={() => navigate("/leaderboard")} className="font-display font-black text-white underline">View leaderboard</button>
             </div>
           </section>
         )}
@@ -205,7 +192,7 @@ export default function ArcadeScreen({
 
         <div className="mt-7 grid gap-3">
           <button onClick={start} disabled={!pool.length} className="flaggo-button bg-flaggo-green text-white disabled:opacity-50">Start run</button>
-          {!user && <button onClick={onSignIn} className="font-display font-black text-flaggo-green underline">Sign in to compete</button>}
+          {!user && <button onClick={openSignIn} className="font-display font-black text-flaggo-green underline">Sign in to compete</button>}
         </div>
       </main>
     );

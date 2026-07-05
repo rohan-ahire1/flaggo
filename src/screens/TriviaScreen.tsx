@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Icon, { type IconName } from "../components/Icon";
 import { TriviaCard } from "../components/QuestionCard";
-import type { Country } from "@flaggo/core/types/country";
-import type { AppProgress } from "@flaggo/core/types/progress";
 import { arcadeScore } from "@flaggo/core/utils/arcade";
 import { hashStringToSeed, mulberry32 } from "@flaggo/core/utils/seededRandom";
 import { buildTrivia, type TriviaMode, type TriviaRound } from "@flaggo/core/utils/trivia";
 import { trackEvent } from "../lib/analytics";
+import { useGame } from "../state/GameProvider";
 
 const MODES: { mode: TriviaMode; label: string; desc: string; icon: IconName }[] = [
   { mode: "higher-lower", label: "Higher / Lower", desc: "Pick which country ranks higher.", icon: "stats" },
@@ -29,17 +29,9 @@ function answerLabel(round: TriviaRound) {
   return round.answer ? "True" : "False";
 }
 
-export default function TriviaScreen({
-  countries,
-  progress,
-  onProgress,
-  onBack
-}: {
-  countries: Country[];
-  progress: AppProgress;
-  onProgress: (progress: AppProgress) => void;
-  onBack: () => void;
-}) {
+export default function TriviaScreen() {
+  const navigate = useNavigate();
+  const { countries, progress, setProgress } = useGame();
   const [mode, setMode] = useState<TriviaMode>("higher-lower");
   const [runMode, setRunMode] = useState<RunMode>("timed");
   const [running, setRunning] = useState(false);
@@ -96,7 +88,7 @@ export default function TriviaScreen({
         [key]: Math.max(progress.arcade[key] ?? 0, finalScore)
       }
     };
-    onProgress(next);
+    setProgress(next);
     setDone(true);
     setRunning(false);
     trackEvent("trivia_complete", { mode, runMode, score: finalScore });
@@ -112,7 +104,7 @@ export default function TriviaScreen({
     return (
       <main className="flex min-h-full flex-col p-5">
         <div className="flex items-center gap-3">
-          <button onClick={onBack} className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-white text-flaggo-muted shadow-card" aria-label="Back">
+          <button onClick={() => navigate("/")} className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-white text-flaggo-muted shadow-card" aria-label="Back">
             <Icon name="chevron" className="rotate-180" />
           </button>
           <div>

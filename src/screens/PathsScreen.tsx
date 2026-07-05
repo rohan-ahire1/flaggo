@@ -1,16 +1,19 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import Icon from "../components/Icon";
 import LessonNode from "../components/LessonNode";
-import type { Lesson } from "@flaggo/core/types/lesson";
-import type { AppProgress } from "@flaggo/core/types/progress";
 import { PATH_TOPICS, type Topic } from "@flaggo/core/types/topic";
 import { lessonsForTopic } from "@flaggo/core/utils/lessonGenerator";
 import { trackEvent } from "../lib/analytics";
+import { useGame } from "../state/GameProvider";
 
 const TOPIC_LABELS: Record<string, string> = { flag: "Flags", capital: "Capitals" };
 
-export default function PathsScreen({ lessons, progress, onOpenLesson, onTopicChange, onBack }: { lessons: Lesson[]; progress: AppProgress; onOpenLesson: (lesson: Lesson) => void; onTopicChange: (topic: Topic) => void; onBack: () => void }) {
-  const [region, setRegion] = useState<string | null>(null);
+export default function PathsScreen() {
+  const navigate = useNavigate();
+  const params = useParams();
+  const { lessons, progress, openLesson, switchTopic } = useGame();
+  const region = params.region ? decodeURIComponent(params.region) : null;
   const topicLessons = lessonsForTopic(lessons, progress.selectedTopic);
   const regions = useMemo(() => {
     const order = ["World", "Asia", "Europe", "Africa", "Americas", "Oceania", "Territories"];
@@ -22,7 +25,7 @@ export default function PathsScreen({ lessons, progress, onOpenLesson, onTopicCh
 
   return (
     <main className="p-5">
-      <button onClick={region ? () => setRegion(null) : onBack} className="mb-4 grid h-10 w-10 place-items-center rounded-full bg-white text-flaggo-muted shadow-card" aria-label="Back">
+      <button onClick={region ? () => navigate("/learn") : () => navigate(-1)} className="mb-4 grid h-10 w-10 place-items-center rounded-full bg-white text-flaggo-muted shadow-card" aria-label="Back">
         <Icon name="chevron" size={20} className="rotate-180" />
       </button>
       <h1 className="screen-title">{region ?? "Learning paths"}</h1>
@@ -33,7 +36,7 @@ export default function PathsScreen({ lessons, progress, onOpenLesson, onTopicCh
             return (
               <button
                 key={topic}
-                onClick={() => onTopicChange(topic)}
+                onClick={() => switchTopic(topic)}
                 className={`rounded-full px-4 py-1.5 font-display text-sm font-black transition ${active ? "bg-flaggo-green text-white shadow-card" : "border border-flaggo-border bg-white text-flaggo-muted"}`}
               >
                 {TOPIC_LABELS[topic] ?? topic}
@@ -52,7 +55,7 @@ export default function PathsScreen({ lessons, progress, onOpenLesson, onTopicCh
               <button
                 key={item.name}
                 onClick={() => {
-                  setRegion(item.name);
+                  navigate(`/learn/${encodeURIComponent(item.name)}`);
                   trackEvent("path_open", { region: item.name, topic: progress.selectedTopic });
                 }}
                 className="flex items-center gap-4 rounded-[22px] border border-flaggo-border bg-white p-4 text-left shadow-card"
@@ -81,7 +84,7 @@ export default function PathsScreen({ lessons, progress, onOpenLesson, onTopicCh
                   index={index}
                   total={visibleLessons.length}
                   state={state}
-                  onClick={() => onOpenLesson(lesson)}
+                  onClick={() => openLesson(lesson)}
                 />
               );
             });
