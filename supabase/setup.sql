@@ -229,4 +229,52 @@ $$;
 
 grant execute on function public.friends_leaderboard() to anon, authenticated;
 
+-- ============================================================
+-- 202607050001_username_accounts.sql
+-- Username-only accounts (no email): synthetic auth email + availability RPC.
+-- ============================================================
+alter table public.profiles add column if not exists username text;
+
+create unique index if not exists profiles_username_lower_idx
+  on public.profiles (lower(username))
+  where username is not null;
+
+create or replace function public.username_available(candidate text)
+returns boolean
+language sql
+security definer set search_path = public
+stable
+as $$
+  select not exists (
+    select 1 from public.profiles where lower(username) = lower(candidate)
+  );
+$$;
+
+grant execute on function public.username_available(text) to anon, authenticated;
+
+create or replace function public.handle_new_user()
+returns trigger
+language plpgsql
+security definer set search_path = public
+as $$
+begin
+  insert into public.profiles (id, display_name, username)
+  values (
+    new.id,
+    nullif(new.raw_user_meta_data->>'full_name', ''),
+    nullif(new.raw_user_meta_data->>'username', '')
+  )
+  on conflict (id) do nothing;
+
+  insert into public.progress (user_id, data)
+  values (new.id, '{}'::jsonb)
+  on conflict (user_id) do nothing;
+
+  insert into public.entitlements (user_id)
+  values (new.id)
+  on conflict (user_id) do nothing;
+
+  return new;
+end;
+$$;
 
