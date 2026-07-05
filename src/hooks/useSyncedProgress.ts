@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useAuth } from "../auth/AuthProvider";
 import { supabase } from "../lib/supabase";
 import { defaultProgress, type AppProgress } from "@flaggo/core/types/progress";
-import { clearAnonymousMergeMarker, loadProgress, loadProgressMeta, needsAnonymousMerge, resetProgress, saveProgress, saveSyncedProgress } from "../utils/storage";
+import { clearAnonymousMergeMarker, loadProgress, resetProgress, saveProgress, saveSyncedProgress } from "../utils/storage";
 import { mergeProgress, normalizeProgress } from "@flaggo/core/utils/progressMerge";
 
 type SyncState = "local" | "loading" | "saved" | "saving" | "error";
@@ -43,12 +43,8 @@ export function useSyncedProgress() {
         }
 
         const local = loadProgress();
-        const meta = loadProgressMeta();
         const serverProgress = normalizeProgress(data?.data as Partial<AppProgress> | null);
-        const serverUpdatedAt = data?.updated_at ? String(data.updated_at) : null;
-        const shouldMerge = needsAnonymousMerge() || meta.userId !== user.id;
-        const serverNewer = serverUpdatedAt && meta.updatedAt ? new Date(serverUpdatedAt).getTime() > new Date(meta.updatedAt).getTime() : Boolean(serverUpdatedAt);
-        const next = shouldMerge ? mergeProgress(local, serverProgress) : serverNewer ? serverProgress : local;
+        const next = mergeProgress(local, serverProgress);
         const updatedAt = new Date().toISOString();
 
         const { error: upsertError } = await client

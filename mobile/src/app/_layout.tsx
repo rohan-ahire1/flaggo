@@ -1,6 +1,6 @@
 import "../global.css";
 import { useEffect, useState } from "react";
-import { LogBox, Platform, Text, View } from "react-native";
+import { AppState, LogBox, Platform, Text, View } from "react-native";
 import { Stack, router } from "expo-router";
 import * as Linking from "expo-linking";
 import * as SplashScreen from "expo-splash-screen";
@@ -18,7 +18,9 @@ import WebSidebarShell from "@/components/WebSidebarShell";
 import { initDb } from "@/db/client";
 import { queryClient } from "@/lib/queryClient";
 import { initSentry } from "@/lib/sentry";
+import { syncStreakReminder } from "@/lib/streakReminder";
 import { ProgressProvider } from "@/state/ProgressProvider";
+import { useProgress } from "@/state/ProgressProvider";
 import { useOnboardStore } from "@/state/onboarding";
 import { ThemeProvider } from "@/theme/ThemeProvider";
 import { applyFigtreeDefault, FIGTREE_FONTS } from "@/theme/fonts";
@@ -164,6 +166,7 @@ export default function RootLayout() {
             <AuthProvider>
               <NameClaimProvider>
                 <ProgressProvider>
+                  <StreakReminderForegroundSync />
                   <WebSidebarShell>
                     <StatusBar style="dark" />
                     <Stack screenOptions={{ headerShown: false }}>
@@ -184,4 +187,17 @@ export default function RootLayout() {
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );
+}
+
+function StreakReminderForegroundSync() {
+  const { progress } = useProgress();
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener("change", (state) => {
+      if (state === "active") void syncStreakReminder(progress).catch(() => undefined);
+    });
+    return () => subscription.remove();
+  }, [progress]);
+
+  return null;
 }

@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { countries } from "@flaggo/core/data/countries";
 import { deckCountries } from "@flaggo/core/utils/decks";
@@ -12,10 +12,12 @@ import type { PopularityGroup } from "@flaggo/core/utils/popularity";
 import { useAuth } from "../auth/AuthProvider";
 import { BRAND } from "../config/brand";
 import { useConfirm } from "../components/ConfirmDialog";
+import { useNameClaim } from "../components/NameClaimProvider";
 import { useSyncedProgress } from "../hooks/useSyncedProgress";
 import { trackEvent } from "../lib/analytics";
 import { submitScore, xpBoard } from "../lib/leaderboard";
-import { createMatch, defaultMatchConfig, matchUrl } from "../lib/matches";
+import { createMatch, defaultMatchConfig, matchUrl, submitMatchResult } from "../lib/matches";
+import { clearPendingMatch, readPendingMatch } from "../lib/pendingMatch";
 import { supabase } from "../lib/supabase";
 import { preloadFlags } from "../utils/preloadFlags";
 import type { TestMode } from "../screens/TestSetupScreen";
@@ -59,9 +61,11 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const confirm = useConfirm();
   const { user, session, displayName, loading: authLoading } = useAuth();
+  const { ensureName } = useNameClaim();
   const { progress, setProgress, resetAllProgress, syncState, syncError, loading: progressLoading } = useSyncedProgress();
   const [signInOpen, setSignInOpen] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
+  const flushingPendingMatch = useRef(false);
   const lessons = useMemo(() => generateLessons(countries), []);
 
   useEffect(() => preloadFlags(countries), []);
@@ -81,6 +85,26 @@ export function GameProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (user && displayName?.trim() && progress.xp > 0) void submitScore(xpBoard(), progress.xp, displayName);
   }, [displayName, progress.xp, user]);
+
+  useEffect(() => {
+    if (!user || authLoading || flushingPendingMatch.current) return;
+    const pending = readPendingMatch();
+    if (!pending) return;
+    flushingPendingMatch.current = true;
+    void ensureName()
+      .then((name) => {
+        if (!name) return;
+        return submitMatchResult(pending.matchId, pending.score, pending.total, name).then(() => {
+          clearPendingMatch();
+          setToast("Challenge score saved");
+          window.setTimeout(() => setToast(null), 1800);
+        });
+      })
+      .catch(() => undefined)
+      .finally(() => {
+        flushingPendingMatch.current = false;
+      });
+  }, [authLoading, ensureName, user]);
 
   function openLesson(lesson: Lesson) {
     navigate("/lesson", { state: { lessonId: lesson.id } });

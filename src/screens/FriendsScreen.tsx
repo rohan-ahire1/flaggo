@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthProvider";
 import Icon from "../components/Icon";
@@ -9,23 +9,12 @@ export default function FriendsScreen() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { createAndShareChallenge, openSignIn } = useGame();
-  const [rows, setRows] = useState<FriendsLeaderboardRow[]>([]);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    let active = true;
-    setError(null);
-    getFriendsLeaderboard()
-      .then((next) => {
-        if (active) setRows(next);
-      })
-      .catch((err: Error) => {
-        if (active) setError(err.message);
-      });
-    return () => {
-      active = false;
-    };
-  }, []);
+  const friendsQuery = useQuery<FriendsLeaderboardRow[], Error>({
+    queryKey: ["friends-leaderboard"],
+    queryFn: getFriendsLeaderboard
+  });
+  const rows = friendsQuery.data ?? [];
+  const queryError = friendsQuery.error?.message ?? null;
 
   return (
     <main className="p-5">
@@ -38,7 +27,7 @@ export default function FriendsScreen() {
         <button onClick={user ? () => void createAndShareChallenge() : openSignIn} className="rounded-2xl bg-primary px-4 py-3 font-display font-black text-white shadow-card">Challenge</button>
       </div>
       {!user && <button onClick={openSignIn} className="mt-4 w-full rounded-2xl bg-primary p-3 font-display font-black text-white">Sign in to challenge friends</button>}
-      {error && <div className="mt-4 rounded-2xl bg-error/10 p-4 font-bold text-error">{error}</div>}
+      {queryError && <div className="mt-4 rounded-2xl bg-error/10 p-4 font-bold text-error">{queryError}</div>}
       <section className="mt-5 grid gap-2">
         {rows.map((row) => (
           <div key={`${row.rank}-${row.handle}`} className="grid grid-cols-[3rem_1fr_auto] items-center gap-3 rounded-2xl border border-line bg-paper p-3 shadow-card">
@@ -50,7 +39,7 @@ export default function FriendsScreen() {
             <span className="font-display text-xl font-black text-primary">{row.wins}W</span>
           </div>
         ))}
-        {!rows.length && !error && (
+        {!rows.length && !queryError && (
           <div className="rounded-[24px] border border-line bg-paper p-6 text-center shadow-card">
             <Icon name="user" size={36} className="mx-auto text-primary" />
             <h2 className="mt-3 font-display text-xl font-semibold text-ink">No friends yet</h2>

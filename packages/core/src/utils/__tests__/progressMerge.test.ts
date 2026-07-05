@@ -133,6 +133,24 @@ describe("mergeProgress", () => {
     expect(merged.review["FR:capital"]).toMatchObject({ topic: "capital", box: 4, correctCount: 5, wrongCount: 2 });
   });
 
+  it("keeps divergent topic progress from two devices", () => {
+    const merged = mergeProgress(
+      progress({
+        review: {
+          "JP:flag": { countryCode: "JP", topic: "flag", box: 5, correctCount: 8, wrongCount: 1, lastSeenAt: "2026-07-01T00:00:00.000Z", nextReviewAt: "2026-08-01T00:00:00.000Z" }
+        }
+      }),
+      progress({
+        review: {
+          "JP:capital": { countryCode: "JP", topic: "capital", box: 4, correctCount: 6, wrongCount: 0, lastSeenAt: "2026-07-02T00:00:00.000Z", nextReviewAt: "2026-07-20T00:00:00.000Z" }
+        }
+      })
+    );
+
+    expect(merged.review["JP:flag"]).toMatchObject({ topic: "flag", box: 5 });
+    expect(merged.review["JP:capital"]).toMatchObject({ topic: "capital", box: 4 });
+  });
+
   it("round-trips new topic review keys and normalizes defensive review shapes", () => {
     TOPICS.forEach((topic) => {
       expect(parseReviewKey(reviewKey("FR", topic))).toEqual({ code: "FR", topic });

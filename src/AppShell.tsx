@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 import { lazy } from "react";
 import AppLayout from "./AppLayout";
@@ -12,6 +13,7 @@ import AuthCallbackPage from "./pages/AuthCallbackPage";
 import { PrivacyPage, TermsPage } from "./pages/LegalPages";
 import NotFoundPage from "./pages/NotFoundPage";
 import { loadPlausible, trackEvent } from "./lib/analytics";
+import { queryClient } from "./lib/queryClient";
 import HomeScreen from "./screens/HomeScreen";
 import LessonScreen from "./screens/LessonScreen";
 import ReviewScreen from "./screens/ReviewScreen";
@@ -49,13 +51,14 @@ function PageTracker() {
 
 export default function AppShell() {
   return (
-    <BrowserRouter>
-      <ThemeProvider>
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <ThemeProvider>
       <AuthProvider>
         <ConfirmProvider>
         <InstallPromptProvider>
-        <GameProvider>
         <NameClaimProvider>
+        <GameProvider>
           <PageTracker />
           <Routes>
             <Route element={<AppLayout />}>
@@ -88,12 +91,13 @@ export default function AppShell() {
             <Route path="/auth/callback" element={<AuthCallbackPage />} />
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
-        </NameClaimProvider>
         </GameProvider>
+        </NameClaimProvider>
         </InstallPromptProvider>
         </ConfirmProvider>
       </AuthProvider>
-      </ThemeProvider>
-    </BrowserRouter>
+        </ThemeProvider>
+      </BrowserRouter>
+    </QueryClientProvider>
   );
 }

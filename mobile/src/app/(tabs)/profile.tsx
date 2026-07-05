@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Alert, Platform, ScrollView, Text, TextInput, View } from "react-native";
+import { useEffect, useState } from "react";
+import { Alert, Platform, ScrollView, Switch, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import Icon, { type IconName } from "@/components/Icon";
@@ -8,6 +8,7 @@ import { Card, PillButton, SectionLabel } from "@/components/ui";
 import { signInWithPassword, signOut, signUpWithPassword } from "@/auth/actions";
 import { useAuth } from "@/auth/AuthProvider";
 import { hasSupabaseConfig } from "@/lib/supabase";
+import { isStreakReminderEnabled, setStreakReminderEnabled, syncStreakReminder } from "@/lib/streakReminder";
 import { useProgress } from "@/state/ProgressProvider";
 import { themeColor } from "@/theme/palettes";
 import { useThemeStore } from "@/theme/store";
@@ -19,6 +20,7 @@ export default function ProfileScreen() {
   const [email, setEmail] = useState("");
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
+  const [reminderEnabled, setReminderEnabled] = useState(false);
 
   const mastered = Object.values(progress.review).filter((r) => r.box >= 5).length;
   const accuracy =
@@ -30,6 +32,10 @@ export default function ProfileScreen() {
   const [signupName, setSignupName] = useState("");
   const [password, setPassword] = useState("");
 
+  useEffect(() => {
+    void isStreakReminderEnabled().then(setReminderEnabled).catch(() => undefined);
+  }, []);
+
   async function submitAuth() {
     setBusy(true);
     setNotice(null);
@@ -37,6 +43,12 @@ export default function ProfileScreen() {
       authMode === "signin" ? await signInWithPassword(email, password) : await signUpWithPassword(email, password, signupName);
     setNotice(error ?? message ?? null);
     setBusy(false);
+  }
+
+  async function toggleReminder(on: boolean) {
+    setReminderEnabled(on);
+    await setStreakReminderEnabled(on);
+    await syncStreakReminder(progress);
   }
 
   function confirmReset() {
@@ -136,6 +148,18 @@ export default function ProfileScreen() {
           <SectionLabel>Compete</SectionLabel>
           <LinkRow icon="users" label="Friends" sub="Head-to-head standings" onPress={() => router.push("/friends")} />
           <LinkRow icon="trophy" label="Leaderboard" sub="Daily & all-time XP" onPress={() => router.push("/leaderboard")} />
+        </View>
+
+        {/* Appearance */}
+        <View className="gap-3">
+          <SectionLabel>Reminders</SectionLabel>
+          <Card className="flex-row items-center gap-3">
+            <View className="flex-1">
+              <Text className="text-[17px] font-black text-ink">Daily streak reminder</Text>
+              <Text className="text-[13px] font-semibold text-muted">7 pm</Text>
+            </View>
+            <Switch value={reminderEnabled} onValueChange={(value) => void toggleReminder(value)} />
+          </Card>
         </View>
 
         {/* Appearance */}

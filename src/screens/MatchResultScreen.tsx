@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import Icon from "../components/Icon";
 import FlagImage from "../components/FlagImage";
 import type { RoundResultItem } from "../components/RoundResults";
 import { BRAND } from "../config/brand";
 import { createMatch, getMatch, getMatchResults, matchUrl, winnerFromResults, buildRematchConfig, type Match, type MatchResult } from "../lib/matches";
+import { supabase } from "../lib/supabase";
 import { useGame } from "../state/GameProvider";
 
 async function shareMatch(id: string) {
@@ -18,32 +20,63 @@ export default function MatchResultScreen() {
   const navigate = useNavigate();
   const { state } = useLocation();
   const { id: matchId = null } = useParams();
+  const queryClient = useQueryClient();
   const { openSignIn } = useGame();
-  const [match, setMatch] = useState<Match | null>(null);
-  const [results, setResults] = useState<MatchResult[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [working, setWorking] = useState(false);
   const [reviewOpen, setReviewOpen] = useState(false);
-  const reviewItems = ((state as { items?: RoundResultItem[] } | null)?.items ?? []);
+  const resultState = state as { items?: RoundResultItem[]; guestScore?: number; guestTotal?: number } | null;
+  const reviewItems = resultState?.items ?? [];
+  const guestScore = typeof resultState?.guestScore === "number" ? resultState.guestScore : null;
+  const guestTotal = typeof resultState?.guestTotal === "number" ? resultState.guestTotal : null;
+  const matchQuery = useQuery<Match | null, Error>({
+    queryKey: ["match-detail", matchId],
+    enabled: Boolean(matchId),
+    queryFn: () => (matchId ? getMatch(matchId) : Promise.resolve(null))
+  });
+  const resultsQuery = useQuery<MatchResult[], Error>({
+    queryKey: ["match-results", matchId],
+    enabled: Boolean(matchId),
+    queryFn: () => (matchId ? getMatchResults(matchId) : Promise.resolve([]))
+  });
+  const match = matchQuery.data ?? null;
+  const results = resultsQuery.data ?? [];
   const outcome = winnerFromResults(results);
+  const [subscribed, setSubscribed] = useState(false);
+  const refetchResults = resultsQuery.refetch;
 
   useEffect(() => {
-    if (!matchId) return;
-    let active = true;
-    setError(null);
-    Promise.all([getMatch(matchId), getMatchResults(matchId)])
-      .then(([nextMatch, nextResults]) => {
-        if (!active) return;
-        setMatch(nextMatch);
-        setResults(nextResults);
+    setError(matchQuery.error?.message ?? resultsQuery.error?.message ?? null);
+  }, [matchQuery.error, resultsQuery.error]);
+
+  useEffect(() => {
+    const client = supabase;
+    if (!client || !matchId) return;
+    let poll: number | null = null;
+    let isSubscribed = false;
+    const fallback = window.setTimeout(() => {
+      if (!isSubscribed) poll = window.setInterval(() => void refetchResults(), 10_000);
+    }, 5_000);
+    const channel = client
+      .channel(`match-${matchId}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "match_results", filter: `match_id=eq.${matchId}` }, () => {
+        void queryClient.invalidateQueries({ queryKey: ["match-results", matchId] });
       })
-      .catch((err: Error) => {
-        if (active) setError(err.message);
+      .subscribe((status) => {
+        if (status === "SUBSCRIBED") {
+          isSubscribed = true;
+          setSubscribed(true);
+          window.clearTimeout(fallback);
+          if (poll) window.clearInterval(poll);
+        }
       });
     return () => {
-      active = false;
+      setSubscribed(false);
+      window.clearTimeout(fallback);
+      if (poll) window.clearInterval(poll);
+      void client.removeChannel(channel);
     };
-  }, [matchId]);
+  }, [matchId, queryClient, refetchResults]);
 
   async function rematch() {
     setWorking(true);
@@ -66,18 +99,29 @@ export default function MatchResultScreen() {
         <Icon name="trophy" size={44} className="mx-auto text-primary" />
         <h1 className="mt-3 screen-title">Match results</h1>
         <p className="mt-2 font-bold text-muted">
-          {outcome?.type === "winner" ? `${outcome.winner?.display_name} wins with ${outcome.topScore}.` : outcome?.type === "tie" ? `Tie at ${outcome.topScore}.` : "Waiting for another player."}
+          {outcome?.type === "winner" ? `${outcome.winner?.display_name} wins with ${outcome.topScore}.` : outcome?.type === "tie" ? `Tie at ${outcome.topScore}.` : (
+            <span className="inline-flex items-center gap-2">
+              {subscribed ? <span className="h-2 w-2 rounded-full bg-success animate-pulse" aria-hidden="true" /> : null}
+              Waiting for another player.
+            </span>
+          )}
         </p>
       </section>
       {error && <div className="mt-4 rounded-2xl bg-error/10 p-4 font-bold text-error">{error}</div>}
       <section className="mt-5 grid gap-3">
+        {guestScore != null && guestTotal != null ? (
+          <div className="grid grid-cols-[1fr_auto] items-center gap-3 rounded-2xl border border-primary bg-primary/10 p-4 shadow-card">
+            <span className="truncate font-display text-xl font-black">You <span className="text-sm text-muted">(not saved)</span></span>
+            <span className="font-display text-2xl font-black text-primary">{guestScore}/{guestTotal}</span>
+          </div>
+        ) : null}
         {results.map((result) => (
           <div key={result.user_id} className="grid grid-cols-[1fr_auto] items-center gap-3 rounded-2xl border border-line bg-paper p-4 shadow-card">
             <span className="truncate font-display text-xl font-black">{result.display_name}</span>
             <span className="font-display text-2xl font-black text-primary">{result.score}/{result.total}</span>
           </div>
         ))}
-        {!results.length && <div className="rounded-[24px] bg-paper p-6 text-center font-bold text-muted shadow-card">No results yet.</div>}
+        {!results.length && guestScore == null && <div className="rounded-[24px] bg-paper p-6 text-center font-bold text-muted shadow-card">No results yet.</div>}
       </section>
       {reviewItems.length ? (
         <section className="mt-5 overflow-hidden rounded-[22px] border border-line bg-paper shadow-card">
@@ -109,6 +153,7 @@ export default function MatchResultScreen() {
         </section>
       ) : null}
       <div className="mt-5 grid gap-3">
+        {guestScore != null ? <button onClick={openSignIn} className="btn-primary">Sign in to save your score</button> : null}
         <button onClick={rematch} disabled={working} className="btn-primary">{working ? "Creating..." : "Rematch"}</button>
         {matchId && <button onClick={() => void shareMatch(matchId)} className="btn-secondary">Share challenge</button>}
       </div>

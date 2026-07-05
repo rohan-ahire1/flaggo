@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import Icon from "../components/Icon";
 import { useAuth } from "../auth/AuthProvider";
@@ -6,7 +7,7 @@ import type { ArcadeMode } from "@flaggo/core/types/arcade";
 import { ARCADE_MODES } from "@flaggo/core/types/arcade";
 import type { Topic } from "@flaggo/core/types/topic";
 import { TOPICS } from "@flaggo/core/types/topic";
-import { arcadeBoard, dailyBoard, fetchMyScore, fetchTopScores, type LeaderboardRow, xpBoard } from "../lib/leaderboard";
+import { arcadeBoard, dailyBoard, fetchMyScore, fetchTopScores, triviaBoard, type LeaderboardRow, xpBoard } from "../lib/leaderboard";
 import { dateKey } from "@flaggo/core/utils/dailyChallenge";
 import { trackEvent } from "../lib/analytics";
 import { useGame } from "../state/GameProvider";
@@ -43,16 +44,29 @@ export default function LeaderboardScreen() {
   const [arcadeMode, setArcadeMode] = useState<ArcadeMode>("timed");
   const [topic, setTopic] = useState<Topic>("flag");
   const [triviaMode, setTriviaMode] = useState<TriviaMode>("higher-lower");
-  const [rows, setRows] = useState<LeaderboardRow[]>([]);
-  const [mine, setMine] = useState<LeaderboardRow | null>(null);
-  const [error, setError] = useState<string | null>(null);
 
   const board = useMemo(() => {
     if (tab === "today") return dailyBoard(dateKey());
     if (tab === "xp") return xpBoard();
-    if (tab === "trivia") return `trivia-${triviaMode}`;
+    if (tab === "trivia") return triviaBoard(triviaMode);
     return arcadeBoard(arcadeMode, topic);
   }, [arcadeMode, tab, topic, triviaMode]);
+  const leaderboardQuery = useQuery<{ rows: LeaderboardRow[]; mine: LeaderboardRow | null }, Error>({
+    queryKey: ["leaderboard", board],
+    queryFn: async () => {
+      trackEvent("leaderboard_open", { board });
+      const [nextRows, myRow] = await Promise.all([fetchTopScores(board), user ? fetchMyScore(board) : Promise.resolve(null)]);
+      return { rows: nextRows, mine: myRow && !nextRows.some((row) => row.is_me) ? myRow : null };
+    }
+  });
+  const rows = leaderboardQuery.data?.rows ?? [];
+  const mine = leaderboardQuery.data?.mine ?? null;
+  const error = leaderboardQuery.error?.message ?? null;
+
+  useEffect(() => {
+    void leaderboardQuery.refetch();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
 
   const heading = tab === "today"
     ? "Today"
@@ -61,25 +75,6 @@ export default function LeaderboardScreen() {
       : tab === "trivia"
         ? TRIVIA.find((item) => item.mode === triviaMode)?.label ?? "Trivia"
         : `${MODE_LABEL[arcadeMode]} · ${TOPIC_LABEL[topic]}`;
-
-  useEffect(() => {
-    let active = true;
-    setError(null);
-    setMine(null);
-    trackEvent("leaderboard_open", { board });
-    Promise.all([fetchTopScores(board), user ? fetchMyScore(board) : Promise.resolve(null)])
-      .then(([nextRows, myRow]) => {
-        if (!active) return;
-        setRows(nextRows);
-        setMine(myRow && !nextRows.some((row) => row.is_me) ? myRow : null);
-      })
-      .catch((err: Error) => {
-        if (active) setError(err.message);
-      });
-    return () => {
-      active = false;
-    };
-  }, [board, user]);
 
   return (
     <main className="p-5">
