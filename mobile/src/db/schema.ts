@@ -1,4 +1,4 @@
-import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { integer, primaryKey, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
 // Single-row table (id = 1) holding the player's scalar progress plus the
 // map/array-shaped fields as JSON. Kept as one row because it mirrors the
@@ -26,15 +26,21 @@ export const progress = sqliteTable("progress", {
 
 // Relational spaced-repetition state: one row per country/topic Leitner card.
 // Modelled as a real table (not JSON) so "cards due now" is a plain SQL query.
-export const reviewItems = sqliteTable("review_items", {
-  countryCode: text("country_code").primaryKey(),
-  topic: text("topic"),
-  box: integer("box").notNull().default(0),
-  correctCount: integer("correct_count").notNull().default(0),
-  wrongCount: integer("wrong_count").notNull().default(0),
-  lastSeenAt: text("last_seen_at"),
-  nextReviewAt: text("next_review_at").notNull()
-});
+export const reviewItems = sqliteTable(
+  "review_items",
+  {
+    countryCode: text("country_code").notNull(),
+    topic: text("topic").notNull().default("flag"),
+    box: integer("box").notNull().default(0),
+    correctCount: integer("correct_count").notNull().default(0),
+    wrongCount: integer("wrong_count").notNull().default(0),
+    lastSeenAt: text("last_seen_at"),
+    nextReviewAt: text("next_review_at").notNull()
+  },
+  (table) => ({
+    pk: primaryKey({ columns: [table.countryCode, table.topic] })
+  })
+);
 
 export type ProgressRow = typeof progress.$inferSelect;
 export type ReviewItemRow = typeof reviewItems.$inferSelect;

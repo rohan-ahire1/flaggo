@@ -84,11 +84,6 @@ export default function App() {
     window.history.replaceState({}, "", `${url.pathname}${url.search}${url.hash}`);
   }, []);
   useEffect(() => {
-    if (syncState === "saved") {
-      setToast("Progress saved");
-      const id = window.setTimeout(() => setToast(null), 1600);
-      return () => window.clearTimeout(id);
-    }
     if (syncError) {
       setToast("Sync needs attention");
       const id = window.setTimeout(() => setToast(null), 2200);

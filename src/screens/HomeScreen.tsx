@@ -167,30 +167,19 @@ export default function HomeScreen({
         ))}
       </div>
 
-      {/* friends today */}
-      <div className="mb-3 flex items-center justify-between">
-        <h2 className="font-display text-[17px] font-medium text-ink">Friends</h2>
-        <button onClick={onOpenLeaderboard} className="text-[13px] font-semibold text-primary">
-          See all
-        </button>
-      </div>
-      <div className="mb-7 flex gap-4">
-        {["Mia", "Leo", "Ada"].map((name, i) => (
-          <button key={name} onClick={onOpenFriends} className="flex flex-col items-center gap-1.5">
-            <span
-              className="h-[52px] w-[52px] rounded-full border-[2.5px] border-line"
-              style={{ background: ["#c9b79a", "#a9bcc4", "#cdb9c4"][i] }}
-            />
-            <span className="text-xs font-semibold text-ink">{name}</span>
-          </button>
-        ))}
-        <button onClick={onOpenFriends} className="flex flex-col items-center gap-1.5">
-          <span className="grid h-[52px] w-[52px] place-items-center rounded-full border-2 border-dashed border-muted text-2xl text-muted">
-            +
-          </span>
-          <span className="text-xs font-semibold text-muted">Invite</span>
-        </button>
-      </div>
+      <button
+        onClick={onOpenFriends}
+        className="mb-7 flex w-full items-center gap-3.5 rounded-[20px] border-[1.5px] border-line bg-surface p-3.5 text-left"
+      >
+        <span className="grid h-[46px] w-[46px] flex-none place-items-center rounded-[14px] bg-accent text-white">
+          <Icon name="trophy" size={24} />
+        </span>
+        <span className="flex-1">
+          <span className="block font-display text-[18px] font-medium text-ink">Friends &amp; leaderboards</span>
+          <span className="block text-[13px] text-muted">Play a challenge to build your friends list</span>
+        </span>
+        <Icon name="chevron" size={20} className="text-muted" />
+      </button>
 
       {/* more */}
       <div className="grid grid-cols-2 gap-3">

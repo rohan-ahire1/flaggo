@@ -12,11 +12,12 @@ import { buildArcadeQuestions, buildLessonQuestions } from "@/quiz/buildQuestion
 import { describeQuestion, questionLabel, type QuizOption } from "@/quiz/describeQuestion";
 import { useProgress } from "@/state/ProgressProvider";
 import { useAuth } from "@/auth/AuthProvider";
+import { useNameClaim } from "@/components/NameClaimProvider";
 import { promptChallenge } from "@/social/challenge";
 import { themeColor } from "@/theme/palettes";
 import { useThemeStore } from "@/theme/store";
 import type { AppProgress } from "@/types/progress";
-import type { ArcadeMode } from "@/types/arcade";
+import { arcadeKey, type ArcadeMode } from "@/types/arcade";
 import type { Country } from "@/types/country";
 import type { Topic } from "@/types/topic";
 import { generateLessonQuestions, generateReviewQuestions, type Question } from "@/utils/quiz";
@@ -25,6 +26,7 @@ import { deckCountries } from "@/utils/decks";
 import { countries } from "@/data/countries";
 import { buildDailyQuiz, dateKey, applyDailyResult } from "@/utils/dailyChallenge";
 import { buildMatchQuestions, normalizeMatchConfig, submitMatchResult, type MatchConfig } from "@/lib/matches";
+import { arcadeBoard, dailyBoard, submitScore } from "@/lib/leaderboard";
 import { persistArcadeBest } from "@/utils/arcade";
 import { updateReviewState } from "@/utils/spacedRepetition";
 
@@ -74,11 +76,16 @@ export default function QuizScreen() {
   const isDaily = params.mode === "daily";
   const isMatch = params.mode === "match";
   const arcadeMode = (params.amode as ArcadeMode) ?? "timed";
+  const isTimedArcade = isArcade && (arcadeMode === "timed" || arcadeMode === "hard");
+  const arcadeLimit = arcadeMode === "hard" ? 45 : 60;
 
   const { progress, setProgress } = useProgress();
-  const { displayName } = useAuth();
+  const { user, displayName } = useAuth();
+  const { ensureName } = useNameClaim();
   const theme = useThemeStore((s) => s.theme);
   const draft = useRef<AppProgress>(progress);
+  const finishing = useRef(false);
+  const scoreRef = useRef(0);
 
   const items: QuizItem[] = useMemo(() => {
     if (isMatch && params.seed && params.config) {
@@ -114,13 +121,27 @@ export default function QuizScreen() {
   const [score, setScore] = useState(0);
   const [results, setResults] = useState<RoundResultItem[]>([]);
   const [finished, setFinished] = useState(false);
-  const [elapsed, setElapsed] = useState(0);
+  const [startedAt] = useState(() => Date.now());
+  const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
     if (finished) return;
-    const id = setInterval(() => setElapsed((e) => e + 1), 1000);
+    const id = setInterval(() => setNow(Date.now()), isTimedArcade ? 250 : 1000);
     return () => clearInterval(id);
-  }, [finished]);
+  }, [finished, isTimedArcade]);
+
+  const elapsed = Math.floor((now - startedAt) / 1000);
+  const remaining = isTimedArcade ? Math.max(0, arcadeLimit - Math.floor((now - startedAt) / 1000)) : null;
+
+  useEffect(() => {
+    if (!isTimedArcade || finished || remaining !== 0) return;
+    if (revealed) {
+      const id = setTimeout(() => void finish(), 250);
+      return () => clearTimeout(id);
+    }
+    void finish();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [finished, isTimedArcade, remaining, revealed]);
 
   if (!items.length) {
     return (
@@ -150,6 +171,7 @@ export default function QuizScreen() {
     let next = updateReviewState(q.correctCountry.code, qTopic, correct, draft.current);
     if (correct) {
       next = { ...next, xp: next.xp + XP_PER_CORRECT };
+      scoreRef.current += 1;
       setScore((s) => s + 1);
     }
     draft.current = next;
@@ -169,6 +191,10 @@ export default function QuizScreen() {
 
   function next() {
     if (!revealed) return;
+    if (isArcade && arcadeMode === "sudden" && !wasCorrect) {
+      finish();
+      return;
+    }
     if (index + 1 >= total) {
       finish();
     } else {
@@ -179,21 +205,24 @@ export default function QuizScreen() {
   }
 
   function finish() {
+    if (finishing.current) return;
+    finishing.current = true;
     let done = draft.current;
     if (isMatch) {
       draft.current = done;
       setProgress(done);
       // Submit the result (best-effort — needs sign-in) then show the compare screen.
       if (params.matchId) {
-        void submitMatchResult(params.matchId, score, total, displayName ?? "Player").catch(() => undefined);
-        router.replace({ pathname: "/match/[id]", params: { id: params.matchId, my: String(score) } });
+        void submitMatchResult(params.matchId, scoreRef.current, total, displayName ?? "Player").catch(() => undefined);
+        router.replace({ pathname: "/match/[id]", params: { id: params.matchId, my: String(scoreRef.current) } });
       }
       return;
     }
+    const scoreToSubmit = scoreRef.current;
     if (isDaily) {
-      done = applyDailyResult(done, dateKey(), { score, total });
+      done = applyDailyResult(done, dateKey(), { score: scoreToSubmit, total });
     } else if (isArcade) {
-      done = persistArcadeBest(done, arcadeMode, topic, score);
+      done = persistArcadeBest(done, arcadeMode, topic, scoreToSubmit);
     } else {
       done = bumpStreak(done);
       if (lesson && !done.completedLessonIds.includes(lesson.id)) {
@@ -203,18 +232,42 @@ export default function QuizScreen() {
     draft.current = done;
     setProgress(done);
     setFinished(true);
+    if (user && isDaily) {
+      void ensureName()
+        .then((name) => {
+          if (name) return submitScore(dailyBoard(dateKey()), scoreToSubmit, name);
+        })
+        .catch(() => undefined);
+    } else if (user && isArcade) {
+      const best = Math.max(draft.current.arcade[arcadeKey(arcadeMode, topic)] ?? 0, scoreToSubmit);
+      void ensureName()
+        .then((name) => {
+          if (name) return submitScore(arcadeBoard(arcadeMode, topic), best, name);
+        })
+        .catch(() => undefined);
+    }
   }
 
   if (finished) {
+    const finalScore = Math.max(score, scoreRef.current);
     const streak = isDaily ? draft.current.daily.streak : isArcade ? undefined : draft.current.streak;
     const missed = results.filter((item) => !item.correct).length;
+    const signedOutCompeteAction = !user && (isDaily || isArcade)
+      ? [
+          {
+            label: "Sign in to compete",
+            variant: "secondary" as const,
+            onPress: () => router.replace("/profile")
+          }
+        ]
+      : [];
     const actions = isDaily
       ? [
           {
             label: "Challenge a friend",
             variant: "primary" as const,
             icon: "users" as const,
-            onPress: () => void promptChallenge(score)
+            onPress: () => void promptChallenge(finalScore)
           },
           {
             label: "See leaderboard",
@@ -222,6 +275,7 @@ export default function QuizScreen() {
             icon: "trophy" as const,
             onPress: () => router.replace("/leaderboard")
           },
+          ...signedOutCompeteAction,
           { label: "Done", variant: "secondary" as const, onPress: () => dismiss() }
         ]
       : [
@@ -245,15 +299,16 @@ export default function QuizScreen() {
                 params: { mode: params.mode ?? "lesson", topic, amode: arcadeMode }
               })
           },
+          ...signedOutCompeteAction,
           { label: "Done", variant: "secondary" as const, onPress: () => dismiss() }
         ];
     return (
       <RoundResults
-        score={score}
+        score={finalScore}
         total={total}
         items={results}
         streak={streak}
-        caption={`${mmss(elapsed)} · +${score * XP_PER_CORRECT} XP`}
+        caption={`${mmss(elapsed)} · +${finalScore * XP_PER_CORRECT} XP`}
         actions={actions}
       />
     );
@@ -276,13 +331,20 @@ export default function QuizScreen() {
 
       <View className="w-full max-w-[900px] self-center flex-row items-center justify-between px-5 pb-2 lg:px-8">
         <Text className="text-[15px] font-bold text-muted">
-          Question {index + 1} of {total}
+          Question {index + 1}{isArcade ? "" : ` of ${total}`}
         </Text>
         <View className="flex-row gap-2">
-          <Pill icon="clock" label={mmss(elapsed)} tone="muted" />
+          <Pill icon="clock" label={mmss(remaining ?? elapsed)} tone="muted" />
           <Pill icon="star" label={String(score)} tone="accent" />
         </View>
       </View>
+      {isArcade ? (
+        <View className="w-full max-w-[900px] self-center px-5 pb-2 lg:px-8">
+          <Text className="text-[13px] font-bold text-muted">
+            {arcadeMode === "timed" ? "60s on the clock" : arcadeMode === "hard" ? "45s · lookalike flags" : "One wrong answer ends the run"}
+          </Text>
+        </View>
+      ) : null}
 
       <ScrollView contentContainerClassName="w-full max-w-[900px] self-center px-5 pb-3 lg:px-8">
         <QuestionCard question={q} revealed={revealed} selectedKey={selectedKey} onSelect={select} />
@@ -316,7 +378,7 @@ export default function QuizScreen() {
               : "Tap the answer you think is right"}
           </Text>
           <PillButton
-            label={index + 1 >= total ? "See results" : "Next question"}
+            label={index + 1 >= total || (isArcade && arcadeMode === "sudden" && revealed && !wasCorrect) ? "See results" : "Next question"}
             variant="primary"
             iconRight="arrow-right"
             onPress={next}

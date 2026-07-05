@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { useAuth } from "../auth/AuthProvider";
+import { useNameClaim } from "../components/NameClaimProvider";
 import FeedbackPanel from "../components/FeedbackPanel";
 import FlagImage from "../components/FlagImage";
 import Icon from "../components/Icon";
@@ -8,7 +9,6 @@ import QuestionCard from "../components/QuestionCard";
 import type { Country } from "../types/country";
 import { getMatch, getMatchResults, buildMatchQuestions, submitMatchResult, type Match, type MatchQuestion, type MatchResult } from "../lib/matches";
 import { trackEvent } from "../lib/analytics";
-import { updateDisplayName } from "../lib/leaderboard";
 
 const WorldMap = lazy(() => import("../components/WorldMap"));
 
@@ -36,7 +36,8 @@ export default function MatchScreen({
   onBack: () => void;
   onSignIn: () => void;
 }) {
-  const { user, displayName, setDisplayName } = useAuth();
+  const { user } = useAuth();
+  const { ensureName } = useNameClaim();
   const [match, setMatch] = useState<Match | null>(null);
   const [results, setResults] = useState<MatchResult[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -69,16 +70,6 @@ export default function MatchScreen({
   useEffect(() => {
     if (matchId && user) trackEvent("match_accept", { id: matchId });
   }, [matchId, user]);
-
-  async function ensureName() {
-    if (!user) return null;
-    if (displayName?.trim()) return displayName;
-    const entered = window.prompt("Choose a match display name");
-    if (!entered) return null;
-    const clean = await updateDisplayName(user.id, entered);
-    setDisplayName(clean);
-    return clean;
-  }
 
   function answer(ok: boolean, wrongCode?: string) {
     if (!question || feedback) return;
