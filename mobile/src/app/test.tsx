@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router, useLocalSearchParams } from "expo-router";
@@ -12,6 +12,9 @@ import { useProgress } from "@/state/ProgressProvider";
 import { getPopularityGroups } from "@flaggo/core/utils/popularity";
 import { getCapitalDistractors, getDistractors, shuffleArray } from "@flaggo/core/utils/quiz";
 import { updateReviewState } from "@flaggo/core/utils/spacedRepetition";
+import { generateLessons } from "@flaggo/core/utils/lessonGenerator";
+import { awardBadges, evaluateBadges } from "@flaggo/core/game/badges";
+import { earnedBadgeResults } from "@/lib/badges";
 import type { AppProgress } from "@flaggo/core/types/progress";
 import type { Topic } from "@flaggo/core/types/topic";
 
@@ -22,6 +25,9 @@ export default function TestScreen() {
   const topic = (params.topic as Topic) ?? "flag";
   const isRecall = params.mode !== "options";
   const { progress, setProgress } = useProgress();
+  const progressRef = useRef(progress);
+  const scoreRef = useRef(0);
+  const lessons = useMemo(() => generateLessons(countries), []);
 
   const questions = useMemo(() => {
     const pool = topic === "capital" ? countries.filter((c) => c.capital?.trim()) : countries;
@@ -35,6 +41,7 @@ export default function TestScreen() {
   const [score, setScore] = useState(0);
   const [results, setResults] = useState<RoundResultItem[]>([]);
   const [finished, setFinished] = useState(false);
+  const [earnedBadgeIds, setEarnedBadgeIds] = useState<string[]>([]);
 
   const country = questions[index];
   const answer = topic === "capital" ? country?.capital?.trim() ?? "" : country?.name ?? "";
@@ -53,6 +60,7 @@ export default function TestScreen() {
         total={questions.length}
         items={results}
         caption={`${topic === "capital" ? "Capitals" : "Flags"} test`}
+        earnedBadges={earnedBadgeResults(earnedBadgeIds)}
         actions={[
           { label: "Done", variant: "primary", icon: "check", onPress: () => dismiss() }
         ]}
@@ -61,9 +69,14 @@ export default function TestScreen() {
   }
 
   function grade(ok: boolean, chosenLabel?: string) {
-    if (ok) setScore((s) => s + 1);
-    const next: AppProgress = updateReviewState(country.code, topic, ok, progress);
-    setProgress({ ...next, xp: next.xp + (ok ? 5 : 0) });
+    if (ok) {
+      scoreRef.current += 1;
+      setScore((s) => s + 1);
+    }
+    const next: AppProgress = updateReviewState(country.code, topic, ok, progressRef.current);
+    const withXp = { ...next, xp: next.xp + (ok ? 5 : 0) };
+    progressRef.current = withXp;
+    setProgress(withXp);
     setResults((r) => [
       ...r,
       { label: topic === "capital" ? `Capital of ${country.name}` : `Flag of ${country.name}`, correct: ok, chosen: ok ? undefined : chosenLabel, answer: ok ? undefined : answer }
@@ -84,6 +97,12 @@ export default function TestScreen() {
 
   function advance() {
     if (index + 1 >= questions.length) {
+      let done = progressRef.current;
+      const newIds = evaluateBadges(done, countries, lessons, { kind: "test", score: scoreRef.current, total: questions.length });
+      if (newIds.length) done = awardBadges(done, newIds);
+      progressRef.current = done;
+      setEarnedBadgeIds(newIds);
+      setProgress(done);
       setFinished(true);
     } else {
       setIndex((i) => i + 1);

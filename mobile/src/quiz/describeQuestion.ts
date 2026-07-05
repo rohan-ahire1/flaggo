@@ -31,7 +31,7 @@ export function questionLabel(q: Question): string {
     case "guess-currency":
       return `Currency of ${q.correctCountry.name}`;
     case "currency-to-country":
-      return `${q.correctCurrency} → country`;
+      return `${q.currencyClue} → country`;
     case "guess-language":
       return `Language of ${q.correctCountry.name}`;
     case "language-to-country":
@@ -120,7 +120,7 @@ export function describeQuestion(q: Question): DescribedQuestion {
       };
     case "currency-to-country":
       return {
-        promptText: q.correctCurrency,
+        promptText: q.currencyClue,
         subText: "Which country uses this currency?",
         layout: "options",
         options: countryOptions(q.options, q.correctCountry.code)

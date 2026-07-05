@@ -105,6 +105,12 @@ topic, `review` map, totals, daily, arcade scores, decks). It is stored:
 XP is also pushed to the `xp-alltime` leaderboard whenever the user has a public-safe
 display name (`App.tsx` effect → `submitScore`).
 
+Achievements are evaluated by pure shared core logic (`packages/core/src/game/badges.ts`)
+from the progress blob plus bundled countries/lessons and optional round context. Earned
+badges live in `progress.badges` as `{ id, earnedAt }` records, so no schema migration is
+needed. Badges are never revoked; progress normalization sanitizes/dedupes them, and
+cross-device merge unions badge ids while keeping the earliest `earnedAt`.
+
 ## 4. Supabase data model
 
 Migrations in `supabase/migrations/` (apply in filename order); `supabase/setup.sql` is a

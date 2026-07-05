@@ -17,6 +17,11 @@ export type Deck = {
   createdAt: string;
 };
 
+export type EarnedBadge = {
+  id: string;
+  earnedAt: string;
+};
+
 export type ReviewState = {
   countryCode: string;
   topic?: Topic;
@@ -40,6 +45,7 @@ export type AppProgress = {
   daily: DailyProgress;
   arcade: Record<string, number>;
   decks: Deck[];
+  badges: EarnedBadge[];
 };
 
 export const defaultProgress: AppProgress = {
@@ -54,5 +60,6 @@ export const defaultProgress: AppProgress = {
   totalWrong: 0,
   daily: { lastDate: null, streak: 0, best: 0, history: {} },
   arcade: {},
-  decks: []
+  decks: [],
+  badges: []
 };

@@ -13,8 +13,14 @@ import { useNameClaim } from "@/components/NameClaimProvider";
 import { submitScore } from "@/lib/leaderboard";
 import { arcadeScore } from "@flaggo/core/utils/arcade";
 import { triviaBoard } from "@flaggo/core/game/boards";
+import { awardBadges, evaluateBadges } from "@flaggo/core/game/badges";
 import { hashStringToSeed, mulberry32 } from "@flaggo/core/utils/seededRandom";
 import { buildTrivia, type TriviaMode, type TriviaRound } from "@flaggo/core/utils/trivia";
+import { generateLessons } from "@flaggo/core/utils/lessonGenerator";
+import { earnedBadgeResults } from "@/lib/badges";
+import Icon from "@/components/Icon";
+import { themeColor } from "@/theme/palettes";
+import { useThemeStore } from "@/theme/store";
 
 const MODES: { mode: TriviaMode; label: string }[] = [
   { mode: "higher-lower", label: "Higher/Lower" },
@@ -36,6 +42,8 @@ export default function TriviaScreen() {
   const { progress, setProgress } = useProgress();
   const { user } = useAuth();
   const { ensureName } = useNameClaim();
+  const theme = useThemeStore((s) => s.theme);
+  const lessons = useMemo(() => generateLessons(countries), []);
   const [mode, setMode] = useState<TriviaMode>("higher-lower");
   const [runMode, setRunMode] = useState<RunMode>("timed");
   const [running, setRunning] = useState(false);
@@ -45,6 +53,7 @@ export default function TriviaScreen() {
   const [answers, setAnswers] = useState<boolean[]>([]);
   const [feedback, setFeedback] = useState<{ ok: boolean; round: TriviaRound } | null>(null);
   const [remaining, setRemaining] = useState(60);
+  const [earnedBadgeIds, setEarnedBadgeIds] = useState<string[]>([]);
 
   const rounds = useMemo(() => {
     const rng = mulberry32(hashStringToSeed(seed));
@@ -71,6 +80,7 @@ export default function TriviaScreen() {
     setAnswers([]);
     setFeedback(null);
     setRemaining(60);
+    setEarnedBadgeIds([]);
   }
   function answer(ok: boolean) {
     if (!round || feedback || done) return;
@@ -83,10 +93,14 @@ export default function TriviaScreen() {
     if (done) return;
     const finalScore = arcadeScore(runMode === "sudden" ? "sudden" : "timed", finalAnswers);
     const key = triviaKey(mode);
-    setProgress({
+    let next = {
       ...progress,
       arcade: { ...progress.arcade, [key]: Math.max(progress.arcade[key] ?? 0, finalScore) }
-    });
+    };
+    const newIds = evaluateBadges(next, countries, lessons, { kind: "trivia", score: finalScore, total: finalAnswers.length });
+    if (newIds.length) next = awardBadges(next, newIds);
+    setEarnedBadgeIds(newIds);
+    setProgress(next);
     setDone(true);
     setRunning(false);
     if (user) {
@@ -115,6 +129,20 @@ export default function TriviaScreen() {
             <Card className="items-center gap-1 py-6">
               <Text className="text-[44px] font-black text-success">{score}</Text>
               <Text className="font-bold text-muted">Best {Math.max(best, score)}</Text>
+            </Card>
+          ) : null}
+          {done && earnedBadgeIds.length ? (
+            <Card className="flex-row items-center gap-3 border-primary/30 bg-primary/10">
+              <View className="h-11 w-11 items-center justify-center rounded-full bg-primary">
+                <Icon name="trophy" size={21} color="white" />
+              </View>
+              <View className="flex-1">
+                <SectionLabel>Badge earned!</SectionLabel>
+                <Text className="text-[17px] font-extrabold text-ink">
+                  {earnedBadgeResults(earnedBadgeIds).map((badge) => badge.name).join(", ")}
+                </Text>
+              </View>
+              <Icon name={earnedBadgeResults(earnedBadgeIds)[0]?.icon ?? "trophy"} size={22} color={themeColor(theme, "primary")} />
             </Card>
           ) : null}
           <View className="gap-2">

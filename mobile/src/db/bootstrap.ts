@@ -19,6 +19,7 @@ export const SCHEMA_SQL = `
     daily_history TEXT NOT NULL DEFAULT '{}',
     arcade TEXT NOT NULL DEFAULT '{}',
     decks TEXT NOT NULL DEFAULT '[]',
+    badges TEXT NOT NULL DEFAULT '[]',
     updated_at TEXT,
     user_id TEXT,
     needs_merge INTEGER NOT NULL DEFAULT 0
@@ -58,14 +59,22 @@ function migrationBatchSql() {
   return `BEGIN TRANSACTION;\n${REVIEW_ITEMS_MIGRATION_SQL.join("\n")}\nCOMMIT;`;
 }
 
+function needsProgressBadgesMigration(rows: TableInfoRow[]): boolean {
+  return rows.length > 0 && !rows.some((row) => row.name === "badges");
+}
+
 export function bootstrapDbSync(db: SQLiteDatabase): void {
   const rows = db.getAllSync<TableInfoRow>("PRAGMA table_info(review_items)");
   if (needsReviewItemsMigration(rows)) db.execSync(migrationBatchSql());
   db.execSync(SCHEMA_SQL);
+  const progressRows = db.getAllSync<TableInfoRow>("PRAGMA table_info(progress)");
+  if (needsProgressBadgesMigration(progressRows)) db.execSync("ALTER TABLE progress ADD COLUMN badges TEXT NOT NULL DEFAULT '[]';");
 }
 
 export async function bootstrapDbAsync(db: SQLiteDatabase): Promise<void> {
   const rows = await db.getAllAsync<TableInfoRow>("PRAGMA table_info(review_items)");
   if (needsReviewItemsMigration(rows)) await db.execAsync(migrationBatchSql());
   await db.execAsync(SCHEMA_SQL);
+  const progressRows = await db.getAllAsync<TableInfoRow>("PRAGMA table_info(progress)");
+  if (needsProgressBadgesMigration(progressRows)) await db.execAsync("ALTER TABLE progress ADD COLUMN badges TEXT NOT NULL DEFAULT '[]';");
 }

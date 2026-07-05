@@ -10,7 +10,9 @@ import type { Country } from "@flaggo/core/types/country";
 import { updateStreak } from "@flaggo/core/utils/date";
 import { generateMapQuestions, type MapMode, type MapQuestion } from "@flaggo/core/utils/quiz";
 import { updateReviewState } from "@flaggo/core/utils/spacedRepetition";
+import { awardBadges, evaluateBadges } from "@flaggo/core/game/badges";
 import { useGame } from "../state/GameProvider";
+import { earnedBadgeResults } from "../lib/badges";
 
 const WorldMap = lazy(() => import("../components/WorldMap"));
 
@@ -20,7 +22,7 @@ export default function MapPlayScreen() {
   const navigate = useNavigate();
   const confirm = useConfirm();
   const { state } = useLocation();
-  const { countries: allCountries, progress, setProgress, startMapPractice } = useGame();
+  const { countries: allCountries, lessons, progress, setProgress, startMapPractice } = useGame();
   const routeState = state as MapRouteState;
   // Keyed memo: a fresh array each render would regenerate questions mid-round.
   const codesKey = routeState?.countryCodes.join(",") ?? "";
@@ -45,6 +47,7 @@ export default function MapPlayScreen() {
   const [feedback, setFeedback] = useState<{ ok: boolean; country: Country; wrongCode?: string } | null>(null);
   const [items, setItems] = useState<RoundResultItem[]>([]);
   const [finished, setFinished] = useState(false);
+  const [earnedBadgeIds, setEarnedBadgeIds] = useState<string[]>([]);
   const question = questions[index];
   const target = question ? countryByCode.get(question.targetCode) : undefined;
   const isIdentify = question?.type === "identify-country";
@@ -75,7 +78,11 @@ export default function MapPlayScreen() {
   function finishRound() {
     const total = questions.length || 1;
     const bonusXp = 10;
-    const next = updateStreak({ ...currentProgress, xp: currentProgress.xp + bonusXp });
+    let next = updateStreak({ ...currentProgress, xp: currentProgress.xp + bonusXp });
+    const newIds = evaluateBadges(next, allCountries, lessons, { kind: "map", score: correct, total });
+    if (newIds.length) next = awardBadges(next, newIds);
+    setEarnedBadgeIds(newIds);
+    setCurrentProgress(next);
     setProgress(next);
     setFinished(true);
   }
@@ -108,6 +115,7 @@ export default function MapPlayScreen() {
         total={questions.length || 1}
         items={items}
         caption={`+${xp + 10} XP`}
+        earnedBadges={earnedBadgeResults(earnedBadgeIds)}
         actions={[
           { label: "Play again", variant: "primary", icon: "play", onPress: () => startMapPractice(mode, countries) },
           { label: "Back to map menu", variant: "secondary", icon: "globe", onPress: onExit }

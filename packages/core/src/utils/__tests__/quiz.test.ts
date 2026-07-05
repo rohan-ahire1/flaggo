@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { Country } from "../../types/country";
 import type { Lesson } from "../../types/lesson";
-import { generateCurrencyQuestions, generateLanguageQuestions, generateLessonQuestions, generateMapQuestions, generateNeighborQuestions, getCapitalDistractors } from "../quiz";
+import { generateCurrencyQuestions, generateLanguageQuestions, generateLessonQuestions, generateMapQuestions, generateNeighborQuestions, getCapitalDistractors, getCurrencyClue } from "../quiz";
 import { hashStringToSeed, mulberry32 } from "../seededRandom";
 
 function country(code: string, name: string, continent: Country["continent"], capital?: string, ccn3?: string, extra: Partial<Country> = {}): Country {
@@ -89,6 +89,19 @@ describe("attribute quiz generation", () => {
         });
       }
     });
+  });
+
+  it("uses non-leaking currency clues for country-picking prompts", () => {
+    expect(getCurrencyClue(country("BA", "Bosnia and Herzegovina", "Europe", "Sarajevo", "070", {
+      currencyCode: "BAM",
+      currencyName: "Bosnia and Herzegovina convertible mark"
+    }))).toBe("Convertible mark (BAM)");
+
+    expect(getCurrencyClue(country("IN", "India", "Asia", "New Delhi", "356", {
+      currencyCode: "INR",
+      currencyName: "Indian rupee",
+      demonym: "Indian"
+    }))).toBe("Rupee (INR)");
   });
 
   it("generates language questions with distractors outside the country's actual languages", () => {

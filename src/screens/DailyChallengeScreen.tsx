@@ -11,9 +11,10 @@ import { useNameClaim } from "../components/NameClaimProvider";
 import { applyDailyResult, buildDailyQuiz, dateKey, type DailyQuestion } from "@flaggo/core/utils/dailyChallenge";
 import { updateReviewState } from "@flaggo/core/utils/spacedRepetition";
 import { answerLabelForWrapper } from "@flaggo/core/game/answerLabel";
+import { awardBadges, evaluateBadges } from "@flaggo/core/game/badges";
 import { trackEvent } from "../lib/analytics";
+import { earnedBadgeResults } from "../lib/badges";
 import { dailyBoard, submitScore } from "../lib/leaderboard";
-import { BRAND } from "../config/brand";
 import { useGame } from "../state/GameProvider";
 
 export default function DailyChallengeScreen() {
@@ -21,7 +22,7 @@ export default function DailyChallengeScreen() {
   const confirm = useConfirm();
   const { user } = useAuth();
   const { ensureName } = useNameClaim();
-  const { countries, progress, setProgress, openSignIn, createAndShareChallenge } = useGame();
+  const { countries, lessons, progress, setProgress, openSignIn, createAndShareChallenge } = useGame();
   const today = dateKey();
   const questions = useMemo(() => buildDailyQuiz(today, countries), [countries, today]);
   const [index, setIndex] = useState(0);
@@ -30,6 +31,7 @@ export default function DailyChallengeScreen() {
   const [feedback, setFeedback] = useState<{ ok: boolean; question: DailyQuestion; wrongCode?: string } | null>(null);
   const [complete, setComplete] = useState(false);
   const [items, setItems] = useState<RoundResultItem[]>([]);
+  const [earnedBadgeIds, setEarnedBadgeIds] = useState<string[]>([]);
   const question = questions[index];
 
   useEffect(() => {
@@ -58,7 +60,10 @@ export default function DailyChallengeScreen() {
 
   async function finish() {
     const result = { score: correct, total: questions.length };
-    const next = applyDailyResult(currentProgress, today, result);
+    let next = applyDailyResult(currentProgress, today, result);
+    const newIds = evaluateBadges(next, countries, lessons, { kind: "daily", score: result.score, total: result.total });
+    if (newIds.length) next = awardBadges(next, newIds);
+    setEarnedBadgeIds(newIds);
     setCurrentProgress(next);
     setProgress(next);
     setComplete(true);
@@ -71,12 +76,6 @@ export default function DailyChallengeScreen() {
     setFeedback(null);
     if (index >= questions.length - 1) void finish();
     else setIndex((value) => value + 1);
-  }
-
-  async function share() {
-    const text = `${BRAND.name} Daily ${today} - ${correct}/${questions.length} streak ${currentProgress.daily.streak}\n${BRAND.url}`;
-    if (navigator.share) await navigator.share({ text });
-    else await navigator.clipboard?.writeText(text);
   }
 
   async function closeRound() {
@@ -100,12 +99,12 @@ export default function DailyChallengeScreen() {
         items={items}
         streak={currentProgress.daily.streak}
         caption={`+${correct * 10} XP · streak ${currentProgress.daily.streak}`}
+        earnedBadges={earnedBadgeResults(earnedBadgeIds)}
         actions={[
           { label: "Challenge a friend", variant: "primary", icon: "flag", onPress: () => void createAndShareChallenge() },
           { label: "See leaderboard", variant: "secondary", icon: "trophy", onPress: () => navigate("/leaderboard") },
           { label: "Done", variant: "secondary", icon: "today", onPress: () => navigate("/") },
-          ...(!user ? [{ label: "Sign in to compete", variant: "secondary" as const, icon: "user" as const, onPress: openSignIn }] : []),
-          { label: "Share score", variant: "secondary", icon: "bolt", onPress: () => void share() }
+          ...(!user ? [{ label: "Sign in to compete", variant: "ghost" as const, onPress: openSignIn }] : [])
         ]}
       />
     );

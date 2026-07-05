@@ -23,6 +23,12 @@ export type ResultAction = {
   icon?: IconName;
 };
 
+export type EarnedBadgeResult = {
+  id: string;
+  name: string;
+  icon: IconName;
+};
+
 function title(score: number, total: number) {
   if (total > 0 && score === total) return "Perfect round!";
   if (score / Math.max(1, total) >= 0.5) return "Great round!";
@@ -35,6 +41,7 @@ export default function RoundResults({
   items,
   streak,
   caption,
+  earnedBadges,
   actions
 }: {
   score: number;
@@ -42,6 +49,7 @@ export default function RoundResults({
   items: RoundResultItem[];
   streak?: number;
   caption?: string;
+  earnedBadges?: EarnedBadgeResult[];
   actions: ResultAction[];
 }) {
   const theme = useThemeStore((s) => s.theme);
@@ -65,6 +73,23 @@ export default function RoundResults({
               {streak} day streak <Text className="font-bold text-muted">· +1 today</Text>
             </Text>
           </Card>
+        ) : null}
+
+        {earnedBadges?.length ? (
+          <Animated.View entering={FadeInUp.duration(220)}>
+            <Card className="flex-row items-center gap-3 border-primary/30 bg-primary/10 py-3">
+              <View className="h-11 w-11 items-center justify-center rounded-full bg-primary">
+                <Icon name="trophy" size={21} color="white" />
+              </View>
+              <View className="flex-1">
+                <SectionLabel>Badge earned!</SectionLabel>
+                <Text className="text-[17px] font-extrabold text-ink">
+                  {earnedBadges.map((badge) => badge.name).join(", ")}
+                </Text>
+              </View>
+              <Icon name={earnedBadges[0].icon} size={22} color={themeColor(theme, "primary")} />
+            </Card>
+          </Animated.View>
         ) : null}
 
         <Card className="flex-row items-center gap-3 py-3">

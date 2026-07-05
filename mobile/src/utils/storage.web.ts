@@ -76,6 +76,7 @@ function hasProgress(progress: AppProgress) {
       progress.daily.lastDate ||
       Object.keys(progress.daily.history).length ||
       Object.keys(progress.arcade).length ||
-      progress.decks.length
+      progress.decks.length ||
+      progress.badges.length
   );
 }

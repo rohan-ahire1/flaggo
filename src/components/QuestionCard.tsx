@@ -176,7 +176,7 @@ export default function QuestionCard({
     return (
       <div className="space-y-5">
         <div className="rounded-[28px] bg-paper p-6 text-center shadow-card">
-          <p className="font-display text-4xl font-black text-ink">{question.correctCurrency}</p>
+          <p className="font-display text-4xl font-black text-ink">{question.currencyClue}</p>
         </div>
         <div>
           <Eyebrow icon="coin">Currency to country</Eyebrow>

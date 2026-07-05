@@ -10,6 +10,7 @@ import ProgressBar from "../components/ProgressBar";
 import QuestionCard from "../components/QuestionCard";
 import type { RoundResultItem } from "../components/RoundResults";
 import { answerLabel, answerLabelForWrapper } from "@flaggo/core/game/answerLabel";
+import { awardBadges, evaluateBadges } from "@flaggo/core/game/badges";
 import { getMatch, getMatchResults, buildMatchQuestions, submitMatchResult, type Match, type MatchQuestion, type MatchResult } from "../lib/matches";
 import { writePendingMatch } from "../lib/pendingMatch";
 import { trackEvent } from "../lib/analytics";
@@ -22,7 +23,7 @@ export default function MatchScreen() {
   const { id: matchId = null } = useParams();
   const { user } = useAuth();
   const { ensureName } = useNameClaim();
-  const { countries } = useGame();
+  const { countries, lessons, progress, setProgress } = useGame();
   const [error, setError] = useState<string | null>(null);
   const [index, setIndex] = useState(0);
   const [correct, setCorrect] = useState(0);
@@ -73,9 +74,15 @@ export default function MatchScreen() {
 
   async function finish(finalScore = correct) {
     if (!matchId || submitting) return;
+    let next = progress;
+    const newIds = evaluateBadges(next, countries, lessons, { kind: "match", score: finalScore, total: questions.length });
+    if (newIds.length) {
+      next = awardBadges(next, newIds);
+      setProgress(next);
+    }
     if (!user) {
       writePendingMatch({ matchId, score: finalScore, total: questions.length, at: Date.now() });
-      navigate(`/match/${matchId}/result`, { state: { items, guestScore: finalScore, guestTotal: questions.length } });
+      navigate(`/match/${matchId}/result`, { state: { items, guestScore: finalScore, guestTotal: questions.length, earnedBadgeIds: newIds } });
       return;
     }
     setSubmitting(true);
@@ -86,7 +93,7 @@ export default function MatchScreen() {
         return;
       }
       await submitMatchResult(matchId, finalScore, questions.length, name);
-      navigate(`/match/${matchId}/result`, { state: { items } });
+      navigate(`/match/${matchId}/result`, { state: { items, earnedBadgeIds: newIds } });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not submit result.");
       setSubmitting(false);
