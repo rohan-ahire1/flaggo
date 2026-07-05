@@ -11,13 +11,13 @@ import type { MapMode } from "@flaggo/core/utils/quiz";
 import type { PopularityGroup } from "@flaggo/core/utils/popularity";
 import { useAuth } from "../auth/AuthProvider";
 import { BRAND } from "../config/brand";
+import { useConfirm } from "../components/ConfirmDialog";
 import { useSyncedProgress } from "../hooks/useSyncedProgress";
 import { trackEvent } from "../lib/analytics";
 import { submitScore, xpBoard } from "../lib/leaderboard";
 import { createMatch, defaultMatchConfig, matchUrl } from "../lib/matches";
 import { supabase } from "../lib/supabase";
 import { preloadFlags } from "../utils/preloadFlags";
-import type { LessonResult } from "../screens/LessonCompleteScreen";
 import type { TestMode } from "../screens/TestSetupScreen";
 
 type GameContextValue = {
@@ -47,7 +47,6 @@ type GameContextValue = {
   openSignIn: () => void;
   resetAll: () => Promise<void>;
   nextLearningLesson: (topic: Topic) => Lesson | undefined;
-  completeLesson: (result: LessonResult) => void;
 };
 
 const GameContext = createContext<GameContextValue | null>(null);
@@ -58,6 +57,7 @@ function countryCodes(group: Country[]) {
 
 export function GameProvider({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
+  const confirm = useConfirm();
   const { user, session, displayName, loading: authLoading } = useAuth();
   const { progress, setProgress, resetAllProgress, syncState, syncError, loading: progressLoading } = useSyncedProgress();
   const [signInOpen, setSignInOpen] = useState(false);
@@ -117,11 +117,6 @@ export function GameProvider({ children }: { children: ReactNode }) {
     startReview(group, deck.topic);
   }
 
-  function completeLesson(result: LessonResult) {
-    trackEvent("lesson-complete", { accuracy: result.accuracy, topic: result.topic });
-    navigate("/complete", { state: { result } });
-  }
-
   function startFlagTest(group: PopularityGroup, mode: TestMode, topic: Topic) {
     navigate("/test", { state: { countryCodes: countryCodes(group.countries), mode, topic } });
   }
@@ -154,7 +149,14 @@ export function GameProvider({ children }: { children: ReactNode }) {
   }
 
   async function deleteAccount() {
-    if (!session || !window.confirm(`Delete your ${BRAND.name} account and all synced data?`)) return;
+    if (!session) return;
+    const ok = await confirm({
+      title: "Delete account?",
+      body: `Delete your ${BRAND.name} account and all synced data?`,
+      confirmLabel: "Delete account",
+      destructive: true
+    });
+    if (!ok) return;
     const response = await fetch("/.netlify/functions/delete-account", {
       method: "POST",
       headers: { Authorization: `Bearer ${session.access_token}` }
@@ -215,7 +217,6 @@ export function GameProvider({ children }: { children: ReactNode }) {
     openSignIn: () => setSignInOpen(true),
     resetAll,
     nextLearningLesson,
-    completeLesson
   };
 
   return <GameContext.Provider value={value}>{children}</GameContext.Provider>;

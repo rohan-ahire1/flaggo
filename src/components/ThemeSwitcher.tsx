@@ -29,7 +29,7 @@ export default function ThemeSwitcher() {
               <span className="block text-[13px] text-muted">{meta.desc}</span>
             </span>
             <span
-              className={`grid h-[26px] w-[26px] flex-none place-items-center rounded-full border-2 text-[15px] font-extrabold ${
+              className={`grid h-[26px] w-[26px] flex-none place-items-center rounded-full border-2 text-[15px] font-semibold ${
                 selected ? "border-primary bg-primary text-white" : "border-line text-transparent"
               }`}
             >

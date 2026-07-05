@@ -29,11 +29,11 @@ export default function MapMenuScreen() {
 
   return (
     <main className="p-5">
-      <button onClick={() => navigate(-1)} className="mb-4 grid h-10 w-10 place-items-center rounded-full bg-white text-flaggo-muted shadow-card" aria-label="Back">
+      <button onClick={() => navigate(-1)} className="mb-4 grid h-10 w-10 place-items-center rounded-full bg-paper text-muted shadow-card" aria-label="Back">
         <Icon name="chevron" size={20} className="rotate-180" />
       </button>
       <h1 className="screen-title">World Map</h1>
-      <p className="mt-1 font-bold text-flaggo-muted">Practice uses countries present in the offline world map.</p>
+      <p className="mt-1 font-bold text-muted">Practice uses countries present in the offline world map.</p>
 
       <section className="mt-5 grid gap-3">
         {([
@@ -43,10 +43,10 @@ export default function MapMenuScreen() {
           <button
             key={value}
             onClick={() => setMode(value)}
-            className={`flaggo-tile bg-white p-4 text-left ${mode === value ? "border-flaggo-green text-flaggo-text" : "border-flaggo-border text-flaggo-muted"}`}
+            className={`rounded-2xl border-2 border-b-[5px] transition-all duration-150 active:translate-y-[3px] active:border-b-2 bg-paper p-4 text-left ${mode === value ? "border-primary text-ink" : "border-line text-muted"}`}
           >
             <span className="flex items-center gap-3">
-              <span className={`grid h-11 w-11 place-items-center rounded-2xl ${mode === value ? "bg-flaggo-green/15 text-flaggo-green" : "bg-surface"}`}>
+              <span className={`grid h-11 w-11 place-items-center rounded-2xl ${mode === value ? "bg-primary/15 text-primary" : "bg-surface"}`}>
                 <Icon name={value === "locate" ? "target" : "globe"} size={22} />
               </span>
               <span>
@@ -58,8 +58,8 @@ export default function MapMenuScreen() {
         ))}
       </section>
 
-      <section className="mt-5 rounded-[24px] border border-flaggo-border bg-white p-4 shadow-card">
-        <div className="mb-3 grid grid-cols-2 rounded-2xl bg-flaggo-bg p-1">
+      <section className="mt-5 rounded-[24px] border border-line bg-paper p-4 shadow-card">
+        <div className="mb-3 grid grid-cols-2 rounded-2xl bg-paper p-1">
           {([
             ["tier", "Tier"],
             ["region", "Region"]
@@ -70,7 +70,7 @@ export default function MapMenuScreen() {
                 setPickerMode(value);
                 setSelectedId(value === "tier" ? groups[0]?.id ?? "" : "World");
               }}
-              className={`rounded-xl px-3 py-2 font-display text-sm font-extrabold ${pickerMode === value ? "bg-white text-flaggo-green shadow-sm" : "text-flaggo-muted"}`}
+              className={`rounded-xl px-3 py-2 font-display text-sm font-semibold ${pickerMode === value ? "bg-paper text-primary shadow-sm" : "text-muted"}`}
             >
               {label}
             </button>
@@ -79,7 +79,7 @@ export default function MapMenuScreen() {
         <select
           value={selectedId}
           onChange={(event) => setSelectedId(event.target.value)}
-          className="w-full rounded-2xl border border-flaggo-border bg-white p-3 font-bold"
+          className="w-full rounded-2xl border border-line bg-paper p-3 font-bold"
         >
           {pickerMode === "tier"
             ? groups.map((group) => <option key={group.id} value={group.id}>{group.title} ({group.countries.length})</option>)

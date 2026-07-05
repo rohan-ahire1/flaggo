@@ -4,6 +4,8 @@ import FeedbackPanel from "../components/FeedbackPanel";
 import Icon from "../components/Icon";
 import ProgressBar from "../components/ProgressBar";
 import QuestionCard from "../components/QuestionCard";
+import RoundResults, { type RoundResultItem } from "../components/RoundResults";
+import { useConfirm } from "../components/ConfirmDialog";
 import { useAuth } from "../auth/AuthProvider";
 import { useNameClaim } from "../components/NameClaimProvider";
 import { applyDailyResult, buildDailyQuiz, dateKey, type DailyQuestion } from "@flaggo/core/utils/dailyChallenge";
@@ -16,6 +18,7 @@ import { useGame } from "../state/GameProvider";
 
 export default function DailyChallengeScreen() {
   const navigate = useNavigate();
+  const confirm = useConfirm();
   const { user } = useAuth();
   const { ensureName } = useNameClaim();
   const { countries, progress, setProgress, openSignIn, createAndShareChallenge } = useGame();
@@ -26,20 +29,31 @@ export default function DailyChallengeScreen() {
   const [correct, setCorrect] = useState(0);
   const [feedback, setFeedback] = useState<{ ok: boolean; question: DailyQuestion; wrongCode?: string } | null>(null);
   const [complete, setComplete] = useState(false);
+  const [items, setItems] = useState<RoundResultItem[]>([]);
   const question = questions[index];
 
   useEffect(() => {
     trackEvent("daily_start", { date: today });
   }, [today]);
 
-  function answer(ok: boolean, wrongCode?: string) {
+  function answer(ok: boolean, selectedLabel?: string) {
     if (!question || feedback) return;
     const next = updateReviewState(question.country.code, question.topic, ok, currentProgress);
     const withXp = { ...next, xp: next.xp + (ok ? 10 : 0) };
     setCurrentProgress(withXp);
     setProgress(withXp);
     setCorrect((value) => value + (ok ? 1 : 0));
-    setFeedback({ ok, question, wrongCode });
+    setItems((value) => [...value, {
+      label: question.country.name,
+      correct: ok,
+      chosen: ok ? undefined : selectedLabel,
+      answer: answerLabelForWrapper(question),
+      countryCode: question.country.code,
+      countryName: question.country.name,
+      flagUrl: question.country.flagUrl,
+      context: [question.country.subregion, question.country.capital ? `Capital: ${question.country.capital}` : ""].filter(Boolean).join(" · ")
+    }]);
+    setFeedback({ ok, question, wrongCode: selectedLabel });
   }
 
   async function finish() {
@@ -65,40 +79,50 @@ export default function DailyChallengeScreen() {
     else await navigator.clipboard?.writeText(text);
   }
 
+  async function closeRound() {
+    if (items.length > 0 && !complete) {
+      const ok = await confirm({
+        title: "End this round?",
+        body: "Answered questions are already counted.",
+        confirmLabel: "End round",
+        destructive: true
+      });
+      if (!ok) return;
+    }
+    navigate("/");
+  }
+
   if (complete) {
     return (
-      <main className="min-h-screen p-5">
-        <button onClick={() => navigate("/")} className="mb-5 grid h-10 w-10 place-items-center rounded-full bg-white text-flaggo-muted shadow-card" aria-label="Go home">
-          <Icon name="close" size={20} />
-        </button>
-        <section className="rounded-[28px] bg-white p-6 text-center shadow-card-lg">
-          <Icon name="flame" size={44} className="mx-auto text-flaggo-red" />
-          <h1 className="mt-3 screen-title">Daily complete</h1>
-          <p className="mt-2 font-display text-5xl font-black text-flaggo-green">{correct}/{questions.length}</p>
-          <p className="mt-1 font-bold text-flaggo-muted">Daily streak {currentProgress.daily.streak}</p>
-          <div className="mt-5 grid gap-3">
-            <button onClick={share} className="btn-primary">Share score</button>
-            <button onClick={() => void createAndShareChallenge()} className="btn-secondary">Challenge a friend</button>
-            <button onClick={() => navigate("/leaderboard")} className="btn-secondary">Leaderboard</button>
-            {!user && <button onClick={openSignIn} className="btn-ghost mt-1">Sign in to compete</button>}
-          </div>
-        </section>
-      </main>
+      <RoundResults
+        score={correct}
+        total={questions.length}
+        items={items}
+        streak={currentProgress.daily.streak}
+        caption={`+${correct * 10} XP · streak ${currentProgress.daily.streak}`}
+        actions={[
+          { label: "Challenge a friend", variant: "primary", icon: "flag", onPress: () => void createAndShareChallenge() },
+          { label: "See leaderboard", variant: "secondary", icon: "trophy", onPress: () => navigate("/leaderboard") },
+          { label: "Done", variant: "secondary", icon: "today", onPress: () => navigate("/") },
+          ...(!user ? [{ label: "Sign in to compete", variant: "secondary" as const, icon: "user" as const, onPress: openSignIn }] : []),
+          { label: "Share score", variant: "secondary", icon: "bolt", onPress: () => void share() }
+        ]}
+      />
     );
   }
 
-  if (!question) return <main className="grid min-h-screen place-items-center p-5"><button onClick={() => navigate("/")} className="flaggo-button bg-flaggo-green text-white">Go Home</button></main>;
+  if (!question) return <main className="grid min-h-screen place-items-center p-5"><button onClick={() => navigate("/")} className="btn-primary">Go Home</button></main>;
 
   return (
-    <main className="min-h-screen bg-flaggo-bg">
-      <header className="sticky top-0 z-20 bg-flaggo-bg/85 p-4 backdrop-blur-md">
-        <p className="mb-2.5 text-center font-display text-[13px] font-extrabold uppercase tracking-wide text-flaggo-muted">Daily Challenge</p>
+    <main className="min-h-screen bg-paper">
+      <header className="sticky top-0 z-20 bg-paper/85 p-4 backdrop-blur-md">
+        <p className="mb-2.5 text-center font-display text-[13px] font-bold uppercase tracking-wide text-muted">Daily Challenge</p>
         <div className="flex items-center gap-3">
-          <button onClick={() => navigate("/")} aria-label="Close daily" className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-white text-flaggo-muted shadow-card">
+          <button onClick={() => void closeRound()} aria-label="Close daily" className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-paper text-muted shadow-card">
             <Icon name="close" size={20} />
           </button>
           <div className="flex-1"><ProgressBar value={(index / questions.length) * 100} /></div>
-          <span className="shrink-0 text-sm font-display font-extrabold text-flaggo-muted">{index + 1}/{questions.length}</span>
+          <span className="shrink-0 text-sm font-display font-bold text-muted">{index + 1}/{questions.length}</span>
         </div>
       </header>
       <section key={question.id} className="animate-fade-in p-5">

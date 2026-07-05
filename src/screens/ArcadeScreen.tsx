@@ -4,6 +4,8 @@ import FeedbackPanel from "../components/FeedbackPanel";
 import FlagImage from "../components/FlagImage";
 import Icon, { type IconName } from "../components/Icon";
 import QuestionCard from "../components/QuestionCard";
+import RoundResults, { type RoundResultItem } from "../components/RoundResults";
+import { useConfirm } from "../components/ConfirmDialog";
 import { useAuth } from "../auth/AuthProvider";
 import { useNameClaim } from "../components/NameClaimProvider";
 import type { ArcadeMode } from "@flaggo/core/types/arcade";
@@ -15,7 +17,7 @@ import { arcadePool, arcadeScore, persistArcadeBest } from "@flaggo/core/utils/a
 import { generateMapQuestions, generateReviewQuestions, type MapQuestion, type Question } from "@flaggo/core/utils/quiz";
 import { updateReviewState } from "@flaggo/core/utils/spacedRepetition";
 import { seededShuffle, hashStringToSeed, mulberry32 } from "@flaggo/core/utils/seededRandom";
-import { answerLabelForWrapper } from "@flaggo/core/game/answerLabel";
+import { answerLabel, answerLabelForWrapper } from "@flaggo/core/game/answerLabel";
 import { trackEvent } from "../lib/analytics";
 import { arcadeBoard, submitScore } from "../lib/leaderboard";
 import { useGame } from "../state/GameProvider";
@@ -43,6 +45,7 @@ type ArcadeQuestion =
 
 export default function ArcadeScreen() {
   const navigate = useNavigate();
+  const confirm = useConfirm();
   const { user } = useAuth();
   const { ensureName } = useNameClaim();
   const { countries, progress, setProgress, openSignIn, createAndShareChallenge } = useGame();
@@ -55,6 +58,8 @@ export default function ArcadeScreen() {
   const [currentProgress, setCurrentProgress] = useState(progress);
   const [feedback, setFeedback] = useState<{ ok: boolean; question: ArcadeQuestion; wrongCode?: string } | null>(null);
   const [remaining, setRemaining] = useState(60);
+  const [startedAt, setStartedAt] = useState(0);
+  const [items, setItems] = useState<RoundResultItem[]>([]);
   const pool = useMemo(() => arcadePool(countries, mode, topic), [countries, mode, topic]);
   const questions = useMemo<ArcadeQuestion[]>(() => {
     const rng = mulberry32(hashStringToSeed(`arcade-${mode}-${topic}-${running ? Date.now() : 0}`));
@@ -66,11 +71,15 @@ export default function ArcadeScreen() {
   const score = arcadeScore(mode, answers);
   const best = progress.arcade[arcadeKey(mode, topic)] ?? 0;
 
+  const runSeconds = mode === "hard" ? 45 : 60;
+
   useEffect(() => {
-    if (!running || done) return;
-    const id = window.setInterval(() => setRemaining((value) => Math.max(0, value - 1)), 1000);
+    if (!running || done || mode === "sudden") return;
+    const id = window.setInterval(() => {
+      setRemaining(Math.max(0, Math.ceil((startedAt + runSeconds * 1000 - Date.now()) / 1000)));
+    }, 250);
     return () => window.clearInterval(id);
-  }, [done, running]);
+  }, [done, mode, runSeconds, running, startedAt]);
 
   useEffect(() => {
     if (running && remaining === 0) void finish();
@@ -81,18 +90,31 @@ export default function ArcadeScreen() {
     setDone(false);
     setIndex(0);
     setAnswers([]);
+    setItems([]);
     setFeedback(null);
-    setRemaining(mode === "hard" ? 60 : 60);
+    setStartedAt(Date.now());
+    setRemaining(runSeconds);
     trackEvent("arcade_start", { mode, topic });
   }
 
-  function answer(ok: boolean, wrongCode?: string) {
+  function answer(ok: boolean, selectedLabel?: string) {
     if (!question || feedback || done) return;
     const next = updateReviewState(question.country.code, topic, ok, currentProgress);
     setCurrentProgress(next);
     setProgress(next);
     setAnswers((value) => [...value, ok]);
-    setFeedback({ ok, question, wrongCode });
+    const chosenLabel = question.topic === "location" && selectedLabel ? countries.find((country) => country.code === selectedLabel)?.name ?? selectedLabel : selectedLabel;
+    setItems((value) => [...value, {
+      label: question.country.name,
+      correct: ok,
+      chosen: ok ? undefined : chosenLabel,
+      answer: question.topic === "location" ? question.country.name : answerLabel(question.question),
+      countryCode: question.country.code,
+      countryName: question.country.name,
+      flagUrl: question.country.flagUrl,
+      context: [question.country.subregion, question.country.capital ? `Capital: ${question.country.capital}` : ""].filter(Boolean).join(" · ")
+    }]);
+    setFeedback({ ok, question, wrongCode: selectedLabel });
     if (mode === "sudden" && !ok) window.setTimeout(() => void finish([...answers, ok]), 250);
   }
 
@@ -102,6 +124,7 @@ export default function ArcadeScreen() {
     const next = persistArcadeBest(currentProgress, mode, topic, finalScore);
     setCurrentProgress(next);
     setProgress(next);
+    setAnswers(finalAnswers);
     setDone(true);
     setRunning(false);
     trackEvent("arcade_complete", { mode, topic, score: finalScore });
@@ -111,32 +134,50 @@ export default function ArcadeScreen() {
 
   function continueNext() {
     setFeedback(null);
-    if (index >= questions.length - 1 || (mode === "hard" && remaining <= 0)) void finish();
+    if (index >= questions.length - 1 || (mode !== "sudden" && remaining <= 0)) void finish();
     else setIndex((value) => value + 1);
+  }
+
+  async function closeRound() {
+    if (answers.length > 0 && !done) {
+      const ok = await confirm({
+        title: "End this round?",
+        body: "Answered questions are already counted.",
+        confirmLabel: "End round",
+        destructive: true
+      });
+      if (!ok) return;
+    }
+    void finish();
+  }
+
+  if (done) {
+    return (
+      <RoundResults
+        score={score}
+        total={items.length}
+        items={items}
+        caption={`Best ${Math.max(best, score)}`}
+        actions={[
+          { label: "Play again", variant: "primary", icon: "play", onPress: start },
+          { label: "Challenge a friend", variant: "secondary", icon: "flag", onPress: () => void createAndShareChallenge() },
+          { label: "View leaderboard", variant: "secondary", icon: "trophy", onPress: () => navigate("/leaderboard") },
+          { label: "Done", variant: "secondary", icon: "today", onPress: () => navigate("/") }
+        ]}
+      />
+    );
   }
 
   if (!running) {
     return (
       <main className="flex min-h-full flex-col p-5">
         <div className="flex items-center gap-3">
-          <button onClick={() => navigate("/")} className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-white text-flaggo-muted shadow-card" aria-label="Back"><Icon name="chevron" className="rotate-180" /></button>
+          <button onClick={() => navigate("/")} className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-paper text-muted shadow-card" aria-label="Back"><Icon name="chevron" className="rotate-180" /></button>
           <div>
             <h1 className="screen-title">Arcade</h1>
-            <p className="mt-1 text-sm font-semibold text-flaggo-muted">Endless rounds, three ways.</p>
+            <p className="mt-1 text-sm font-semibold text-muted">Endless rounds, three ways.</p>
           </div>
         </div>
-
-        {done && (
-          <section className="mt-5 rounded-[24px] bg-green-grad p-6 text-center text-white shadow-glow">
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-white/70">You scored</p>
-            <p className="font-display text-6xl font-black leading-none">{score}</p>
-            <p className="mt-1 font-bold text-white/80">Best {Math.max(best, score)}</p>
-            <div className="mt-5 grid gap-3">
-              <button onClick={() => void createAndShareChallenge()} className="flaggo-button bg-white text-flaggo-green shadow-none">Challenge a friend</button>
-              <button onClick={() => navigate("/leaderboard")} className="font-display font-black text-white underline">View leaderboard</button>
-            </div>
-          </section>
-        )}
 
         <div className="mt-7 flex flex-1 flex-col gap-7">
           <section className="grid gap-3">
@@ -150,17 +191,17 @@ export default function ArcadeScreen() {
                   key={item}
                   onClick={() => setMode(item)}
                   aria-pressed={on}
-                  className={`flex items-center gap-3.5 rounded-2xl border-2 p-3.5 text-left transition-all ${on ? "border-flaggo-green bg-flaggo-green text-white shadow-button-green" : "border-line bg-white text-ink shadow-card"}`}
+                  className={`flex items-center gap-3.5 rounded-2xl border-2 p-3.5 text-left transition-all ${on ? "border-primary bg-primary text-white shadow-button" : "border-line bg-paper text-ink shadow-card"}`}
                 >
-                  <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-xl ${on ? "bg-white/15 text-white" : "bg-surface text-flaggo-green"}`}>
+                  <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-xl ${on ? "bg-paper/15 text-white" : "bg-surface text-primary"}`}>
                     <Icon name={meta.icon} size={22} />
                   </span>
                   <span className="min-w-0 flex-1">
-                    <span className="block font-display text-[17px] font-black">{meta.label}</span>
-                    <span className={`block text-[12.5px] font-semibold ${on ? "text-white/80" : "text-flaggo-muted"}`}>{meta.desc}</span>
+                    <span className="block font-display text-[17px] font-semibold">{meta.label}</span>
+                    <span className={`block text-[12.5px] font-semibold ${on ? "text-white/80" : "text-muted"}`}>{meta.desc}</span>
                   </span>
                   <span className="shrink-0 pl-1 text-right">
-                    <span className={`block text-[10px] font-bold uppercase tracking-wide ${on ? "text-white/70" : "text-flaggo-muted"}`}>Best</span>
+                    <span className={`block text-[10px] font-bold uppercase tracking-wide ${on ? "text-white/70" : "text-muted"}`}>Best</span>
                     <span className="block font-display text-lg font-black leading-none">{modeBest}</span>
                   </span>
                 </button>
@@ -179,10 +220,10 @@ export default function ArcadeScreen() {
                     key={item}
                     onClick={() => setTopic(item)}
                     aria-pressed={on}
-                    className={`flex items-center gap-2.5 rounded-2xl border-2 px-3.5 py-3 transition-all ${on ? "border-flaggo-blue bg-flaggo-blue text-white shadow-button-blue" : "border-line bg-white text-ink shadow-card"}`}
+                    className={`flex items-center gap-2.5 rounded-2xl border-2 px-3.5 py-3 transition-all ${on ? "border-primary bg-primary text-white shadow-button" : "border-line bg-paper text-ink shadow-card"}`}
                   >
-                    <Icon name={meta.icon} size={19} className={on ? "text-white" : "text-flaggo-blue"} />
-                    <span className="font-display text-[15px] font-extrabold">{meta.label}</span>
+                    <Icon name={meta.icon} size={19} className={on ? "text-white" : "text-primary"} />
+                    <span className="font-display text-[15px] font-semibold">{meta.label}</span>
                   </button>
                 );
               })}
@@ -191,33 +232,33 @@ export default function ArcadeScreen() {
         </div>
 
         <div className="mt-7 grid gap-3">
-          <button onClick={start} disabled={!pool.length} className="flaggo-button bg-flaggo-green text-white disabled:opacity-50">Start run</button>
-          {!user && <button onClick={openSignIn} className="font-display font-black text-flaggo-green underline">Sign in to compete</button>}
+          <button onClick={start} disabled={!pool.length} className="btn-primary disabled:opacity-50">Start run</button>
+          {!user && <button onClick={openSignIn} className="font-display font-bold text-primary underline">Sign in to compete</button>}
         </div>
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-flaggo-bg">
-      <header className="sticky top-0 z-20 bg-flaggo-bg/85 p-4 backdrop-blur-md">
-        <p className="mb-2.5 text-center font-display text-[13px] font-extrabold uppercase tracking-wide text-flaggo-muted">Arcade · {TOPIC_META[topic].label} · {MODE_META[mode].label}</p>
+    <main className="min-h-screen bg-paper">
+      <header className="sticky top-0 z-20 bg-paper/85 p-4 backdrop-blur-md">
+        <p className="mb-2.5 text-center font-display text-[13px] font-bold uppercase tracking-wide text-muted">Arcade · {TOPIC_META[topic].label} · {MODE_META[mode].label}</p>
         <div className="flex items-center gap-3">
-          <button onClick={() => void finish()} className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-white text-flaggo-muted shadow-card" aria-label="End run"><Icon name="close" size={20} /></button>
-          <div className="flex-1 rounded-full bg-white px-4 py-2 font-display font-black shadow-card">Score {score}</div>
-          <span className="rounded-full bg-flaggo-red px-4 py-2 font-display font-black text-white">{remaining}s</span>
+          <button onClick={() => void closeRound()} className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-paper text-muted shadow-card" aria-label="End run"><Icon name="close" size={20} /></button>
+          <div className="flex-1 rounded-full bg-paper px-4 py-2 font-display font-bold shadow-card">Score {score}</div>
+          {mode !== "sudden" && <span className={`rounded-full bg-error px-4 py-2 font-display font-black text-white ${remaining <= 10 ? "animate-pulse" : ""}`}>{remaining}s</span>}
         </div>
       </header>
       <section key={index} className="animate-fade-in p-5">
         {question.topic === "location" ? (
           <>
-            <div className="mb-4 rounded-[24px] border border-flaggo-border bg-white p-4 shadow-card">
+            <div className="mb-4 rounded-[24px] border border-line bg-paper p-4 shadow-card">
               <div className="mt-2 flex items-center gap-3">
                 <FlagImage code={question.country.code} name={question.country.name} src={question.country.flagUrl} className="h-14 w-20 rounded-xl p-1" />
-                <h1 className="font-display text-2xl font-black">Tap {question.country.name}</h1>
+                <h1 className="font-display text-2xl font-semibold">Tap {question.country.name}</h1>
               </div>
             </div>
-            <Suspense fallback={<div className="h-[360px] animate-pulse rounded-[24px] bg-white shadow-card" />}>
+            <Suspense fallback={<div className="h-[360px] animate-pulse rounded-[24px] bg-paper shadow-card" />}>
               <WorldMap countries={countries} correctCode={feedback?.ok ? question.country.code : undefined} wrongCode={feedback?.wrongCode} interactive={!feedback} onCountryTap={(code) => answer(code === question.country.code, code)} />
             </Suspense>
           </>

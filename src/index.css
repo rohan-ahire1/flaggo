@@ -62,9 +62,7 @@ button {
   /* ---- Buttons: one hierarchy across the app ----
      .btn-primary   = the single main action (solid, 3D edge)
      .btn-secondary = supporting action (tonal, flat)
-     .btn-ghost     = tertiary / low-commitment (text link)
-     `.flaggo-button` stays as an alias of the primary style so legacy
-     markup keeps working; new/updated screens use the semantic names. */
+     .btn-ghost     = tertiary / low-commitment (text link). */
   .btn-base {
     @apply rounded-2xl px-5 py-4 text-center font-display font-semibold tracking-wide transition-all duration-150 disabled:cursor-not-allowed disabled:opacity-50;
   }
@@ -77,10 +75,6 @@ button {
   .btn-ghost {
     @apply font-display text-[15px] font-bold text-primary underline underline-offset-[3px];
   }
-  .flaggo-button {
-    @apply rounded-2xl px-5 py-4 font-display font-semibold tracking-wide shadow-button transition-all duration-150 active:translate-y-1 active:shadow-none disabled:cursor-not-allowed disabled:opacity-50;
-  }
-
   /* ---- Screen chrome ---- */
   .screen-title {
     @apply font-display text-3xl font-semibold leading-none text-ink;
@@ -89,14 +83,6 @@ button {
     @apply text-xs font-bold uppercase tracking-[0.18em] text-muted;
   }
 
-  .flaggo-card {
-    @apply rounded-[24px] border border-line bg-paper shadow-card;
-  }
-
-  /* Chunky tappable surface with a colored 3D edge */
-  .flaggo-tile {
-    @apply rounded-2xl border-2 border-b-[5px] transition-all duration-150 active:translate-y-[3px] active:border-b-2;
-  }
 }
 
 @layer utilities {

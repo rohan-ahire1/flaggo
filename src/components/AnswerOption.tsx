@@ -18,7 +18,7 @@ export default function AnswerOption({
     <button
       disabled={disabled}
       onClick={onClick}
-      className="flaggo-button min-h-16 border-2 border-b-[5px] border-slate-200 bg-white text-left text-flaggo-text transition-all hover:border-flaggo-blue/40 active:translate-y-[3px] active:border-b-2"
+      className="btn-primary min-h-16 border-2 border-b-[5px] border-line bg-paper text-left text-ink transition-all hover:border-primary/40 active:translate-y-[3px] active:border-b-2"
     >
       {showFlag && country ? (
         <span className="flex items-center gap-3">

@@ -6,10 +6,10 @@ const contact = "support@playflaggo.netlify.app";
 function LegalLayout({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <main className="mx-auto min-h-screen max-w-2xl px-5 py-8">
-      <Link to="/" className="font-display font-black text-flaggo-green">{BRAND.name}</Link>
-      <article className="mt-5 rounded-[24px] border border-flaggo-border bg-white p-6 shadow-card">
+      <Link to="/" className="font-display font-black text-primary">{BRAND.name}</Link>
+      <article className="mt-5 rounded-[24px] border border-line bg-paper p-6 shadow-card">
         <h1 className="font-display text-3xl font-black">{title}</h1>
-        <div className="prose prose-slate mt-5 max-w-none space-y-4 text-sm font-semibold leading-6 text-flaggo-text">{children}</div>
+        <div className="prose prose-slate mt-5 max-w-none space-y-4 text-sm font-semibold leading-6 text-ink">{children}</div>
       </article>
     </main>
   );

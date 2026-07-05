@@ -4,6 +4,8 @@ import FeedbackPanel from "../components/FeedbackPanel";
 import FlagImage from "../components/FlagImage";
 import Icon from "../components/Icon";
 import ProgressBar from "../components/ProgressBar";
+import RoundResults, { type RoundResultItem } from "../components/RoundResults";
+import { useConfirm } from "../components/ConfirmDialog";
 import type { Country } from "@flaggo/core/types/country";
 import { updateStreak } from "@flaggo/core/utils/date";
 import { generateMapQuestions, type MapMode, type MapQuestion } from "@flaggo/core/utils/quiz";
@@ -16,8 +18,9 @@ type MapRouteState = { mode: MapMode; countryCodes: string[] } | null;
 
 export default function MapPlayScreen() {
   const navigate = useNavigate();
+  const confirm = useConfirm();
   const { state } = useLocation();
-  const { countries: allCountries, progress, setProgress, completeLesson } = useGame();
+  const { countries: allCountries, progress, setProgress, startMapPractice } = useGame();
   const routeState = state as MapRouteState;
   const countries = routeState?.countryCodes.map((code) => allCountries.find((country) => country.code === code)).filter((country): country is Country => Boolean(country)) ?? [];
   const mode = routeState?.mode ?? "locate";
@@ -29,6 +32,8 @@ export default function MapPlayScreen() {
   const [correct, setCorrect] = useState(0);
   const [xp, setXp] = useState(0);
   const [feedback, setFeedback] = useState<{ ok: boolean; country: Country; wrongCode?: string } | null>(null);
+  const [items, setItems] = useState<RoundResultItem[]>([]);
+  const [finished, setFinished] = useState(false);
   const question = questions[index];
   const target = question ? countryByCode.get(question.targetCode) : undefined;
   const isIdentify = question?.type === "identify-country";
@@ -43,71 +48,101 @@ export default function MapPlayScreen() {
     setProgress(withXp);
     setCorrect((value) => value + (ok ? 1 : 0));
     setXp((value) => value + earned);
+    setItems((value) => [...value, {
+      label: target.name,
+      correct: ok,
+      chosen: ok ? undefined : countryByCode.get(selectedCode)?.name ?? selectedCode,
+      answer: target.name,
+      countryCode: target.code,
+      countryName: target.name,
+      flagUrl: target.flagUrl,
+      context: [target.subregion, target.capital ? `Capital: ${target.capital}` : ""].filter(Boolean).join(" · ")
+    }]);
     setFeedback({ ok, country: target, wrongCode: ok ? undefined : selectedCode });
   }
 
-  function complete() {
+  function finishRound() {
     const total = questions.length || 1;
     const bonusXp = 10;
     const next = updateStreak({ ...currentProgress, xp: currentProgress.xp + bonusXp });
     setProgress(next);
-    completeLesson({
-      xpEarned: xp + bonusXp,
-      accuracy: Math.round((correct / total) * 100),
-      correct,
-      total,
-      streak: next.streak,
-      coinsEarned: 0,
-      topic: "location"
-    });
+    setFinished(true);
   }
 
   function continueNext() {
     setFeedback(null);
-    if (index >= questions.length - 1) complete();
+    if (index >= questions.length - 1) finishRound();
     else setIndex((value) => value + 1);
   }
 
   if (!routeState) return <Navigate to="/map" replace />;
 
+  async function closeRound() {
+    if (items.length > 0 && !finished) {
+      const ok = await confirm({
+        title: "End this round?",
+        body: "Answered questions are already counted.",
+        confirmLabel: "End round",
+        destructive: true
+      });
+      if (!ok) return;
+    }
+    onExit();
+  }
+
+  if (finished) {
+    return (
+      <RoundResults
+        score={correct}
+        total={questions.length || 1}
+        items={items}
+        caption={`+${xp + 10} XP`}
+        actions={[
+          { label: "Play again", variant: "primary", icon: "play", onPress: () => startMapPractice(mode, countries) },
+          { label: "Back to map menu", variant: "secondary", icon: "globe", onPress: onExit }
+        ]}
+      />
+    );
+  }
+
   if (!question || !target) {
     return (
       <main className="grid min-h-screen place-items-center p-5">
-        <button onClick={onExit} className="flaggo-button bg-flaggo-green text-white">Go back</button>
+        <button onClick={onExit} className="btn-primary">Go back</button>
       </main>
     );
   }
 
   return (
-    <main className={mode === "locate" ? "flex h-dvh flex-col overflow-hidden bg-flaggo-bg p-5" : "min-h-screen bg-flaggo-bg p-5"}>
+    <main className={mode === "locate" ? "flex h-dvh flex-col overflow-hidden bg-paper p-5" : "min-h-screen bg-paper p-5"}>
       <header className="mb-4">
         <div className="mb-3 flex items-center gap-3">
           <button
-            onClick={onExit}
+            onClick={() => void closeRound()}
             aria-label="Exit map practice"
-            className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-white text-flaggo-muted shadow-card transition active:translate-y-0.5 active:shadow-none"
+            className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-paper text-muted shadow-card transition active:translate-y-0.5 active:shadow-none"
           >
             <Icon name="close" size={20} />
           </button>
           <div className="flex-1"><ProgressBar value={(index / questions.length) * 100} /></div>
-          <span className="shrink-0 text-sm font-display font-extrabold text-flaggo-muted">{index + 1}/{questions.length}</span>
+          <span className="shrink-0 text-sm font-display font-bold text-muted">{index + 1}/{questions.length}</span>
         </div>
-        <div className="rounded-[24px] border border-flaggo-border bg-white p-4 shadow-card">
-          <p className="flex items-center gap-1.5 text-xs font-display font-extrabold uppercase tracking-wide text-flaggo-blue">
+        <div className="rounded-[24px] border border-line bg-paper p-4 shadow-card">
+          <p className="flex items-center gap-1.5 text-xs font-display font-bold uppercase tracking-wide text-primary">
             <Icon name="globe" size={14} /> {mode === "locate" ? "Locate" : "Identify"}
           </p>
           {mode === "locate" ? (
             <div className="mt-2 flex items-center gap-3">
               <FlagImage code={target.code} name={target.name} src={target.flagUrl} className="h-14 w-20 rounded-xl p-1" />
-              <h1 className="font-display text-2xl font-black">Tap {target.name}</h1>
+              <h1 className="font-display text-2xl font-semibold">Tap {target.name}</h1>
             </div>
           ) : (
-            <h1 className="mt-1 font-display text-2xl font-black">Which country is highlighted?</h1>
+            <h1 className="mt-1 font-display text-2xl font-semibold">Which country is highlighted?</h1>
           )}
         </div>
       </header>
 
-      <Suspense fallback={<div className={mode === "locate" ? "min-h-0 flex-1 animate-pulse rounded-[24px] bg-white shadow-card" : "h-[360px] animate-pulse rounded-[24px] bg-white shadow-card"} />}>
+      <Suspense fallback={<div className={mode === "locate" ? "min-h-0 flex-1 animate-pulse rounded-[24px] bg-paper shadow-card" : "h-[360px] animate-pulse rounded-[24px] bg-paper shadow-card"} />}>
         <WorldMap
           countries={countries}
           highlightCode={isIdentify ? question.targetCode : undefined}
@@ -129,8 +164,8 @@ export default function MapPlayScreen() {
                 key={country.code}
                 disabled={Boolean(feedback)}
                 onClick={() => answer(country.code)}
-                className={`flaggo-tile bg-white p-4 text-left font-display font-extrabold ${
-                  correctOption ? "border-flaggo-green text-flaggo-green" : selected ? "border-flaggo-red text-flaggo-red" : "border-flaggo-border text-flaggo-text"
+                className={`rounded-2xl border-2 border-b-[5px] bg-paper p-4 text-left font-display font-semibold transition-all active:translate-y-[3px] active:border-b-2 ${
+                  correctOption ? "border-success text-success" : selected ? "border-error text-error" : "border-line text-ink"
                 }`}
               >
                 {country.name}

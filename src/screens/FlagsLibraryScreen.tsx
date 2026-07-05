@@ -35,35 +35,37 @@ export default function FlagsLibraryScreen() {
 
   return (
     <main className="p-5">
-      <button onClick={() => navigate(-1)} className="mb-4 grid h-10 w-10 place-items-center rounded-full bg-white text-flaggo-muted shadow-card" aria-label="Back">
+      <button onClick={() => navigate(-1)} className="mb-4 grid h-10 w-10 place-items-center rounded-full bg-paper text-muted shadow-card" aria-label="Back">
         <Icon name="chevron" size={20} className="rotate-180" />
       </button>
       <h1 className="screen-title">Flag library</h1>
-      <div className="mt-4 grid grid-cols-2 rounded-2xl bg-white p-1 shadow-card">
-        <button className="rounded-xl bg-flaggo-green px-4 py-2 font-display text-sm font-extrabold text-white shadow-sm">Flags</button>
-        <button onClick={() => navigate("/map/explore")} className="rounded-xl px-4 py-2 font-display text-sm font-extrabold text-flaggo-muted hover:text-flaggo-text">Explore</button>
+      <div className="mt-4 grid grid-cols-2 rounded-2xl bg-paper p-1 shadow-card">
+        <button className="rounded-xl bg-primary px-4 py-2 font-display text-sm font-semibold text-white shadow-sm">Flags</button>
+        <button onClick={() => navigate("/map/explore")} className="inline-flex items-center justify-center gap-1 rounded-xl px-4 py-2 font-display text-sm font-semibold text-muted hover:text-ink">
+          Explore <Icon name="chevron" size={14} className="-rotate-45" />
+        </button>
       </div>
       <div className="mt-4 grid gap-3">
         <div className="relative">
-          <Icon name="search" size={18} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-flaggo-muted" />
+          <Icon name="search" size={18} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-muted" />
           <input
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Search flags"
-            className="w-full rounded-2xl border-2 border-flaggo-border bg-white py-3 pl-10 pr-4 font-bold outline-none transition focus:border-flaggo-blue"
+            className="w-full rounded-2xl border-2 border-line bg-paper py-3 pl-10 pr-4 font-bold outline-none transition focus:border-primary"
           />
         </div>
         <div className="grid grid-cols-2 gap-2">
-          <select value={continent} onChange={(event) => setContinent(event.target.value)} className="rounded-2xl border border-flaggo-border bg-white p-3 font-bold">
+          <select value={continent} onChange={(event) => setContinent(event.target.value)} className="rounded-2xl border border-line bg-paper p-3 font-bold">
             {["All", "Africa", "Americas", "Asia", "Europe", "Oceania", "Antarctic"].map((value) => <option key={value}>{value}</option>)}
           </select>
-          <select value={difficulty} onChange={(event) => setDifficulty(event.target.value)} className="rounded-2xl border border-flaggo-border bg-white p-3 font-bold">
+          <select value={difficulty} onChange={(event) => setDifficulty(event.target.value)} className="rounded-2xl border border-line bg-paper p-3 font-bold">
             {["All", "easy", "medium", "hard"].map((value) => <option key={value}>{value}</option>)}
           </select>
-          <select value={scope} onChange={(event) => setScope(event.target.value)} className="rounded-2xl border border-flaggo-border bg-white p-3 font-bold">
+          <select value={scope} onChange={(event) => setScope(event.target.value)} className="rounded-2xl border border-line bg-paper p-3 font-bold">
             {["All", "UN", "Independent", "Territories"].map((value) => <option key={value}>{value}</option>)}
           </select>
-          <select value={sort} onChange={(event) => setSort(event.target.value)} className="rounded-2xl border border-flaggo-border bg-white p-3 font-bold">
+          <select value={sort} onChange={(event) => setSort(event.target.value)} className="rounded-2xl border border-line bg-paper p-3 font-bold">
             <option value="az">A to Z</option>
             <option value="mastery">Mastery</option>
             <option value="weakest">Weakest</option>
@@ -80,7 +82,7 @@ export default function FlagsLibraryScreen() {
                   event.stopPropagation();
                   setProgress(toggleStarredDeck(progress, country.code, topic));
                 }}
-                className={`absolute right-2 top-2 z-20 grid h-8 w-8 place-items-center rounded-full shadow-md ${isStarred(progress, country.code, topic) ? "bg-flaggo-yellow text-white" : "bg-white text-flaggo-muted"}`}
+                className={`absolute right-2 top-2 z-20 grid h-8 w-8 place-items-center rounded-full shadow-md ${isStarred(progress, country.code, topic) ? "bg-accent text-white" : "bg-paper text-muted"}`}
                 aria-label={isStarred(progress, country.code, topic) ? "Remove from starred deck" : "Add to starred deck"}
               >
                 <Icon name="star" size={15} />
@@ -89,7 +91,23 @@ export default function FlagsLibraryScreen() {
           ))}
         </div>
       ) : (
-        <div className="mt-8 rounded-[24px] bg-white p-6 text-center font-bold text-flaggo-muted">No flags match those filters.</div>
+        <div className="mt-8 rounded-[24px] border border-line bg-paper p-6 text-center shadow-card">
+          <Icon name="search" size={34} className="mx-auto text-primary" />
+          <h2 className="mt-3 font-display text-xl font-semibold text-ink">No flags match those filters.</h2>
+          <p className="mt-1 text-sm font-semibold text-muted">Try broadening the search or reset every filter.</p>
+          <button
+            onClick={() => {
+              setQuery("");
+              setContinent("All");
+              setDifficulty("All");
+              setScope("All");
+              setSort("az");
+            }}
+            className="btn-primary mt-4 w-full"
+          >
+            Clear filters
+          </button>
+        </div>
       )}
     </main>
   );

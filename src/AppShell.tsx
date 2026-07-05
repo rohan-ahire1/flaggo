@@ -5,6 +5,8 @@ import AppLayout from "./AppLayout";
 import { ThemeProvider } from "./theme/ThemeProvider";
 import { AuthProvider } from "./auth/AuthProvider";
 import { NameClaimProvider } from "./components/NameClaimProvider";
+import { ConfirmProvider } from "./components/ConfirmDialog";
+import { InstallPromptProvider } from "./components/InstallPromptProvider";
 import { GameProvider } from "./state/GameProvider";
 import AuthCallbackPage from "./pages/AuthCallbackPage";
 import { PrivacyPage, TermsPage } from "./pages/LegalPages";
@@ -16,7 +18,6 @@ import ReviewScreen from "./screens/ReviewScreen";
 import TestSetupScreen from "./screens/TestSetupScreen";
 import FlagTestScreen from "./screens/FlagTestScreen";
 import FlagsLibraryScreen from "./screens/FlagsLibraryScreen";
-import LessonCompleteScreen from "./screens/LessonCompleteScreen";
 import ProfileScreen from "./screens/ProfileScreen";
 import StatsScreen from "./screens/StatsScreen";
 import WelcomeScreen from "./screens/WelcomeScreen";
@@ -51,6 +52,8 @@ export default function AppShell() {
     <BrowserRouter>
       <ThemeProvider>
       <AuthProvider>
+        <ConfirmProvider>
+        <InstallPromptProvider>
         <GameProvider>
         <NameClaimProvider>
           <PageTracker />
@@ -79,7 +82,6 @@ export default function AppShell() {
               <Route path="/profile" element={<ProfileScreen />} />
               <Route path="/match/:id" element={<MatchScreen />} />
               <Route path="/match/:id/result" element={<MatchResultScreen />} />
-              <Route path="/complete" element={<LessonCompleteScreen />} />
             </Route>
             <Route path="/privacy" element={<PrivacyPage />} />
             <Route path="/terms" element={<TermsPage />} />
@@ -88,6 +90,8 @@ export default function AppShell() {
           </Routes>
         </NameClaimProvider>
         </GameProvider>
+        </InstallPromptProvider>
+        </ConfirmProvider>
       </AuthProvider>
       </ThemeProvider>
     </BrowserRouter>

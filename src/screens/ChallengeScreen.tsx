@@ -13,14 +13,14 @@ export default function ChallengeScreen() {
       </header>
 
       <section className="mt-5 overflow-hidden rounded-[24px] bg-primary p-5 text-white shadow-card-lg">
-        <div className="grid h-12 w-12 place-items-center rounded-2xl bg-white/15">
+        <div className="grid h-12 w-12 place-items-center rounded-2xl bg-paper/15">
           <Icon name="flag" size={26} />
         </div>
         <h2 className="mt-3 font-display text-[28px] font-black leading-tight">Challenge a friend</h2>
         <p className="mt-1 text-[15px] font-semibold text-white/80">
           Send today's exact 5-question round. When you both finish, compare scores.
         </p>
-        <button onClick={() => void createAndShareChallenge()} className="mt-5 w-full rounded-2xl bg-white px-5 py-3.5 font-display text-lg font-black text-primary shadow-card">
+        <button onClick={() => void createAndShareChallenge()} className="mt-5 w-full rounded-2xl bg-paper px-5 py-3.5 font-display text-lg font-black text-primary shadow-card">
           Create &amp; share
         </button>
       </section>

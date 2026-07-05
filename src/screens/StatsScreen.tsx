@@ -38,7 +38,7 @@ export default function StatsScreen() {
 
   return (
     <main className="p-5">
-      <button onClick={() => navigate(-1)} className="mb-4 grid h-10 w-10 place-items-center rounded-full bg-white text-flaggo-muted shadow-card" aria-label="Back">
+      <button onClick={() => navigate(-1)} className="mb-4 grid h-10 w-10 place-items-center rounded-full bg-paper text-muted shadow-card" aria-label="Back">
         <Icon name="chevron" size={20} className="rotate-180" />
       </button>
       <h1 className="screen-title">Stats</h1>
@@ -52,21 +52,21 @@ export default function StatsScreen() {
         <StatCard label="Map mastered" value={mapCountryCount ? `${mapMasteredCount}/${mapCountryCount}` : mapMasteredCount} tone="green" icon="globe" />
         <StatCard label="Accuracy" value={total ? `${Math.round((progress.totalCorrect / total) * 100)}%` : "0%"} tone="orange" icon="target" />
       </div>
-      <section className="mt-6 rounded-[24px] border border-flaggo-border bg-white p-5 shadow-card">
+      <section className="mt-6 rounded-[24px] border border-line bg-paper p-5 shadow-card">
         <h2 className="flex items-center gap-2 font-display text-xl font-black">
-          <Icon name="heart" size={20} className="text-flaggo-red" /> Weakest {topicLabel.toLowerCase()}
+          <Icon name="heart" size={20} className="text-error" /> Weakest {topicLabel.toLowerCase()}
         </h2>
         {weak.length ? weak.map((country) => (
           <div key={country.code} className="mt-3 flex items-center gap-3">
-            <img src={country.flagUrl} alt="" className="h-9 w-12 rounded-md border border-flaggo-border object-contain" />
+            <img src={country.flagUrl} alt="" className="h-9 w-12 rounded-md border border-line object-contain" />
             <span className="font-bold">{country.name}</span>
-            <span className="ml-auto rounded-full bg-error/10 px-2.5 py-1 text-xs font-display font-extrabold text-error">{progress.review[reviewKey(country.code, topic)]?.wrongCount ?? 0} misses</span>
+            <span className="ml-auto rounded-full bg-error/10 px-2.5 py-1 text-xs font-display font-semibold text-error">{progress.review[reviewKey(country.code, topic)]?.wrongCount ?? 0} misses</span>
           </div>
-        )) : <p className="mt-3 font-bold text-flaggo-muted">No weak {topicLabel.toLowerCase()} yet.</p>}
+        )) : <p className="mt-3 font-bold text-muted">No weak {topicLabel.toLowerCase()} yet.</p>}
       </section>
-      <section className="mt-6 rounded-[24px] border border-flaggo-border bg-white p-5 shadow-card">
+      <section className="mt-6 rounded-[24px] border border-line bg-paper p-5 shadow-card">
         <h2 className="flex items-center gap-2 font-display text-xl font-black">
-          <Icon name="globe" size={20} className="text-flaggo-blue" /> Region progress
+          <Icon name="globe" size={20} className="text-primary" /> Region progress
         </h2>
         <div className="mt-2 space-y-3">
           {regions.map((region) => {
@@ -77,10 +77,10 @@ export default function StatsScreen() {
               <div key={region}>
                 <div className="flex items-center justify-between text-sm font-bold">
                   <span>{region}</span>
-                  <span className="text-flaggo-muted">{done}/{group.length}</span>
+                  <span className="text-muted">{done}/{group.length}</span>
                 </div>
                 <div className="mt-1 h-2 overflow-hidden rounded-full bg-surface">
-                  <div className="h-full rounded-full bg-flaggo-green transition-all duration-500" style={{ width: `${pct}%` }} />
+                  <div className="h-full rounded-full bg-primary transition-all duration-500" style={{ width: `${pct}%` }} />
                 </div>
               </div>
             );

@@ -21,9 +21,9 @@ export default function FlagImage({ code, name, src, className = "", imgClassNam
     // very wide bar) stay a sane size instead of blowing up the layout. Rounding the
     // <img> itself rounds the actual flag corners to match the UI.
     return (
-      <div className={`flex items-center justify-center rounded-2xl border border-flaggo-border bg-white p-2 ${className}`}>
+      <div className={`flex items-center justify-center rounded-2xl border border-line bg-paper p-2 ${className}`}>
         {failed ? (
-          <div className="grid aspect-[3/2] w-full place-items-center rounded-[14px] bg-slate-100 font-display text-lg font-black text-flaggo-muted">
+          <div className="grid aspect-[3/2] w-full place-items-center rounded-[14px] bg-surface font-display text-lg font-black text-muted">
             {code}
           </div>
         ) : (
@@ -42,9 +42,9 @@ export default function FlagImage({ code, name, src, className = "", imgClassNam
 
   const cover = fit === "cover";
   return (
-    <div className={`grid overflow-hidden rounded-2xl border border-flaggo-border bg-white ${cover ? "" : "p-2"} ${className}`}>
+    <div className={`grid overflow-hidden rounded-2xl border border-line bg-paper ${cover ? "" : "p-2"} ${className}`}>
       {failed ? (
-        <div className="grid h-full w-full place-items-center rounded-xl bg-slate-100 font-display text-lg font-black text-flaggo-muted">
+        <div className="grid h-full w-full place-items-center rounded-xl bg-surface font-display text-lg font-black text-muted">
           {code}
         </div>
       ) : (
