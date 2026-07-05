@@ -11,8 +11,10 @@ import { updateStreak } from "@flaggo/core/utils/date";
 import { generateLessonQuestions, generateReviewQuestions, type Question } from "@flaggo/core/utils/quiz";
 import { updateReviewState } from "@flaggo/core/utils/spacedRepetition";
 import { answerLabel } from "@flaggo/core/game/answerLabel";
+import { awardBadges, evaluateBadges } from "@flaggo/core/game/badges";
 import { useGame } from "../state/GameProvider";
 import { trackEvent } from "../lib/analytics";
+import { earnedBadgeResults } from "../lib/badges";
 
 export const TOPIC_LABEL: Record<string, string> = {
   flag: "Flags",
@@ -62,7 +64,7 @@ export default function LessonScreen() {
   const [xp, setXp] = useState(0);
   const [feedback, setFeedback] = useState<{ ok: boolean; question: Question } | null>(null);
   const [items, setItems] = useState<RoundResultItem[]>([]);
-  const [result, setResult] = useState<{ xpEarned: number; correct: number; total: number; streak: number } | null>(null);
+  const [result, setResult] = useState<{ xpEarned: number; correct: number; total: number; streak: number; earnedBadgeIds: string[] } | null>(null);
   const question = questions[index];
   const topicLabel = TOPIC_LABEL[activeTopic] ?? activeTopic;
   const contextTitle = mode === "review" ? `Review · ${topicLabel}` : `${lesson?.title ?? "Lesson"} · ${topicLabel}`;
@@ -106,9 +108,11 @@ export default function LessonScreen() {
         completedLessonIds: Array.from(new Set([...next.completedLessonIds, lesson.id]))
       });
     }
+    const newIds = evaluateBadges(next, countries, lessons, { kind: mode === "review" ? "review" : "lesson", score: correct, total });
+    if (newIds.length) next = awardBadges(next, newIds);
     setProgress(next);
     trackEvent("lesson-complete", { accuracy: Math.round((correct / total) * 100), topic: activeTopic });
-    setResult({ xpEarned: xp + bonusXp, correct, total, streak: next.streak });
+    setResult({ xpEarned: xp + bonusXp, correct, total, streak: next.streak, earnedBadgeIds: newIds });
   }
 
   function continueNext() {
@@ -139,6 +143,7 @@ export default function LessonScreen() {
         items={items}
         streak={result.streak}
         caption={`+${result.xpEarned} XP`}
+        earnedBadges={earnedBadgeResults(result.earnedBadgeIds)}
         actions={[
           ...(next ? [{ label: "Continue learning", variant: "primary" as const, icon: "learn" as const, onPress: () => openLesson(next) }] : []),
           { label: "Back to Today", variant: next ? "secondary" as const : "primary" as const, icon: "today" as const, onPress: () => navigate("/") }

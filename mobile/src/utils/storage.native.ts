@@ -40,7 +40,8 @@ function rowToProgress(row: ProgressRow, review: Record<string, ReviewState>): A
       history: parse(row.dailyHistory, {})
     },
     arcade: parse(row.arcade, {}),
-    decks: parse(row.decks, [])
+    decks: parse(row.decks, []),
+    badges: parse(row.badges, [])
   });
 }
 
@@ -99,6 +100,7 @@ async function writeRow(progress: AppProgress, meta: ProgressMeta, needsMerge: b
       dailyHistory: JSON.stringify(progress.daily.history),
       arcade: JSON.stringify(progress.arcade),
       decks: JSON.stringify(progress.decks),
+      badges: JSON.stringify(progress.badges),
       updatedAt: meta.updatedAt,
       userId: meta.userId,
       needsMerge: needsMerge ? 1 : 0
@@ -150,6 +152,7 @@ export async function resetProgress(): Promise<void> {
     dailyHistory: "{}",
     arcade: "{}",
     decks: "[]",
+    badges: "[]",
     updatedAt: null,
     userId: null,
     needsMerge: 0
@@ -185,6 +188,7 @@ function hasProgress(progress: AppProgress) {
       progress.daily.lastDate ||
       Object.keys(progress.daily.history).length ||
       Object.keys(progress.arcade).length ||
-      progress.decks.length
+      progress.decks.length ||
+      progress.badges.length
   );
 }

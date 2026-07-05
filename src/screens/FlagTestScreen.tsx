@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import FlagImage from "../components/FlagImage";
 import Icon from "../components/Icon";
@@ -8,7 +8,9 @@ import { useConfirm } from "../components/ConfirmDialog";
 import type { Topic } from "@flaggo/core/types/topic";
 import { getCapitalDistractors, getDistractors, shuffleArray } from "@flaggo/core/utils/quiz";
 import { updateReviewState } from "@flaggo/core/utils/spacedRepetition";
+import { awardBadges, evaluateBadges } from "@flaggo/core/game/badges";
 import { useGame } from "../state/GameProvider";
+import { earnedBadgeResults } from "../lib/badges";
 import type { TestMode } from "./TestSetupScreen";
 
 type TestRouteState = { countryCodes: string[]; mode: TestMode; topic: Topic } | null;
@@ -17,7 +19,7 @@ export default function FlagTestScreen() {
   const navigate = useNavigate();
   const confirm = useConfirm();
   const { state } = useLocation();
-  const { countries: allCountries, progress, setProgress, startReview } = useGame();
+  const { countries: allCountries, lessons, progress, setProgress, startReview } = useGame();
   const routeState = state as TestRouteState;
   // Keyed memo: a fresh array each render would reshuffle the test mid-round.
   const codesKey = routeState?.countryCodes.join(",") ?? "";
@@ -36,13 +38,16 @@ export default function FlagTestScreen() {
   const onDone = () => navigate("/review");
   const questions = useMemo(() => shuffleArray(countries), [countries]);
   const [index, setIndex] = useState(0);
+  const progressRef = useRef(progress);
   const [selectedValue, setSelectedValue] = useState<string | null>(null);
   const [revealed, setRevealed] = useState(false);
   const [graded, setGraded] = useState<null | boolean>(null);
   const [correctCount, setCorrectCount] = useState(0);
+  const correctRef = useRef(0);
   const [items, setItems] = useState<RoundResultItem[]>([]);
   const [missed, setMissed] = useState<typeof allCountries>([]);
   const [complete, setComplete] = useState(false);
+  const [earnedBadgeIds, setEarnedBadgeIds] = useState<string[]>([]);
   const country = questions[index];
   const options = useMemo(() => {
     if (!country) return [];
@@ -66,6 +71,7 @@ export default function FlagTestScreen() {
   function grade(ok: boolean) {
     if (!country || graded !== null) return;
     setGraded(ok);
+    if (ok) correctRef.current += 1;
     setCorrectCount((value) => value + (ok ? 1 : 0));
     setItems((value) => [...value, {
       label: country.name,
@@ -78,12 +84,20 @@ export default function FlagTestScreen() {
       context: [country.subregion, country.capital ? `Capital: ${country.capital}` : ""].filter(Boolean).join(" · ")
     }]);
     if (!ok) setMissed((value) => [...value, country]);
-    const next = updateReviewState(country.code, topic, ok, progress);
-    setProgress({ ...next, xp: next.xp + (ok ? 5 : 0) });
+    const next = updateReviewState(country.code, topic, ok, progressRef.current);
+    const withXp = { ...next, xp: next.xp + (ok ? 5 : 0) };
+    progressRef.current = withXp;
+    setProgress(withXp);
   }
 
   function next() {
     if (index >= questions.length - 1) {
+      let finalProgress = progressRef.current;
+      const newIds = evaluateBadges(finalProgress, allCountries, lessons, { kind: "test", score: correctRef.current, total: questions.length });
+      if (newIds.length) finalProgress = awardBadges(finalProgress, newIds);
+      progressRef.current = finalProgress;
+      setEarnedBadgeIds(newIds);
+      setProgress(finalProgress);
       setComplete(true);
       return;
     }
@@ -115,6 +129,7 @@ export default function FlagTestScreen() {
         total={questions.length}
         items={items}
         caption={`+${correctCount * 5} XP`}
+        earnedBadges={earnedBadgeResults(earnedBadgeIds)}
         actions={[
           ...(missed.length ? [{ label: "Practice missed", variant: "primary" as const, icon: "review" as const, onPress: () => startReview(missed, topic) }] : []),
           { label: "Back to Practice", variant: missed.length ? "secondary" as const : "primary" as const, icon: "target" as const, onPress: onDone }

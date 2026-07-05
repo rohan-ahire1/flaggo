@@ -1,4 +1,4 @@
-import { defaultProgress, type AppProgress, type DailyProgress, type DailyResult, type Deck, type ReviewState } from "../types/progress";
+import { defaultProgress, type AppProgress, type DailyProgress, type DailyResult, type Deck, type EarnedBadge, type ReviewState } from "../types/progress";
 import { parseReviewKey, reviewKey, TOPICS, type Topic } from "../types/topic";
 
 function laterDate(a: string | null, b: string | null) {
@@ -13,6 +13,10 @@ function nonNegativeInteger(value: unknown) {
 
 function validTopic(value: unknown): value is Topic {
   return typeof value === "string" && TOPICS.includes(value as Topic);
+}
+
+function isValidDateString(value: string) {
+  return !Number.isNaN(new Date(value).getTime());
 }
 
 function chooseReview(a: ReviewState | undefined, b: ReviewState | undefined): ReviewState | undefined {
@@ -50,6 +54,7 @@ export function normalizeProgress(progress: Partial<AppProgress> | null | undefi
   const daily = normalizeDaily(progress?.daily);
   const arcade = normalizeArcade(progress?.arcade);
   const decks = normalizeDecks(progress?.decks);
+  const badges = normalizeBadges(progress?.badges);
   return {
     ...defaultProgress,
     ...(progress ?? {}),
@@ -64,7 +69,8 @@ export function normalizeProgress(progress: Partial<AppProgress> | null | undefi
     totalWrong: nonNegativeInteger(progress?.totalWrong),
     daily,
     arcade,
-    decks
+    decks,
+    badges
   };
 }
 
@@ -124,6 +130,25 @@ function normalizeDecks(value: unknown): Deck[] {
   return decks;
 }
 
+function normalizeBadges(value: unknown): EarnedBadge[] {
+  if (!Array.isArray(value)) return [];
+  const badges = new Map<string, EarnedBadge>();
+  value.forEach((item) => {
+    if (!item || typeof item !== "object") return;
+    const badge = item as Partial<EarnedBadge>;
+    if (typeof badge.id !== "string" || typeof badge.earnedAt !== "string" || !isValidDateString(badge.earnedAt)) return;
+    const current = badges.get(badge.id);
+    if (!current || new Date(badge.earnedAt).getTime() < new Date(current.earnedAt).getTime()) {
+      badges.set(badge.id, { id: badge.id, earnedAt: badge.earnedAt });
+    }
+  });
+  return Array.from(badges.values());
+}
+
+function mergeBadges(local: EarnedBadge[], server: EarnedBadge[]): EarnedBadge[] {
+  return normalizeBadges([...local, ...server]);
+}
+
 function mergeDaily(local: DailyProgress, server: DailyProgress): DailyProgress {
   const history: Record<string, DailyResult> = { ...local.history };
   Object.entries(server.history).forEach(([date, result]) => {
@@ -179,6 +204,7 @@ export function mergeProgress(local: AppProgress, server: AppProgress): AppProgr
     arcade: Object.fromEntries(
       Array.from(new Set([...Object.keys(local.arcade), ...Object.keys(server.arcade)])).map((key) => [key, Math.max(local.arcade[key] ?? 0, server.arcade[key] ?? 0)])
     ),
-    decks: mergeDecks(local.decks, server.decks)
+    decks: mergeDecks(local.decks, server.decks),
+    badges: mergeBadges(local.badges, server.badges)
   };
 }

@@ -4,6 +4,7 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 import Icon from "../components/Icon";
 import FlagImage from "../components/FlagImage";
 import type { RoundResultItem } from "../components/RoundResults";
+import { earnedBadgeResults } from "../lib/badges";
 import { BRAND } from "../config/brand";
 import { createMatch, getMatch, getMatchResults, matchUrl, winnerFromResults, buildRematchConfig, type Match, type MatchResult } from "../lib/matches";
 import { supabase } from "../lib/supabase";
@@ -25,8 +26,9 @@ export default function MatchResultScreen() {
   const [error, setError] = useState<string | null>(null);
   const [working, setWorking] = useState(false);
   const [reviewOpen, setReviewOpen] = useState(false);
-  const resultState = state as { items?: RoundResultItem[]; guestScore?: number; guestTotal?: number } | null;
+  const resultState = state as { items?: RoundResultItem[]; guestScore?: number; guestTotal?: number; earnedBadgeIds?: string[] } | null;
   const reviewItems = resultState?.items ?? [];
+  const earnedBadges = earnedBadgeResults(resultState?.earnedBadgeIds ?? []);
   const guestScore = typeof resultState?.guestScore === "number" ? resultState.guestScore : null;
   const guestTotal = typeof resultState?.guestTotal === "number" ? resultState.guestTotal : null;
   const matchQuery = useQuery<Match | null, Error>({
@@ -107,6 +109,17 @@ export default function MatchResultScreen() {
           )}
         </p>
       </section>
+      {earnedBadges.length ? (
+        <section className="mt-4 flex animate-pop-in items-center gap-3 rounded-[22px] border border-primary/30 bg-primary/10 p-4 shadow-card">
+          <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-primary text-white">
+            <Icon name="trophy" size={21} />
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="section-label text-primary">Badge earned!</p>
+            <p className="mt-0.5 font-display text-[18px] font-semibold text-ink">{earnedBadges.map((badge) => badge.name).join(", ")}</p>
+          </div>
+        </section>
+      ) : null}
       {error && <div className="mt-4 rounded-2xl bg-error/10 p-4 font-bold text-error">{error}</div>}
       <section className="mt-5 grid gap-3">
         {guestScore != null && guestTotal != null ? (

@@ -20,6 +20,7 @@ import { isStreakReminderEnabled, setStreakReminderEnabled, syncStreakReminder }
 import { useProgress } from "@/state/ProgressProvider";
 import { themeColor } from "@/theme/palettes";
 import { useThemeStore } from "@/theme/store";
+import { BADGES } from "@flaggo/core/game/badges";
 
 export default function ProfileScreen() {
   const { user, displayName } = useAuth();
@@ -31,6 +32,8 @@ export default function ProfileScreen() {
   const [reminderEnabled, setReminderEnabled] = useState(false);
 
   const mastered = Object.values(progress.review).filter((r) => r.box >= 5).length;
+  const earnedBadges = new Map(progress.badges.map((badge) => [badge.id, badge]));
+  const earnedCount = BADGES.filter((badge) => earnedBadges.has(badge.id)).length;
   const accuracy =
     progress.totalCorrect + progress.totalWrong > 0
       ? Math.round((progress.totalCorrect / (progress.totalCorrect + progress.totalWrong)) * 100)
@@ -220,6 +223,34 @@ export default function ProfileScreen() {
           <Stat label="Accuracy" value={`${accuracy}%`} />
           <Stat label="Mastered" value={`${mastered}`} />
           <Stat label="XP" value={`${progress.xp}`} />
+        </View>
+
+        <View className="gap-3">
+          <View className="flex-row items-center justify-between">
+            <SectionLabel>Achievements</SectionLabel>
+            <View className="rounded-full border border-line bg-surface px-3 py-1">
+              <Text className="text-[12px] font-bold text-muted">{earnedCount} of {BADGES.length}</Text>
+            </View>
+          </View>
+          <View className="flex-row flex-wrap gap-2.5">
+            {BADGES.map((badge) => {
+              const earned = earnedBadges.get(badge.id);
+              const icon = (badge.icon === "pin" ? "map-pin" : badge.icon) as IconName;
+              return (
+                <Card key={badge.id} className={`w-[31%] items-center gap-1 p-2.5 ${earned ? "" : "bg-surface opacity-60"}`}>
+                  <View className={`h-11 w-11 items-center justify-center rounded-2xl ${earned ? "bg-primary/10" : "bg-paper"}`}>
+                    <Icon name={icon} size={22} color={themeColor(theme, earned ? "primary" : "muted")} />
+                  </View>
+                  <Text className={`min-h-9 text-center text-[13px] font-black leading-tight ${earned ? "text-ink" : "text-muted"}`}>
+                    {badge.name}
+                  </Text>
+                  <Text className="min-h-9 text-center text-[10px] font-bold leading-tight text-muted">
+                    {earned ? new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric", year: "numeric" }).format(new Date(earned.earnedAt)) : badge.hint}
+                  </Text>
+                </Card>
+              );
+            })}
+          </View>
         </View>
 
         {/* Social */}

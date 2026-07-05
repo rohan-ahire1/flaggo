@@ -18,8 +18,14 @@ export type RoundResultItem = {
 export type ResultAction = {
   label: string;
   onPress: () => void;
-  variant?: "primary" | "secondary";
+  variant?: "primary" | "secondary" | "ghost";
   icon?: IconName;
+};
+
+export type EarnedBadgeResult = {
+  id: string;
+  name: string;
+  icon: IconName;
 };
 
 const confettiColors = [
@@ -43,6 +49,7 @@ export default function RoundResults({
   items,
   streak,
   caption,
+  earnedBadges,
   actions
 }: {
   score: number;
@@ -50,9 +57,12 @@ export default function RoundResults({
   items: RoundResultItem[];
   streak?: number;
   caption?: string;
+  earnedBadges?: EarnedBadgeResult[];
   actions: ResultAction[];
 }) {
   const missed = items.filter((item) => !item.correct);
+  const primaryAction = actions.find((action) => action.variant === "primary") ?? actions[0];
+  const secondaryActions = actions.filter((action) => action !== primaryAction);
   useEffect(() => {
     playComplete();
   }, []);
@@ -88,6 +98,23 @@ export default function RoundResults({
         </section>
       ) : null}
 
+      {earnedBadges?.length ? (
+        <section className="mt-4 flex animate-pop-in items-center gap-3 rounded-[22px] border border-primary/30 bg-primary/10 p-4 shadow-card">
+          <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-primary text-white">
+            <Icon name="trophy" size={21} />
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="section-label text-primary">Badge earned!</p>
+            <p className="mt-0.5 font-display text-[18px] font-semibold text-ink">
+              {earnedBadges.map((badge) => badge.name).join(", ")}
+            </p>
+          </div>
+          <span className="hidden h-10 w-10 shrink-0 place-items-center rounded-full bg-paper text-primary sm:grid">
+            <Icon name={earnedBadges[0].icon} size={20} />
+          </span>
+        </section>
+      ) : null}
+
       <section className="mt-3 flex items-center gap-3 rounded-[22px] border border-line bg-paper p-4 shadow-card">
         <span className={`grid h-10 w-10 place-items-center rounded-full ${missed.length ? "bg-accent/20 text-accent" : "bg-success/20 text-success"}`}>
           <Icon name={missed.length ? "target" : "check"} size={20} />
@@ -98,12 +125,12 @@ export default function RoundResults({
         </div>
       </section>
 
-      <section className="mt-3 min-h-0 flex-1 overflow-hidden rounded-[22px] border border-line bg-paper shadow-card">
+      <section className="mt-3 rounded-[22px] border border-line bg-paper shadow-card">
         <div className="flex items-center justify-between px-4 py-3">
           <p className="section-label">Review</p>
           <p className="text-sm font-bold text-muted">{score}/{total} correct</p>
         </div>
-        <div className="max-h-[42vh] overflow-y-auto border-t border-line">
+        <div className="border-t border-line">
           {items.map((item, index) => (
             <div key={`${item.label}-${index}`} className="flex items-start gap-3 border-b border-line px-4 py-3 last:border-b-0">
               {item.countryCode && item.flagUrl ? (
@@ -131,16 +158,37 @@ export default function RoundResults({
         </div>
       </section>
 
-      <div className="safe-bottom sticky bottom-0 mt-4 grid gap-2 bg-paper pt-2">
-        {actions.map((action, index) => (
-          <button key={`${action.label}-${index}`} onClick={action.onPress} className={action.variant === "primary" ? "btn-primary" : "btn-secondary"}>
+      {/* Secondary/ghost actions flow with the page; only the primary sticks,
+          so short viewports never bury the review list under a wall of CTAs. */}
+      {secondaryActions.length ? (
+        <div className="mt-4 grid gap-2">
+          {secondaryActions.map((action, index) =>
+            action.variant === "ghost" ? (
+              <button key={`${action.label}-${index}`} onClick={action.onPress} className="btn-ghost justify-self-center">
+                {action.label}
+              </button>
+            ) : (
+              <button key={`${action.label}-${index}`} onClick={action.onPress} className="btn-secondary">
+                <span className="inline-flex items-center justify-center gap-2">
+                  {action.icon ? <Icon name={action.icon} size={18} /> : null}
+                  {action.label}
+                </span>
+              </button>
+            )
+          )}
+        </div>
+      ) : null}
+
+      {primaryAction ? (
+        <div className="safe-bottom sticky bottom-0 mt-3 bg-paper pt-2">
+          <button onClick={primaryAction.onPress} className="btn-primary w-full">
             <span className="inline-flex items-center justify-center gap-2">
-              {action.icon ? <Icon name={action.icon} size={18} /> : null}
-              {action.label}
+              {primaryAction.icon ? <Icon name={primaryAction.icon} size={18} /> : null}
+              {primaryAction.label}
             </span>
           </button>
-        ))}
-      </div>
+        </div>
+      ) : null}
     </main>
   );
 }

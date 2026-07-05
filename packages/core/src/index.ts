@@ -19,5 +19,6 @@ export * from "./utils/trivia";
 export * from "./data/countries";
 export * from "./data/lookalikes";
 export * from "./game/answerLabel";
+export * from "./game/badges";
 export * from "./game/boards";
 export * from "./game/matchConfig";

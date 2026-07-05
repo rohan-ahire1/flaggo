@@ -18,7 +18,9 @@ import { generateMapQuestions, generateReviewQuestions, type MapQuestion, type Q
 import { updateReviewState } from "@flaggo/core/utils/spacedRepetition";
 import { seededShuffle, hashStringToSeed, mulberry32 } from "@flaggo/core/utils/seededRandom";
 import { answerLabel, answerLabelForWrapper } from "@flaggo/core/game/answerLabel";
+import { awardBadges, evaluateBadges } from "@flaggo/core/game/badges";
 import { trackEvent } from "../lib/analytics";
+import { earnedBadgeResults } from "../lib/badges";
 import { arcadeBoard, submitScore } from "../lib/leaderboard";
 import { useGame } from "../state/GameProvider";
 
@@ -48,7 +50,7 @@ export default function ArcadeScreen() {
   const confirm = useConfirm();
   const { user } = useAuth();
   const { ensureName } = useNameClaim();
-  const { countries, progress, setProgress, openSignIn, createAndShareChallenge } = useGame();
+  const { countries, lessons, progress, setProgress, openSignIn, createAndShareChallenge } = useGame();
   const [mode, setMode] = useState<ArcadeMode>("timed");
   const [topic, setTopic] = useState<Topic>(progress.selectedTopic);
   const [running, setRunning] = useState(false);
@@ -60,6 +62,7 @@ export default function ArcadeScreen() {
   const [remaining, setRemaining] = useState(60);
   const [startedAt, setStartedAt] = useState(0);
   const [items, setItems] = useState<RoundResultItem[]>([]);
+  const [earnedBadgeIds, setEarnedBadgeIds] = useState<string[]>([]);
   const pool = useMemo(() => arcadePool(countries, mode, topic), [countries, mode, topic]);
   const questions = useMemo<ArcadeQuestion[]>(() => {
     const rng = mulberry32(hashStringToSeed(`arcade-${mode}-${topic}-${running ? Date.now() : 0}`));
@@ -91,6 +94,7 @@ export default function ArcadeScreen() {
     setIndex(0);
     setAnswers([]);
     setItems([]);
+    setEarnedBadgeIds([]);
     setFeedback(null);
     setStartedAt(Date.now());
     setRemaining(runSeconds);
@@ -121,7 +125,10 @@ export default function ArcadeScreen() {
   async function finish(finalAnswers = answers) {
     if (done) return;
     const finalScore = arcadeScore(mode, finalAnswers);
-    const next = persistArcadeBest(currentProgress, mode, topic, finalScore);
+    let next = persistArcadeBest(currentProgress, mode, topic, finalScore);
+    const newIds = evaluateBadges(next, countries, lessons, { kind: "arcade", arcadeMode: mode, score: finalScore, total: finalAnswers.length });
+    if (newIds.length) next = awardBadges(next, newIds);
+    setEarnedBadgeIds(newIds);
     setCurrentProgress(next);
     setProgress(next);
     setAnswers(finalAnswers);
@@ -158,6 +165,7 @@ export default function ArcadeScreen() {
         total={items.length}
         items={items}
         caption={`Best ${Math.max(best, score)}`}
+        earnedBadges={earnedBadgeResults(earnedBadgeIds)}
         actions={[
           { label: "Play again", variant: "primary", icon: "play", onPress: start },
           { label: "Challenge a friend", variant: "secondary", icon: "flag", onPress: () => void createAndShareChallenge() },

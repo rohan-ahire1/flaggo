@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Platform, Pressable, ScrollView, Text, View, useWindowDimensions } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router, useLocalSearchParams } from "expo-router";
@@ -11,11 +11,17 @@ import { countries } from "@flaggo/core/data/countries";
 import { useProgress } from "@/state/ProgressProvider";
 import { generateMapQuestions, type MapMode } from "@flaggo/core/utils/quiz";
 import { updateReviewState } from "@flaggo/core/utils/spacedRepetition";
+import { generateLessons } from "@flaggo/core/utils/lessonGenerator";
+import { awardBadges, evaluateBadges } from "@flaggo/core/game/badges";
+import { earnedBadgeResults } from "@/lib/badges";
 
 export default function MapPlayScreen() {
   const params = useLocalSearchParams<{ mode?: string; codes?: string }>();
   const mode = (params.mode as MapMode) ?? "locate";
   const { progress, setProgress } = useProgress();
+  const progressRef = useRef(progress);
+  const scoreRef = useRef(0);
+  const lessons = useMemo(() => generateLessons(countries), []);
   const { width } = useWindowDimensions();
   const isWideWeb = Platform.OS === "web" && width >= 1024;
 
@@ -32,6 +38,7 @@ export default function MapPlayScreen() {
   const [results, setResults] = useState<RoundResultItem[]>([]);
   const [feedback, setFeedback] = useState<{ ok: boolean; wrongCode?: string } | null>(null);
   const [finished, setFinished] = useState(false);
+  const [earnedBadgeIds, setEarnedBadgeIds] = useState<string[]>([]);
 
   const question = questions[index];
   const target = question ? byCode.get(question.targetCode) : undefined;
@@ -43,6 +50,7 @@ export default function MapPlayScreen() {
         total={questions.length}
         items={results}
         caption={mode === "locate" ? "Locate" : "Identify"}
+        earnedBadges={earnedBadgeResults(earnedBadgeIds)}
         actions={[{ label: "Done", variant: "primary", icon: "check", onPress: () => dismiss() }]}
       />
     );
@@ -51,9 +59,14 @@ export default function MapPlayScreen() {
   function answer(code: string) {
     if (feedback || !target) return;
     const ok = code === target.code;
-    const next = updateReviewState(target.code, "location", ok, progress);
-    setProgress({ ...next, xp: next.xp + (ok ? 10 : 0) });
-    if (ok) setScore((s) => s + 1);
+    const next = updateReviewState(target.code, "location", ok, progressRef.current);
+    const withXp = { ...next, xp: next.xp + (ok ? 10 : 0) };
+    progressRef.current = withXp;
+    setProgress(withXp);
+    if (ok) {
+      scoreRef.current += 1;
+      setScore((s) => s + 1);
+    }
     setResults((r) => [
       ...r,
       {
@@ -67,8 +80,15 @@ export default function MapPlayScreen() {
 
   function next() {
     setFeedback(null);
-    if (index + 1 >= questions.length) setFinished(true);
-    else setIndex((i) => i + 1);
+    if (index + 1 >= questions.length) {
+      let done = progressRef.current;
+      const newIds = evaluateBadges(done, countries, lessons, { kind: "map", score: scoreRef.current, total: questions.length });
+      if (newIds.length) done = awardBadges(done, newIds);
+      progressRef.current = done;
+      setEarnedBadgeIds(newIds);
+      setProgress(done);
+      setFinished(true);
+    } else setIndex((i) => i + 1);
   }
 
   const isIdentify = question.type === "identify-country";

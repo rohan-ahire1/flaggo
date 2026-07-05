@@ -10,6 +10,7 @@ import { supabase } from "../lib/supabase";
 import { isSfxEnabled, setSfxEnabled } from "../lib/sfx";
 import { isSyntheticEmail } from "../lib/username";
 import { useGame } from "../state/GameProvider";
+import { BADGES } from "@flaggo/core/game/badges";
 
 export default function ProfileScreen() {
   const { user } = useAuth();
@@ -19,6 +20,8 @@ export default function ProfileScreen() {
   const userEmail = user?.email ?? null;
   const synthetic = isSyntheticEmail(userEmail);
   const [sfxOn, setSfxOn] = useState(true);
+  const earnedBadges = new Map(progress.badges.map((badge) => [badge.id, badge]));
+  const earnedCount = BADGES.filter((badge) => earnedBadges.has(badge.id)).length;
   useEffect(() => {
     setSfxOn(isSfxEnabled());
   }, []);
@@ -98,6 +101,29 @@ export default function ProfileScreen() {
           </div>
         ))}
       </div>
+
+      <section className="mt-5 rounded-[22px] border border-line bg-paper p-4 shadow-card">
+        <div className="mb-3 flex items-center justify-between gap-3">
+          <h2 className="font-display text-lg font-semibold">Achievements</h2>
+          <span className="rounded-full bg-surface px-3 py-1 text-xs font-bold text-muted">{earnedCount} of {BADGES.length}</span>
+        </div>
+        <div className="grid grid-cols-3 gap-2.5 md:grid-cols-6">
+          {BADGES.map((badge) => {
+            const earned = earnedBadges.get(badge.id);
+            return (
+              <div key={badge.id} className={`rounded-2xl border border-line p-2.5 text-center ${earned ? "bg-paper" : "bg-surface opacity-60"}`}>
+                <div className={`mx-auto grid h-12 w-12 place-items-center rounded-2xl ${earned ? "bg-primary/10 text-primary" : "bg-paper text-muted"}`}>
+                  <Icon name={badge.icon as IconName} size={23} />
+                </div>
+                <p className={`mt-2 min-h-10 text-sm font-display font-semibold leading-tight ${earned ? "text-ink" : "text-muted"}`}>{badge.name}</p>
+                <p className="mt-1 min-h-8 text-[11px] font-bold leading-tight text-muted">
+                  {earned ? new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric", year: "numeric" }).format(new Date(earned.earnedAt)) : badge.hint}
+                </p>
+              </div>
+            );
+          })}
+        </div>
+      </section>
 
       <button
         onClick={async () => {

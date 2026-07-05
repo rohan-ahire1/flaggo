@@ -10,8 +10,10 @@ import { arcadeScore } from "@flaggo/core/utils/arcade";
 import { hashStringToSeed, mulberry32 } from "@flaggo/core/utils/seededRandom";
 import { buildTrivia, type TriviaMode, type TriviaRound } from "@flaggo/core/utils/trivia";
 import { triviaBoard } from "@flaggo/core/game/boards";
+import { awardBadges, evaluateBadges } from "@flaggo/core/game/badges";
 import { useNameClaim } from "../components/NameClaimProvider";
 import { trackEvent } from "../lib/analytics";
+import { earnedBadgeResults } from "../lib/badges";
 import { submitScore } from "../lib/leaderboard";
 import { useGame } from "../state/GameProvider";
 
@@ -45,7 +47,7 @@ export default function TriviaScreen() {
   const confirm = useConfirm();
   const { user } = useAuth();
   const { ensureName } = useNameClaim();
-  const { countries, progress, setProgress } = useGame();
+  const { countries, lessons, progress, setProgress } = useGame();
   const [mode, setMode] = useState<TriviaMode>("higher-lower");
   const [runMode, setRunMode] = useState<RunMode>("timed");
   const [running, setRunning] = useState(false);
@@ -57,6 +59,7 @@ export default function TriviaScreen() {
   const [remaining, setRemaining] = useState(60);
   const [startedAt, setStartedAt] = useState(0);
   const [items, setItems] = useState<RoundResultItem[]>([]);
+  const [earnedBadgeIds, setEarnedBadgeIds] = useState<string[]>([]);
   const rounds = useMemo(() => {
     const rng = mulberry32(hashStringToSeed(seed));
     return Array.from({ length: 60 }, () => buildTrivia(mode, countries, rng));
@@ -84,6 +87,7 @@ export default function TriviaScreen() {
     setIndex(0);
     setAnswers([]);
     setItems([]);
+    setEarnedBadgeIds([]);
     setFeedback(null);
     setStartedAt(Date.now());
     setRemaining(60);
@@ -112,13 +116,16 @@ export default function TriviaScreen() {
     if (done) return;
     const finalScore = arcadeScore(runMode === "sudden" ? "sudden" : "timed", finalAnswers);
     const key = triviaKey(mode);
-    const next = {
+    let next = {
       ...progress,
       arcade: {
         ...progress.arcade,
         [key]: Math.max(progress.arcade[key] ?? 0, finalScore)
       }
     };
+    const newIds = evaluateBadges(next, countries, lessons, { kind: "trivia", score: finalScore, total: finalAnswers.length });
+    if (newIds.length) next = awardBadges(next, newIds);
+    setEarnedBadgeIds(newIds);
     setProgress(next);
     setAnswers(finalAnswers);
     setDone(true);
@@ -160,6 +167,7 @@ export default function TriviaScreen() {
         total={items.length}
         items={items}
         caption={`Best ${Math.max(best, score)}`}
+        earnedBadges={earnedBadgeResults(earnedBadgeIds)}
         actions={[
           { label: "Play again", variant: "primary", icon: "play", onPress: start },
           { label: "Done", variant: "secondary", icon: "today", onPress: () => navigate("/") }

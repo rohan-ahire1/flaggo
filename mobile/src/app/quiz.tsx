@@ -29,10 +29,12 @@ import { buildDailyQuiz, dateKey, applyDailyResult } from "@flaggo/core/utils/da
 import { buildMatchQuestions, normalizeMatchConfig, submitMatchResult, type MatchConfig } from "@/lib/matches";
 import { arcadeBoard, dailyBoard, submitScore } from "@/lib/leaderboard";
 import { writePendingMatch } from "@/lib/pendingMatch";
+import { earnedBadgeResults } from "@/lib/badges";
 import { syncStreakReminder } from "@/lib/streakReminder";
 import { persistArcadeBest } from "@flaggo/core/utils/arcade";
 import { updateStreak } from "@flaggo/core/utils/date";
 import { updateReviewState } from "@flaggo/core/utils/spacedRepetition";
+import { awardBadges, evaluateBadges } from "@flaggo/core/game/badges";
 
 type QuizItem = { question: Question; topic: Topic };
 
@@ -63,10 +65,8 @@ export default function QuizScreen() {
     deckId?: string;
     codes?: string;
   }>();
-  const lesson = useMemo(
-    () => (params.lessonId ? generateLessons(countries).find((l) => l.id === params.lessonId) ?? null : null),
-    [params.lessonId]
-  );
+  const lessons = useMemo(() => generateLessons(countries), []);
+  const lesson = useMemo(() => (params.lessonId ? lessons.find((l) => l.id === params.lessonId) ?? null : null), [lessons, params.lessonId]);
   const topic = (lesson?.topic as Topic) ?? (params.topic as Topic) ?? "flag";
   const isArcade = params.mode === "arcade";
   const isDaily = params.mode === "daily";
@@ -121,6 +121,7 @@ export default function QuizScreen() {
   const [score, setScore] = useState(0);
   const [results, setResults] = useState<RoundResultItem[]>([]);
   const [finished, setFinished] = useState(false);
+  const [earnedBadgeIds, setEarnedBadgeIds] = useState<string[]>([]);
   const [notice, setNotice] = useState<string | null>(null);
   const [startedAt] = useState(() => Date.now());
   const [now, setNow] = useState(() => Date.now());
@@ -219,6 +220,8 @@ export default function QuizScreen() {
     finishing.current = true;
     let done = draft.current;
     if (isMatch) {
+      const newIds = evaluateBadges(done, countries, lessons, { kind: "match", score: scoreRef.current, total });
+      if (newIds.length) done = awardBadges(done, newIds);
       draft.current = done;
       setProgress(done);
       if (params.matchId) {
@@ -253,6 +256,10 @@ export default function QuizScreen() {
         done = { ...done, completedLessonIds: [...done.completedLessonIds, lesson.id] };
       }
     }
+    const roundKind = isDaily ? "daily" : isArcade ? "arcade" : lesson ? "lesson" : "review";
+    const newIds = evaluateBadges(done, countries, lessons, { kind: roundKind, arcadeMode: isArcade ? arcadeMode : undefined, score: scoreToSubmit, total });
+    if (newIds.length) done = awardBadges(done, newIds);
+    setEarnedBadgeIds(newIds);
     draft.current = done;
     setProgress(done);
     setFinished(true);
@@ -334,6 +341,7 @@ export default function QuizScreen() {
         items={results}
         streak={streak}
         caption={`${mmss(elapsed)} · +${finalScore * XP_PER_CORRECT} XP`}
+        earnedBadges={earnedBadgeResults(earnedBadgeIds)}
         actions={actions}
       />
     );

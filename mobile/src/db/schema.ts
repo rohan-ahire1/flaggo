@@ -19,6 +19,7 @@ export const progress = sqliteTable("progress", {
   dailyHistory: text("daily_history").notNull().default("{}"),
   arcade: text("arcade").notNull().default("{}"),
   decks: text("decks").notNull().default("[]"),
+  badges: text("badges").notNull().default("[]"),
   updatedAt: text("updated_at"),
   userId: text("user_id"),
   needsMerge: integer("needs_merge").notNull().default(0)

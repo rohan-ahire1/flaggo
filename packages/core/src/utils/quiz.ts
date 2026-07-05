@@ -13,7 +13,7 @@ export type Question =
   | { id: string; type: "flag-to-capital"; correctCountry: Country; correctCapital: string; optionCapitals: string[] }
   | { id: string; type: "capital-true-false"; correctCountry: Country; shownCapital: string; answer: boolean }
   | { id: string; type: "guess-currency"; correctCountry: Country; correctCurrency: string; optionCurrencies: string[] }
-  | { id: string; type: "currency-to-country"; correctCountry: Country; correctCurrency: string; options: Country[] }
+  | { id: string; type: "currency-to-country"; correctCountry: Country; correctCurrency: string; currencyClue: string; options: Country[] }
   | { id: string; type: "guess-language"; correctCountry: Country; correctLanguage: string; optionLanguages: string[] }
   | { id: string; type: "language-to-country"; correctCountry: Country; correctLanguage: string; options: Country[] }
   | { id: string; type: "pick-neighbor"; correctCountry: Country; correctNeighbor: Country; options: Country[] }
@@ -99,6 +99,36 @@ function makeCurrencyOptions(correctCountry: Country, allCountries: Country[], r
   return shuffleArray([correct, ...shuffleArray(distractors, rng).slice(0, 3)], rng);
 }
 
+function sentenceCase(value: string) {
+  return value ? `${value[0].toUpperCase()}${value.slice(1)}` : value;
+}
+
+function escapeRegex(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+export function getCurrencyClue(country: Country) {
+  const currencyName = country.currencyName?.trim() ?? "";
+  if (!currencyName) return country.currencyCode?.trim() ?? "";
+
+  const countryDescriptors = [
+    country.name,
+    country.officialName,
+    ...(country.demonym?.split(",") ?? [])
+  ]
+    .map((descriptor) => descriptor?.trim())
+    .filter((descriptor): descriptor is string => Boolean(descriptor));
+
+  const stripped = countryDescriptors.reduce((label, descriptor) => {
+    return label.replace(new RegExp(`^${escapeRegex(descriptor)}\\s+`, "i"), "");
+  }, currencyName).trim();
+  const label = stripped && stripped.toLowerCase() !== currencyName.toLowerCase()
+    ? sentenceCase(stripped)
+    : currencyName;
+
+  return country.currencyCode ? `${label} (${country.currencyCode})` : label;
+}
+
 function makeLanguageOptions(correctCountry: Country, allCountries: Country[], rng: () => number = Math.random) {
   const actualLanguages = new Set(uniqueValues(correctCountry.languages ?? []));
   const correct = shuffleArray(Array.from(actualLanguages), rng)[0];
@@ -165,6 +195,7 @@ export function generateCurrencyQuestions(idPrefix: string, lessonCountries: Cou
       type: "currency-to-country",
       correctCountry: country,
       correctCurrency,
+      currencyClue: getCurrencyClue(country),
       options: makeOptions(country, countriesWithDifferentCurrency(country, currencyPool), rng)
     };
   });
