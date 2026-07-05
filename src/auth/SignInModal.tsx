@@ -1,14 +1,18 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import Icon from "../components/Icon";
+import { useDialogFocus } from "../components/useDialogFocus";
+import { env } from "../config/env";
 import { supabase } from "../lib/supabase";
 import { trackEvent } from "../lib/analytics";
 import { checkUsernameAvailable, isValidUsername, usernameToEmail } from "../lib/username";
+import { useGame } from "../state/GameProvider";
 
 type Availability = "idle" | "invalid" | "checking" | "yes" | "no";
 
 export default function SignInModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [mode, setMode] = useState<"signin" | "signup">("signin");
+  const [resetMode, setResetMode] = useState(false);
   const [signupMethod, setSignupMethod] = useState<"email" | "username">("email");
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
@@ -16,6 +20,10 @@ export default function SignInModal({ open, onClose }: { open: boolean; onClose:
   const [status, setStatus] = useState("");
   const [busy, setBusy] = useState(false);
   const [avail, setAvail] = useState<Availability>("idle");
+  const [showPassword, setShowPassword] = useState(false);
+  const { setToast } = useGame();
+  const close = useCallback(() => onClose(), [onClose]);
+  const { shellRef, initialFocusRef } = useDialogFocus(open, close);
 
   const usernameOnly = mode === "signup" && signupMethod === "username";
 
@@ -46,6 +54,25 @@ export default function SignInModal({ open, onClose }: { open: boolean; onClose:
   }, [displayName, usernameOnly]);
 
   if (!open) return null;
+
+  async function submitReset(event: FormEvent) {
+    event.preventDefault();
+    if (!supabase) {
+      setStatus("Supabase is not configured yet.");
+      return;
+    }
+    if (!email.trim()) {
+      setStatus("Enter your email.");
+      return;
+    }
+    setBusy(true);
+    setStatus("");
+    const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+      redirectTo: `${env.siteUrl}/auth/callback?type=recovery`
+    });
+    setBusy(false);
+    setStatus(error ? error.message : "Check your email.");
+  }
 
   async function submit(event: FormEvent) {
     event.preventDefault();
@@ -107,18 +134,15 @@ export default function SignInModal({ open, onClose }: { open: boolean; onClose:
       trackEvent(mode === "signin" ? "sign-in" : "sign-up", {
         method: mode === "signup" ? signupMethod : "password"
       });
-      setStatus(
-        mode === "signin"
-          ? "Signed in."
-          : usernameOnly
-            ? "Account created. You can add a recovery email later in your profile."
-            : "Account created. Check your email if confirmation is required."
-      );
+      setToast(mode === "signin" ? "Signed in" : "Account created");
+      window.setTimeout(() => setToast(null), 1800);
+      onClose();
     }
   }
 
   function switchMode(nextMode: "signin" | "signup") {
     setMode(nextMode);
+    setResetMode(false);
     setStatus("");
   }
 
@@ -144,48 +168,77 @@ export default function SignInModal({ open, onClose }: { open: boolean; onClose:
   const createDisabled = busy || (usernameOnly && avail !== "yes");
 
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-slate-900/40 p-4">
-      <section className="w-full max-w-sm rounded-[24px] border border-flaggo-border bg-white p-5 shadow-soft animate-pop-in">
+    <div
+      className="fixed inset-0 z-50 grid place-items-center bg-ink/40 p-4"
+      role="presentation"
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget) onClose();
+      }}
+    >
+      <section ref={shellRef} role="dialog" aria-modal="true" aria-labelledby="signin-title" className="w-full max-w-sm rounded-[24px] border border-line bg-paper p-5 shadow-soft animate-pop-in">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <h2 className="font-display text-2xl font-black">{mode === "signin" ? "Sign in" : "Create account"}</h2>
-            <p className="mt-1 text-sm font-bold text-flaggo-muted">Sync progress across devices.</p>
+            <h2 id="signin-title" className="font-display text-2xl font-semibold">{resetMode ? "Reset password" : mode === "signin" ? "Sign in" : "Create account"}</h2>
+            <p className="mt-1 text-sm font-bold text-muted">{resetMode ? "We'll send a reset link to your email." : "Sync progress across devices."}</p>
           </div>
-          <button onClick={onClose} className="rounded-full p-2 font-display font-black text-flaggo-muted hover:bg-slate-100" aria-label="Close">
+          <button onClick={onClose} className="rounded-full p-2 font-display font-bold text-muted hover:bg-surface" aria-label="Close">
             x
           </button>
         </div>
 
-        <div className="mt-5 grid grid-cols-2 gap-2 rounded-2xl bg-slate-100 p-1">
+        {!resetMode && <div className="mt-5 grid grid-cols-2 gap-2 rounded-2xl bg-surface p-1">
           <button
             type="button"
             onClick={() => switchMode("signin")}
-            className={`rounded-xl px-3 py-2 font-display text-sm font-black ${mode === "signin" ? "bg-white text-flaggo-text shadow-sm" : "text-flaggo-muted"}`}
+            className={`rounded-xl px-3 py-2 font-display text-sm font-semibold ${mode === "signin" ? "bg-paper text-ink shadow-sm" : "text-muted"}`}
           >
             Sign in
           </button>
           <button
             type="button"
             onClick={() => switchMode("signup")}
-            className={`rounded-xl px-3 py-2 font-display text-sm font-black ${mode === "signup" ? "bg-white text-flaggo-text shadow-sm" : "text-flaggo-muted"}`}
+            className={`rounded-xl px-3 py-2 font-display text-sm font-semibold ${mode === "signup" ? "bg-paper text-ink shadow-sm" : "text-muted"}`}
           >
             Create account
           </button>
-        </div>
+        </div>}
+
+        {resetMode ? (
+          <form onSubmit={submitReset} className="mt-4 space-y-3">
+            <div>
+              <label className="text-sm font-display font-semibold text-muted" htmlFor="reset-email">Email</label>
+              <input
+                ref={initialFocusRef}
+                id="reset-email"
+                type="email"
+                required
+                autoComplete="email"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                placeholder="you@example.com"
+                className="mt-2 w-full rounded-2xl border-2 border-line bg-paper px-4 py-3 font-bold outline-none transition focus:border-primary"
+              />
+            </div>
+            <button disabled={busy} className="btn-primary mt-3 w-full disabled:opacity-50">{busy ? "Sending..." : "Send reset link"}</button>
+            <button type="button" onClick={() => { setResetMode(false); setStatus(""); }} className="w-full py-2 font-display font-bold text-muted">Back to sign in</button>
+            {status && <p className="mt-4 rounded-2xl bg-surface p-3 text-sm font-bold text-muted">{status}</p>}
+          </form>
+        ) : (
+          <>
 
         {mode === "signup" && (
-          <div className="mt-3 grid grid-cols-2 gap-2 rounded-2xl border border-flaggo-border p-1">
+          <div className="mt-3 grid grid-cols-2 gap-2 rounded-2xl border border-line p-1">
             <button
               type="button"
               onClick={() => setSignupMethod("email")}
-              className={`rounded-xl px-3 py-1.5 font-display text-xs font-black ${signupMethod === "email" ? "bg-flaggo-green text-white" : "text-flaggo-muted"}`}
+              className={`rounded-xl px-3 py-1.5 font-display text-xs font-semibold ${signupMethod === "email" ? "bg-primary text-white" : "text-muted"}`}
             >
               With email
             </button>
             <button
               type="button"
               onClick={() => setSignupMethod("username")}
-              className={`rounded-xl px-3 py-1.5 font-display text-xs font-black ${signupMethod === "username" ? "bg-flaggo-green text-white" : "text-flaggo-muted"}`}
+              className={`rounded-xl px-3 py-1.5 font-display text-xs font-semibold ${signupMethod === "username" ? "bg-primary text-white" : "text-muted"}`}
             >
               Username only
             </button>
@@ -195,7 +248,7 @@ export default function SignInModal({ open, onClose }: { open: boolean; onClose:
         <form onSubmit={submit} className="mt-4 space-y-3">
           {mode === "signup" && (
             <div>
-              <label className="text-sm font-display font-extrabold text-flaggo-muted" htmlFor="signin-display-name">
+              <label className="text-sm font-display font-semibold text-muted" htmlFor="signin-display-name">
                 Username{usernameOnly ? "" : " (optional)"}
               </label>
               <div className="relative">
@@ -207,23 +260,23 @@ export default function SignInModal({ open, onClose }: { open: boolean; onClose:
                   placeholder="flag_explorer"
                   maxLength={usernameOnly ? 20 : 32}
                   autoComplete="username"
-                  className={`mt-2 w-full rounded-2xl border-2 bg-white px-4 py-3 pr-11 font-bold outline-none transition focus:border-flaggo-green ${
-                    usernameOnly && avail === "no" ? "border-flaggo-red" : "border-flaggo-border"
+                  className={`mt-2 w-full rounded-2xl border-2 bg-paper px-4 py-3 pr-11 font-bold outline-none transition focus:border-primary ${
+                    usernameOnly && avail === "no" ? "border-error" : "border-line"
                   }`}
                 />
                 {usernameOnly && avail === "yes" && (
-                  <span className="absolute right-3 top-1/2 mt-1 -translate-y-1/2 text-flaggo-green" aria-label="Username available">
+                  <span className="absolute right-3 top-1/2 mt-1 -translate-y-1/2 text-success" aria-label="Username available">
                     <Icon name="check" size={22} />
                   </span>
                 )}
                 {usernameOnly && avail === "no" && (
-                  <span className="absolute right-3 top-1/2 mt-1 -translate-y-1/2 text-flaggo-red" aria-label="Username taken">
+                  <span className="absolute right-3 top-1/2 mt-1 -translate-y-1/2 text-error" aria-label="Username taken">
                     <Icon name="x" size={22} />
                   </span>
                 )}
               </div>
               {usernameOnly && (
-                <p className={`mt-1.5 text-xs font-bold ${avail === "no" ? "text-flaggo-red" : "text-flaggo-muted"}`}>
+                <p className={`mt-1.5 text-xs font-bold ${avail === "no" ? "text-error" : "text-muted"}`}>
                   {avail === "checking"
                     ? "Checking availability…"
                     : avail === "yes"
@@ -238,51 +291,65 @@ export default function SignInModal({ open, onClose }: { open: boolean; onClose:
 
           {!usernameOnly && (
             <div>
-              <label className="text-sm font-display font-extrabold text-flaggo-muted" htmlFor="signin-email">
+              <label className="text-sm font-display font-semibold text-muted" htmlFor="signin-email">
                 Email
               </label>
               <input
                 id="signin-email"
+                ref={initialFocusRef}
                 type="email"
                 required
                 autoComplete="email"
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
                 placeholder="you@example.com"
-                className="mt-2 w-full rounded-2xl border-2 border-flaggo-border bg-white px-4 py-3 font-bold outline-none transition focus:border-flaggo-green"
+                className="mt-2 w-full rounded-2xl border-2 border-line bg-paper px-4 py-3 font-bold outline-none transition focus:border-primary"
               />
             </div>
           )}
 
           <div>
-            <label className="text-sm font-display font-extrabold text-flaggo-muted" htmlFor="signin-password">
+            <label className="text-sm font-display font-semibold text-muted" htmlFor="signin-password">
               Password
             </label>
-            <input
-              id="signin-password"
-              type="password"
-              required
-              autoComplete={mode === "signin" ? "current-password" : "new-password"}
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              placeholder={mode === "signin" ? "Your password" : "At least 6 characters"}
-              minLength={mode === "signup" ? 6 : undefined}
-              className="mt-2 w-full rounded-2xl border-2 border-flaggo-border bg-white px-4 py-3 font-bold outline-none transition focus:border-flaggo-green"
-            />
+            <div className="relative">
+              <input
+                id="signin-password"
+                type={showPassword ? "text" : "password"}
+                required
+                autoComplete={mode === "signin" ? "current-password" : "new-password"}
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                placeholder={mode === "signin" ? "Your password" : "At least 6 characters"}
+                minLength={mode === "signup" ? 6 : undefined}
+                className="mt-2 w-full rounded-2xl border-2 border-line bg-paper px-4 py-3 pr-14 font-bold outline-none transition focus:border-primary"
+              />
+              <button type="button" onClick={() => setShowPassword((value) => !value)} aria-label={showPassword ? "Hide password" : "Show password"} className="absolute right-2 top-1/2 mt-1 -translate-y-1/2 rounded-xl px-3 py-2 text-xs font-bold text-muted">
+                {showPassword ? "Hide" : "Show"}
+              </button>
+            </div>
           </div>
 
+          {mode === "signin" && (
+            <button type="button" onClick={() => { setResetMode(true); setStatus(""); }} className="btn-ghost text-sm">
+              Forgot password?
+            </button>
+          )}
+
           {usernameOnly && (
-            <p className="rounded-2xl bg-slate-50 p-3 text-xs font-bold text-flaggo-muted">
+            <p className="rounded-2xl bg-surface p-3 text-xs font-bold text-muted">
               No email means we can&apos;t help you reset your password. You can add a recovery email anytime from your profile.
             </p>
           )}
 
-          <button disabled={createDisabled} className="flaggo-button mt-3 w-full bg-green-grad text-white shadow-button-green disabled:opacity-50">
+          <button disabled={createDisabled} className="btn-primary mt-3 w-full disabled:opacity-50">
             {mode === "signin" ? "Sign in" : "Create account"}
           </button>
         </form>
 
-        {status && <p className="mt-4 rounded-2xl bg-slate-50 p-3 text-sm font-bold text-flaggo-muted">{status}</p>}
+        {status && <p className="mt-4 rounded-2xl bg-surface p-3 text-sm font-bold text-muted">{status}</p>}
+          </>
+        )}
       </section>
     </div>
   );

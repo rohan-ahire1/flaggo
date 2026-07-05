@@ -64,11 +64,11 @@ export default function LessonNode({
         className={`my-2 flex flex-1 items-center gap-3 rounded-2xl p-4 text-left transition-all duration-150 active:translate-y-[1px] ${card}`}
       >
         <span className="min-w-0 flex-1">
-          <span className="block truncate font-display text-[16px] font-extrabold leading-tight text-ink">{lesson.title}</span>
+          <span className="block truncate font-display text-[16px] font-semibold leading-tight text-ink">{lesson.title}</span>
           <span className="block text-[13px] font-semibold text-muted">{lesson.countryCodes.length} {countLabel}</span>
         </span>
         {current ? (
-          <span className="shrink-0 rounded-full bg-primary px-3.5 py-1.5 font-display text-xs font-extrabold text-white">Start</span>
+          <span className="shrink-0 rounded-full bg-primary px-3.5 py-1.5 font-display text-xs font-semibold text-white">Start</span>
         ) : done ? (
           <Icon name="check" size={20} className="shrink-0 text-primary" />
         ) : review ? (

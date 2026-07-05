@@ -7,7 +7,8 @@ import FlagImage from "../components/FlagImage";
 import Icon from "../components/Icon";
 import ProgressBar from "../components/ProgressBar";
 import QuestionCard from "../components/QuestionCard";
-import { answerLabelForWrapper } from "@flaggo/core/game/answerLabel";
+import type { RoundResultItem } from "../components/RoundResults";
+import { answerLabel, answerLabelForWrapper } from "@flaggo/core/game/answerLabel";
 import { getMatch, getMatchResults, buildMatchQuestions, submitMatchResult, type Match, type MatchQuestion, type MatchResult } from "../lib/matches";
 import { trackEvent } from "../lib/analytics";
 import { useGame } from "../state/GameProvider";
@@ -27,6 +28,7 @@ export default function MatchScreen() {
   const [correct, setCorrect] = useState(0);
   const [feedback, setFeedback] = useState<{ ok: boolean; question: MatchQuestion; scoreAfter: number; wrongCode?: string } | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [items, setItems] = useState<RoundResultItem[]>([]);
   const questions = useMemo(() => (match ? buildMatchQuestions(match.seed, match.config, countries) : []), [countries, match]);
   const question = questions[index];
 
@@ -53,11 +55,22 @@ export default function MatchScreen() {
     if (matchId && user) trackEvent("match_accept", { id: matchId });
   }, [matchId, user]);
 
-  function answer(ok: boolean, wrongCode?: string) {
+  function answer(ok: boolean, selectedLabel?: string) {
     if (!question || feedback) return;
     const scoreAfter = correct + (ok ? 1 : 0);
+    const chosen = question.topic === "location" && selectedLabel ? countries.find((country) => country.code === selectedLabel)?.name ?? selectedLabel : selectedLabel;
+    setItems((value) => [...value, {
+      label: question.country.name,
+      correct: ok,
+      chosen: ok ? undefined : chosen,
+      answer: question.topic === "location" ? question.country.name : answerLabel(question.question),
+      countryCode: question.country.code,
+      countryName: question.country.name,
+      flagUrl: question.country.flagUrl,
+      context: [question.country.subregion, question.country.capital ? `Capital: ${question.country.capital}` : ""].filter(Boolean).join(" · ")
+    }]);
     setCorrect(scoreAfter);
-    setFeedback({ ok, question, scoreAfter, wrongCode });
+    setFeedback({ ok, question, scoreAfter, wrongCode: selectedLabel });
   }
 
   async function finish(finalScore = correct) {
@@ -70,7 +83,7 @@ export default function MatchScreen() {
     setSubmitting(true);
     try {
       await submitMatchResult(matchId, finalScore, questions.length, name);
-      navigate(`/match/${matchId}/result`);
+      navigate(`/match/${matchId}/result`, { state: { items } });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not submit result.");
       setSubmitting(false);
@@ -88,32 +101,32 @@ export default function MatchScreen() {
   if (!matchId || error) {
     return (
       <main className="p-5">
-        <button onClick={() => navigate("/")} className="mb-4 grid h-10 w-10 place-items-center rounded-full bg-white text-flaggo-muted shadow-card" aria-label="Back"><Icon name="chevron" className="rotate-180" /></button>
-        <section className="rounded-[24px] bg-white p-6 text-center shadow-card">
+        <button onClick={() => navigate("/")} className="mb-4 grid h-10 w-10 place-items-center rounded-full bg-paper text-muted shadow-card" aria-label="Back"><Icon name="chevron" className="rotate-180" /></button>
+        <section className="rounded-[24px] bg-paper p-6 text-center shadow-card">
           <h1 className="font-display text-2xl font-black">Challenge unavailable</h1>
-          <p className="mt-2 font-bold text-flaggo-muted">{error ?? "No match link was provided."}</p>
+          <p className="mt-2 font-bold text-muted">{error ?? "No match link was provided."}</p>
         </section>
       </main>
     );
   }
 
   if (!match) {
-    return <main className="p-5"><div className="h-96 animate-pulse rounded-[24px] bg-white shadow-card" /></main>;
+    return <main className="p-5"><div className="h-96 animate-pulse rounded-[24px] bg-paper shadow-card" /></main>;
   }
 
   if (!user) {
     const challenger = results[0];
     return (
       <main className="p-5">
-        <button onClick={() => navigate("/")} className="mb-4 grid h-10 w-10 place-items-center rounded-full bg-white text-flaggo-muted shadow-card" aria-label="Back"><Icon name="chevron" className="rotate-180" /></button>
-        <section className="rounded-[28px] bg-white p-6 text-center shadow-card-lg">
-          <Icon name="trophy" size={44} className="mx-auto text-flaggo-blue" />
+        <button onClick={() => navigate("/")} className="mb-4 grid h-10 w-10 place-items-center rounded-full bg-paper text-muted shadow-card" aria-label="Back"><Icon name="chevron" className="rotate-180" /></button>
+        <section className="rounded-[28px] bg-paper p-6 text-center shadow-card-lg">
+          <Icon name="trophy" size={44} className="mx-auto text-primary" />
           <h1 className="mt-3 screen-title">Friend challenge</h1>
-          <p className="mt-2 font-bold text-flaggo-muted">
+          <p className="mt-2 font-bold text-muted">
             {challenger ? `${challenger.display_name} scored ${challenger.score}/${challenger.total}.` : "Play the same seeded quiz and compare scores."}
           </p>
-          <p className="mt-2 font-medium text-flaggo-muted">Sign in to accept this challenge and save your score to the leaderboard.</p>
-          <button onClick={openSignIn} className="flaggo-button mt-5 w-full bg-flaggo-green text-white">Sign in to accept &amp; save your score</button>
+          <p className="mt-2 font-medium text-muted">Sign in to accept this challenge and save your score to the leaderboard.</p>
+          <button onClick={openSignIn} className="btn-primary mt-5 w-full bg-primary text-white">Sign in to accept &amp; save your score</button>
         </section>
       </main>
     );
@@ -122,33 +135,33 @@ export default function MatchScreen() {
   if (!question) {
     return (
       <main className="grid min-h-screen place-items-center p-5">
-        <button onClick={() => navigate("/")} className="flaggo-button bg-flaggo-green text-white">Go Home</button>
+        <button onClick={() => navigate("/")} className="btn-primary bg-primary text-white">Go Home</button>
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-flaggo-bg">
-      <header className="sticky top-0 z-20 bg-flaggo-bg/85 p-4 backdrop-blur-md">
-        <p className="mb-2.5 text-center font-display text-[13px] font-extrabold uppercase tracking-wide text-flaggo-muted">Friend Challenge</p>
+    <main className="min-h-screen bg-paper">
+      <header className="sticky top-0 z-20 bg-paper/85 p-4 backdrop-blur-md">
+        <p className="mb-2.5 text-center font-display text-[13px] font-semibold uppercase tracking-wide text-muted">Friend Challenge</p>
         <div className="flex items-center gap-3">
-          <button onClick={() => navigate("/")} aria-label="Close match" className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-white text-flaggo-muted shadow-card">
+          <button onClick={() => navigate("/")} aria-label="Close match" className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-paper text-muted shadow-card">
             <Icon name="close" size={20} />
           </button>
           <div className="flex-1"><ProgressBar value={(index / questions.length) * 100} /></div>
-          <span className="shrink-0 text-sm font-display font-extrabold text-flaggo-muted">{index + 1}/{questions.length}</span>
+          <span className="shrink-0 text-sm font-display font-semibold text-muted">{index + 1}/{questions.length}</span>
         </div>
       </header>
       <section key={question.id} className="animate-fade-in p-5">
         {question.topic === "location" ? (
           <>
-            <div className="mb-4 rounded-[24px] border border-flaggo-border bg-white p-4 shadow-card">
+            <div className="mb-4 rounded-[24px] border border-line bg-paper p-4 shadow-card">
               <div className="mt-2 flex items-center gap-3">
                 <FlagImage code={question.country.code} name={question.country.name} src={question.country.flagUrl} className="h-14 w-20 rounded-xl p-1" />
                 <h1 className="font-display text-2xl font-black">Tap {question.country.name}</h1>
               </div>
             </div>
-            <Suspense fallback={<div className="h-[360px] animate-pulse rounded-[24px] bg-white shadow-card" />}>
+            <Suspense fallback={<div className="h-[360px] animate-pulse rounded-[24px] bg-paper shadow-card" />}>
               <WorldMap countries={countries} correctCode={feedback?.ok ? question.country.code : undefined} wrongCode={feedback?.wrongCode} interactive={!feedback} onCountryTap={(code) => answer(code === question.country.code, code)} />
             </Suspense>
           </>

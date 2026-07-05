@@ -17,11 +17,11 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
 
 function ErrorFallback() {
   return (
-    <main className="grid min-h-screen place-items-center bg-flaggo-bg p-5">
-      <section className="flaggo-card max-w-sm p-6 text-center">
+    <main className="grid min-h-screen place-items-center bg-paper p-5">
+      <section className="rounded-[24px] border border-line bg-paper shadow-card max-w-sm p-6 text-center">
         <h1 className="font-display text-2xl font-black">Something went wrong</h1>
-        <p className="mt-2 font-bold text-flaggo-muted">Reload {BRAND.name} to get back to learning.</p>
-        <button onClick={() => window.location.reload()} className="flaggo-button mt-5 bg-green-grad text-white shadow-button-green">
+        <p className="mt-2 font-bold text-muted">Reload {BRAND.name} to get back to learning.</p>
+        <button onClick={() => window.location.reload()} className="btn-primary mt-5 bg-primary text-white shadow-button">
           Reload
         </button>
       </section>

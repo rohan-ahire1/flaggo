@@ -25,7 +25,7 @@ export default function PathsScreen() {
 
   return (
     <main className="p-5">
-      <button onClick={region ? () => navigate("/learn") : () => navigate(-1)} className="mb-4 grid h-10 w-10 place-items-center rounded-full bg-white text-flaggo-muted shadow-card" aria-label="Back">
+      <button onClick={region ? () => navigate("/learn") : () => navigate(-1)} className="mb-4 grid h-10 w-10 place-items-center rounded-full bg-paper text-muted shadow-card" aria-label="Back">
         <Icon name="chevron" size={20} className="rotate-180" />
       </button>
       <h1 className="screen-title">{region ?? "Learning paths"}</h1>
@@ -37,7 +37,7 @@ export default function PathsScreen() {
               <button
                 key={topic}
                 onClick={() => switchTopic(topic)}
-                className={`rounded-full px-4 py-1.5 font-display text-sm font-black transition ${active ? "bg-flaggo-green text-white shadow-card" : "border border-flaggo-border bg-white text-flaggo-muted"}`}
+                className={`rounded-full px-4 py-1.5 font-display text-sm font-black transition ${active ? "bg-primary text-white shadow-card" : "border border-line bg-paper text-muted"}`}
               >
                 {TOPIC_LABELS[topic] ?? topic}
               </button>
@@ -45,7 +45,7 @@ export default function PathsScreen() {
           })}
         </div>
       )}
-      {region && <p className="mt-1 font-bold text-flaggo-muted">Learning path: {TOPIC_LABELS[progress.selectedTopic] ?? progress.selectedTopic}</p>}
+      {region && <p className="mt-1 font-bold text-muted">Learning path: {TOPIC_LABELS[progress.selectedTopic] ?? progress.selectedTopic}</p>}
       {!region ? (
         <section className="mt-5 grid gap-3">
           {regions.map((item) => {
@@ -58,14 +58,14 @@ export default function PathsScreen() {
                   navigate(`/learn/${encodeURIComponent(item.name)}`);
                   trackEvent("path_open", { region: item.name, topic: progress.selectedTopic });
                 }}
-                className="flex items-center gap-4 rounded-[22px] border border-flaggo-border bg-white p-4 text-left shadow-card"
+                className="flex items-center gap-4 rounded-[22px] border border-line bg-paper p-4 text-left shadow-card"
               >
-                <span className="grid h-14 w-14 place-items-center rounded-full bg-flaggo-green/10 font-display font-black text-flaggo-green">{pct}%</span>
+                <span className="grid h-14 w-14 place-items-center rounded-full bg-primary/10 font-display font-black text-primary">{pct}%</span>
                 <span className="flex-1">
                   <span className="block font-display text-xl font-black">{item.name === "World" ? "World Basics" : item.name}</span>
-                  <span className="font-bold text-flaggo-muted">{done}/{item.lessons.length} lessons</span>
+                  <span className="font-bold text-muted">{done}/{item.lessons.length} lessons</span>
                 </span>
-                <Icon name="chevron" className="text-flaggo-muted" />
+                <Icon name="chevron" className="text-muted" />
               </button>
             );
           })}

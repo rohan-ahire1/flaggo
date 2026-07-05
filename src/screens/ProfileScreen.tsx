@@ -3,6 +3,8 @@ import type { FormEvent } from "react";
 import { useAuth } from "../auth/AuthProvider";
 import Icon, { type IconName } from "../components/Icon";
 import ThemeSwitcher from "../components/ThemeSwitcher";
+import { useConfirm } from "../components/ConfirmDialog";
+import { useInstallPrompt } from "../components/InstallPromptProvider";
 import { BRAND } from "../config/brand";
 import { supabase } from "../lib/supabase";
 import { isSyntheticEmail } from "../lib/username";
@@ -10,38 +12,40 @@ import { useGame } from "../state/GameProvider";
 
 export default function ProfileScreen() {
   const { user } = useAuth();
+  const confirm = useConfirm();
+  const { installPrompt, isStandalone, promptInstall } = useInstallPrompt();
   const { progress, resetAll, syncState, syncError, openSignIn, signOutUser, deleteAccount } = useGame();
   const userEmail = user?.email ?? null;
   const synthetic = isSyntheticEmail(userEmail);
   const stats: { label: string; value: number; icon: IconName; color: string }[] = [
-    { label: "XP", value: progress.xp, icon: "bolt", color: "text-flaggo-blue" },
-    { label: "Streak", value: progress.streak, icon: "flame", color: "text-flaggo-orange" },
-    { label: "Coins", value: progress.coins, icon: "coin", color: "text-flaggo-yellow" },
-    { label: "Flags seen", value: Object.keys(progress.review).length, icon: "globe", color: "text-flaggo-green" }
+    { label: "XP", value: progress.xp, icon: "bolt", color: "text-primary" },
+    { label: "Streak", value: progress.streak, icon: "flame", color: "text-accent" },
+    { label: "Coins", value: progress.coins, icon: "coin", color: "text-accent" },
+    { label: "Flags seen", value: Object.keys(progress.review).length, icon: "globe", color: "text-success" }
   ];
   return (
     <main className="p-5">
-      <section className="relative overflow-hidden rounded-[28px] bg-white p-6 text-center shadow-card-lg">
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-20 bg-green-grad" />
-        <div className="relative mx-auto grid h-24 w-24 place-items-center rounded-full bg-green-grad text-white shadow-button ring-4 ring-paper">
+      <section className="relative overflow-hidden rounded-[28px] bg-paper p-6 text-center shadow-card-lg">
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-20 bg-primary" />
+        <div className="relative mx-auto grid h-24 w-24 place-items-center rounded-full bg-primary text-white shadow-button ring-4 ring-paper">
           <Icon name="user" size={48} />
         </div>
         <h1 className="mt-4 screen-title">{BRAND.name} learner</h1>
-        <p className="font-bold text-flaggo-muted">{synthetic ? "Username account · no email" : userEmail ?? "Sign in to sync progress"}</p>
+        <p className="font-bold text-muted">{synthetic ? "Username account · no email" : userEmail ?? "Sign in to sync progress"}</p>
       </section>
 
-      <section className="mt-5 rounded-[22px] border border-flaggo-border bg-white p-4 shadow-card">
+      <section className="mt-5 rounded-[22px] border border-line bg-paper p-4 shadow-card">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <h2 className="font-display text-lg font-black">Account</h2>
-            <p className="text-sm font-bold text-flaggo-muted">
+            <h2 className="font-display text-lg font-semibold">Account</h2>
+            <p className="text-sm font-bold text-muted">
               {syncError ? `Sync error: ${syncError}` : userEmail ? `Sync status: ${syncState}` : "Local progress only"}
             </p>
           </div>
           {userEmail ? (
-            <button onClick={() => void signOutUser()} className="rounded-2xl bg-surface px-4 py-2 font-display font-black text-ink">Sign out</button>
+            <button onClick={() => void signOutUser()} className="rounded-2xl bg-surface px-4 py-2 font-display font-semibold text-ink">Sign out</button>
           ) : (
-            <button onClick={openSignIn} className="rounded-2xl bg-primary px-4 py-2 font-display font-black text-white">Sign in</button>
+            <button onClick={openSignIn} className="rounded-2xl bg-primary px-4 py-2 font-display font-semibold text-white">Sign in</button>
           )}
         </div>
         {synthetic && <AddRecoveryEmail />}
@@ -53,34 +57,46 @@ export default function ProfileScreen() {
         <ThemeSwitcher />
       </section>
 
-      <section className="mt-5 rounded-[22px] border border-flaggo-border bg-white p-4 shadow-card">
-        <h2 className="font-display text-lg font-black">Install {BRAND.name}</h2>
-        <p className="mt-1 text-sm font-bold text-flaggo-muted">Use your browser&apos;s install or add-to-home-screen button for quick offline practice.</p>
+      <section className="mt-5 rounded-[22px] border border-line bg-paper p-4 shadow-card">
+        <h2 className="font-display text-lg font-semibold">Install {BRAND.name}</h2>
+        {isStandalone ? (
+          <p className="mt-1 text-sm font-bold text-success">Installed ✓</p>
+        ) : installPrompt ? (
+          <button onClick={() => void promptInstall()} className="btn-primary mt-3 w-full">Install app</button>
+        ) : (
+          <p className="mt-1 text-sm font-bold text-muted">Use your browser&apos;s install or add-to-home-screen button for quick offline practice.</p>
+        )}
       </section>
 
       <div className="mt-5 grid grid-cols-2 gap-3 md:grid-cols-4">
         {stats.map((stat) => (
-          <div key={stat.label} className="rounded-[22px] border border-flaggo-border bg-white p-4 shadow-card">
+          <div key={stat.label} className="rounded-[22px] border border-line bg-paper p-4 shadow-card">
             <div className={`flex items-center gap-1.5 ${stat.color}`}>
               <Icon name={stat.icon} size={18} />
               <span className="font-display text-2xl font-black">{stat.value}</span>
             </div>
-            <div className="mt-0.5 font-bold text-flaggo-muted">{stat.label}</div>
+            <div className="mt-0.5 font-bold text-muted">{stat.label}</div>
           </div>
         ))}
       </div>
 
       <button
-        onClick={() => {
-          if (window.confirm(`Reset all ${BRAND.name} progress?`)) void resetAll();
+        onClick={async () => {
+          const ok = await confirm({
+            title: "Reset progress?",
+            body: `Reset all ${BRAND.name} progress?`,
+            confirmLabel: "Reset progress",
+            destructive: true
+          });
+          if (ok) void resetAll();
         }}
-        className="flaggo-button mt-8 w-full bg-flaggo-red text-white shadow-button-red"
+        className="btn-primary mt-8 w-full bg-error shadow-button-error"
       >
         Reset progress
       </button>
 
       {userEmail && (
-        <button onClick={() => void deleteAccount()} className="mt-3 w-full rounded-2xl px-5 py-4 font-display font-extrabold text-flaggo-red">
+        <button onClick={() => void deleteAccount()} className="mt-3 w-full rounded-2xl px-5 py-4 font-display font-semibold text-error">
           Delete my account & data
         </button>
       )}
@@ -112,11 +128,11 @@ function AddRecoveryEmail() {
   }
 
   return (
-    <form onSubmit={submit} className="mt-4 border-t border-flaggo-border pt-4">
-      <label className="text-sm font-display font-extrabold text-flaggo-muted" htmlFor="recovery-email">
+    <form onSubmit={submit} className="mt-4 border-t border-line pt-4">
+      <label className="text-sm font-display font-semibold text-muted" htmlFor="recovery-email">
         Add a recovery email
       </label>
-      <p className="mt-0.5 text-xs font-bold text-flaggo-muted">Optional — enables password reset if you forget it.</p>
+      <p className="mt-0.5 text-xs font-bold text-muted">Optional — enables password reset if you forget it.</p>
       <div className="mt-2 flex gap-2">
         <input
           id="recovery-email"
@@ -125,13 +141,13 @@ function AddRecoveryEmail() {
           onChange={(event) => setEmail(event.target.value)}
           placeholder="you@example.com"
           autoComplete="email"
-          className="min-w-0 flex-1 rounded-2xl border-2 border-flaggo-border bg-white px-4 py-2.5 font-bold outline-none transition focus:border-flaggo-green"
+          className="min-w-0 flex-1 rounded-2xl border-2 border-line bg-paper px-4 py-2.5 font-bold outline-none transition focus:border-primary"
         />
-        <button disabled={busy || !email.trim()} className="flaggo-button bg-green-grad px-4 text-white shadow-button-green disabled:opacity-50">
+        <button disabled={busy || !email.trim()} className="btn-primary px-4 disabled:opacity-50">
           Add
         </button>
       </div>
-      {status && <p className="mt-2 text-xs font-bold text-flaggo-muted">{status}</p>}
+      {status && <p className="mt-2 text-xs font-bold text-muted">{status}</p>}
     </form>
   );
 }

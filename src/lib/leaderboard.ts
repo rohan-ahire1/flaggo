@@ -60,3 +60,31 @@ export async function fetchTopScores(board: string, limit = 50): Promise<Leaderb
   if (error) throw error;
   return (data ?? []) as LeaderboardRow[];
 }
+
+export async function fetchMyScore(board: string): Promise<LeaderboardRow | null> {
+  const client = supabase;
+  if (!client) return null;
+  const { data: auth } = await client.auth.getUser();
+  const user = auth.user;
+  if (!user) return null;
+  const { data: mine, error } = await client
+    .from("leaderboard_scores")
+    .select("score,display_name")
+    .eq("user_id", user.id)
+    .eq("board", board)
+    .maybeSingle();
+  if (error) throw error;
+  if (!mine || typeof mine.score !== "number") return null;
+  const { count, error: countError } = await client
+    .from("leaderboard_scores")
+    .select("user_id", { count: "exact", head: true })
+    .eq("board", board)
+    .gt("score", mine.score);
+  if (countError) throw countError;
+  return {
+    rank: (count ?? 0) + 1,
+    display_name: mine.display_name ?? "you",
+    score: mine.score,
+    is_me: true
+  };
+}

@@ -32,42 +32,18 @@ export default {
         display: ["Fredoka", "ui-rounded", "Figtree", "system-ui", "sans-serif"]
       },
       colors: {
-        ...semantic,
-        // Legacy "flaggo" palette remapped onto the new semantic vars so existing
-        // markup adopts the cartographic identity without per-file edits.
-        flaggo: {
-          green: v("--primary"),
-          greenDark: v("--primary-dark"),
-          greenLight: v("--primary"),
-          blue: v("--primary"),
-          blueDark: v("--primary-dark"),
-          red: v("--error"),
-          redDark: v("--error"),
-          yellow: v("--accent"),
-          orange: v("--accent"),
-          purple: v("--accent"),
-          bg: v("--paper"),
-          card: v("--paper"),
-          text: v("--ink"),
-          muted: v("--muted"),
-          border: v("--line")
-        }
+        ...semantic
       },
       boxShadow: {
         button: "0 6px 0 rgb(var(--primary-dark))",
-        "button-green": "0 5px 0 rgb(var(--primary-dark))",
-        "button-blue": "0 5px 0 rgb(var(--primary-dark))",
-        "button-red": "0 5px 0 rgb(var(--error))",
+        "button-error": "0 5px 0 rgb(var(--error))",
         soft: "0 16px 40px rgba(20, 30, 40, 0.16)",
         card: "0 2px 6px rgba(20, 30, 40, 0.07)",
         "card-lg": "0 8px 20px rgba(20, 30, 40, 0.12)",
         glow: "0 12px 32px rgb(var(--primary) / 0.30)"
       },
       backgroundImage: {
-        "hero-sky": "linear-gradient(180deg, rgb(var(--surface)) 0%, rgb(var(--paper)) 70%)",
-        "green-grad": "linear-gradient(180deg, rgb(var(--primary)) 0%, rgb(var(--primary-dark)) 100%)",
-        "blue-grad": "linear-gradient(180deg, rgb(var(--primary)) 0%, rgb(var(--primary-dark)) 100%)",
-        "accent-grad": "linear-gradient(180deg, rgb(var(--accent)) 0%, rgb(var(--accent)) 100%)"
+        "hero-sky": "linear-gradient(180deg, rgb(var(--surface)) 0%, rgb(var(--paper)) 70%)"
       },
       keyframes: {
         bounceSoft: {

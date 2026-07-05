@@ -159,7 +159,7 @@ export default function WorldMap({
 
   return (
     <div
-      className={`relative touch-none select-none overflow-hidden rounded-[24px] border border-flaggo-border shadow-card ${mapClassName}`}
+      className={`relative touch-none select-none overflow-hidden rounded-[24px] border border-line shadow-card ${mapClassName}`}
       style={{ backgroundColor: OCEAN_RIM, cursor: draggingRef.current ? "grabbing" : "grab" }}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
@@ -172,7 +172,7 @@ export default function WorldMap({
           type="button"
           onClick={() => zoom(1.3)}
           aria-label="Zoom in"
-          className="pointer-events-auto grid h-10 w-10 place-items-center rounded-full border border-flaggo-border bg-white font-display text-xl font-black text-flaggo-text shadow-card"
+          className="pointer-events-auto grid h-10 w-10 place-items-center rounded-full border border-line bg-paper font-display text-xl font-black text-ink shadow-card"
         >
           +
         </button>
@@ -180,7 +180,7 @@ export default function WorldMap({
           type="button"
           onClick={() => zoom(1 / 1.3)}
           aria-label="Zoom out"
-          className="pointer-events-auto grid h-10 w-10 place-items-center rounded-full border border-flaggo-border bg-white font-display text-xl font-black text-flaggo-text shadow-card"
+          className="pointer-events-auto grid h-10 w-10 place-items-center rounded-full border border-line bg-paper font-display text-xl font-black text-ink shadow-card"
         >
           -
         </button>
@@ -188,7 +188,7 @@ export default function WorldMap({
           type="button"
           onClick={resetView}
           aria-label="Reset globe view"
-          className="pointer-events-auto grid h-10 w-10 place-items-center rounded-full border border-flaggo-border bg-white text-flaggo-muted shadow-card"
+          className="pointer-events-auto grid h-10 w-10 place-items-center rounded-full border border-line bg-paper text-muted shadow-card"
         >
           <Icon name="target" size={18} />
         </button>

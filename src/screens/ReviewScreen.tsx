@@ -17,46 +17,46 @@ export default function ReviewScreen() {
   return (
     <main className="p-5">
       <h1 className="screen-title">Practice</h1>
-      <p className="mt-1 font-bold text-flaggo-muted">Spaced repetition brings back {label} right before you'd forget them.</p>
-      <section className="mt-5 overflow-hidden rounded-[24px] border border-flaggo-border bg-white p-5 shadow-card-lg">
+      <p className="mt-1 font-bold text-muted">Spaced repetition brings back {label} right before you'd forget them.</p>
+      <section className="mt-5 overflow-hidden rounded-[24px] border border-line bg-paper p-5 shadow-card-lg">
         <div className="flex items-center gap-3">
-          <span className="grid h-14 w-14 place-items-center rounded-2xl bg-flaggo-blue/10 text-flaggo-blue">
+          <span className="grid h-14 w-14 place-items-center rounded-2xl bg-primary/10 text-primary">
             <Icon name="review" size={28} />
           </span>
           <div>
-            <div className="font-display text-5xl font-black leading-none text-flaggo-blue">{due.length}</div>
-            <p className="mt-1 font-bold text-flaggo-muted">{due.length ? `${label} due for review` : "No reviews due today."}</p>
+            <div className="font-display text-5xl font-black leading-none text-primary">{due.length}</div>
+            <p className="mt-1 font-bold text-muted">{due.length ? `${label} due for review` : "No reviews due today."}</p>
           </div>
         </div>
         <button onClick={() => startReview(practice)} className="btn-primary mt-5 flex w-full items-center justify-center gap-2">
           <Icon name="bolt" size={20} /> Start Review
         </button>
       </section>
-      <section className="mt-5 rounded-[24px] border border-flaggo-border bg-white p-5 shadow-card-lg">
+      <section className="mt-5 rounded-[24px] border border-line bg-paper p-5 shadow-card-lg">
         <h2 className="font-display text-2xl font-black">Map practice</h2>
-        <p className="mt-1 font-bold text-flaggo-muted">Review country locations with the same spaced-repetition schedule.</p>
+        <p className="mt-1 font-bold text-muted">Review country locations with the same spaced-repetition schedule.</p>
         <button onClick={() => void startMapReview()} className="btn-secondary mt-5 flex w-full items-center justify-center gap-2">
           <Icon name="globe" size={18} /> Start map practice
         </button>
       </section>
-      <section className="mt-5 rounded-[24px] border border-flaggo-border bg-white p-5 shadow-card-lg">
-        <p className="inline-flex items-center gap-1.5 rounded-full bg-flaggo-blue/10 px-2.5 py-0.5 text-xs font-display font-extrabold uppercase tracking-wide text-flaggo-blue">
+      <section className="mt-5 rounded-[24px] border border-line bg-paper p-5 shadow-card-lg">
+        <p className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-display font-semibold uppercase tracking-wide text-primary">
           <Icon name="sparkle" size={13} /> New
         </p>
         <h2 className="mt-2 font-display text-2xl font-black">50-country test</h2>
-        <p className="mt-1 font-bold text-flaggo-muted">Choose Top 50, 51-100, and beyond. Practice with typed recall or answer choices.</p>
+        <p className="mt-1 font-bold text-muted">Choose Top 50, 51-100, and beyond. Practice with typed recall or answer choices.</p>
         <button onClick={() => navigate("/test-setup")} className="btn-secondary mt-5 flex w-full items-center justify-center gap-2">
           <Icon name="target" size={18} /> Configure test
         </button>
       </section>
       <h2 className="mt-6 flex items-center gap-2 font-display text-xl font-black">
-        <Icon name="heart" size={18} className="text-flaggo-red" /> Weakest {label}
+        <Icon name="heart" size={18} className="text-error" /> Weakest {label}
       </h2>
       {weak.length ? (
         <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
           {weak.map((country) => <FlagCard key={country.code} country={country} review={progress.review[reviewKey(country.code, topic)]} onClick={() => startReview([country])} />)}
         </div>
-      ) : <p className="mt-3 font-bold text-flaggo-muted">Practice will include new {label} until weak {label} appear.</p>}
+      ) : <p className="mt-3 font-bold text-muted">Practice will include new {label} until weak {label} appear.</p>}
     </main>
   );
 }
