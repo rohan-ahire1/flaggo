@@ -24,21 +24,48 @@ export const SCHEMA_SQL = `
     needs_merge INTEGER NOT NULL DEFAULT 0
   );
   CREATE TABLE IF NOT EXISTS review_items (
-    country_code TEXT PRIMARY KEY,
-    topic TEXT,
+    country_code TEXT NOT NULL,
+    topic TEXT NOT NULL DEFAULT 'flag',
     box INTEGER NOT NULL DEFAULT 0,
     correct_count INTEGER NOT NULL DEFAULT 0,
     wrong_count INTEGER NOT NULL DEFAULT 0,
     last_seen_at TEXT,
-    next_review_at TEXT NOT NULL
+    next_review_at TEXT NOT NULL,
+    PRIMARY KEY (country_code, topic)
   );
   INSERT OR IGNORE INTO progress (id) VALUES (1);
 `;
 
+type TableInfoRow = {
+  name: string;
+  pk: number;
+};
+
+const REVIEW_ITEMS_MIGRATION_SQL = [
+  "CREATE TABLE review_items_new (country_code TEXT NOT NULL, topic TEXT NOT NULL DEFAULT 'flag', box INTEGER NOT NULL DEFAULT 0, correct_count INTEGER NOT NULL DEFAULT 0, wrong_count INTEGER NOT NULL DEFAULT 0, last_seen_at TEXT, next_review_at TEXT NOT NULL, PRIMARY KEY (country_code, topic));",
+  "INSERT OR REPLACE INTO review_items_new (country_code, topic, box, correct_count, wrong_count, last_seen_at, next_review_at) SELECT country_code, COALESCE(topic, 'flag'), box, correct_count, wrong_count, last_seen_at, next_review_at FROM review_items;",
+  "DROP TABLE review_items;",
+  "ALTER TABLE review_items_new RENAME TO review_items;"
+];
+
+function needsReviewItemsMigration(rows: TableInfoRow[]): boolean {
+  if (!rows.length) return false;
+  const topic = rows.find((row) => row.name === "topic");
+  return Boolean(topic && topic.pk === 0);
+}
+
+function migrationBatchSql() {
+  return `BEGIN TRANSACTION;\n${REVIEW_ITEMS_MIGRATION_SQL.join("\n")}\nCOMMIT;`;
+}
+
 export function bootstrapDbSync(db: SQLiteDatabase): void {
+  const rows = db.getAllSync<TableInfoRow>("PRAGMA table_info(review_items)");
+  if (needsReviewItemsMigration(rows)) db.execSync(migrationBatchSql());
   db.execSync(SCHEMA_SQL);
 }
 
 export async function bootstrapDbAsync(db: SQLiteDatabase): Promise<void> {
+  const rows = await db.getAllAsync<TableInfoRow>("PRAGMA table_info(review_items)");
+  if (needsReviewItemsMigration(rows)) await db.execAsync(migrationBatchSql());
   await db.execAsync(SCHEMA_SQL);
 }

@@ -1,7 +1,7 @@
 import "../global.css";
 import { useEffect, useState } from "react";
 import { LogBox, Platform, Text, View } from "react-native";
-import { Stack } from "expo-router";
+import { Stack, router } from "expo-router";
 import * as Linking from "expo-linking";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
@@ -11,6 +11,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { createSessionFromUrl } from "@/auth/actions";
 import { AuthProvider } from "@/auth/AuthProvider";
+import { NameClaimProvider } from "@/components/NameClaimProvider";
 import PwaRegistration from "@/components/PwaRegistration";
 import WebDocumentHead from "@/components/WebDocumentHead";
 import WebSidebarShell from "@/components/WebSidebarShell";
@@ -95,7 +96,18 @@ export default function RootLayout() {
 
   // Handle auth callbacks that open the app via deep link.
   useEffect(() => {
-    if (url) void createSessionFromUrl(url);
+    if (!url) return;
+    try {
+      const parsed = new URL(url);
+      const id = parsed.searchParams.get("m");
+      if (id) {
+        router.push({ pathname: "/match/[id]", params: { id } });
+        return;
+      }
+    } catch {
+      // Fall through to auth handling for non-standard URLs.
+    }
+    void createSessionFromUrl(url);
   }, [url]);
 
   if (dbError) {
@@ -150,20 +162,22 @@ export default function RootLayout() {
             <WebDocumentHead />
             <PwaRegistration />
             <AuthProvider>
-              <ProgressProvider>
-                <WebSidebarShell>
-                  <StatusBar style="dark" />
-                  <Stack screenOptions={{ headerShown: false }}>
-                    <Stack.Screen name="(tabs)" />
-                    <Stack.Screen name="quiz" options={{ presentation: "card" }} />
-                    <Stack.Screen name="arcade" options={{ presentation: "card" }} />
-                    <Stack.Screen name="match/[id]" options={{ presentation: "card" }} />
-                    <Stack.Screen name="friends" options={{ presentation: "card" }} />
-                    <Stack.Screen name="leaderboard" options={{ presentation: "card" }} />
-                    <Stack.Screen name="auth/callback" options={{ presentation: "card" }} />
-                  </Stack>
-                </WebSidebarShell>
-              </ProgressProvider>
+              <NameClaimProvider>
+                <ProgressProvider>
+                  <WebSidebarShell>
+                    <StatusBar style="dark" />
+                    <Stack screenOptions={{ headerShown: false }}>
+                      <Stack.Screen name="(tabs)" />
+                      <Stack.Screen name="quiz" options={{ presentation: "card" }} />
+                      <Stack.Screen name="arcade" options={{ presentation: "card" }} />
+                      <Stack.Screen name="match/[id]" options={{ presentation: "card" }} />
+                      <Stack.Screen name="friends" options={{ presentation: "card" }} />
+                      <Stack.Screen name="leaderboard" options={{ presentation: "card" }} />
+                      <Stack.Screen name="auth/callback" options={{ presentation: "card" }} />
+                    </Stack>
+                  </WebSidebarShell>
+                </ProgressProvider>
+              </NameClaimProvider>
             </AuthProvider>
           </ThemeProvider>
         </QueryClientProvider>

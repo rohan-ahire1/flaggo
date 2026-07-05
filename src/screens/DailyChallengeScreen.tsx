@@ -5,12 +5,13 @@ import Icon from "../components/Icon";
 import ProgressBar from "../components/ProgressBar";
 import QuestionCard from "../components/QuestionCard";
 import { useAuth } from "../auth/AuthProvider";
+import { useNameClaim } from "../components/NameClaimProvider";
 import type { Country } from "../types/country";
 import type { AppProgress } from "../types/progress";
 import { applyDailyResult, buildDailyQuiz, dateKey, type DailyQuestion } from "../utils/dailyChallenge";
 import { updateReviewState } from "../utils/spacedRepetition";
 import { trackEvent } from "../lib/analytics";
-import { dailyBoard, submitScore, updateDisplayName } from "../lib/leaderboard";
+import { dailyBoard, submitScore } from "../lib/leaderboard";
 import { BRAND } from "../config/brand";
 
 const WorldMap = lazy(() => import("../components/WorldMap"));
@@ -43,7 +44,8 @@ export default function DailyChallengeScreen({
   onSignIn: () => void;
   onChallenge: () => void;
 }) {
-  const { user, displayName, setDisplayName } = useAuth();
+  const { user } = useAuth();
+  const { ensureName } = useNameClaim();
   const today = dateKey();
   const questions = useMemo(() => buildDailyQuiz(today, countries), [countries, today]);
   const [index, setIndex] = useState(0);
@@ -56,16 +58,6 @@ export default function DailyChallengeScreen({
   useEffect(() => {
     trackEvent("daily_start", { date: today });
   }, [today]);
-
-  async function ensureName() {
-    if (!user) return null;
-    if (displayName?.trim()) return displayName;
-    const entered = window.prompt("Choose a leaderboard display name");
-    if (!entered) return null;
-    const clean = await updateDisplayName(user.id, entered);
-    setDisplayName(clean);
-    return clean;
-  }
 
   function answer(ok: boolean, wrongCode?: string) {
     if (!question || feedback) return;

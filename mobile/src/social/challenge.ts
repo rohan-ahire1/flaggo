@@ -1,5 +1,6 @@
 import { Alert, Platform, Share } from "react-native";
 import * as Linking from "expo-linking";
+import { env } from "@/config/env";
 import { createMatch, normalizeMatchConfig, type Match, type MatchConfig } from "@/lib/matches";
 
 // Alert.alert is a no-op on react-native-web, so notices from web silently
@@ -28,9 +29,9 @@ export function matchDeepLink(id: string) {
 }
 
 export async function shareChallenge(match: Match, score?: number) {
-  const link = matchDeepLink(match.id);
+  const webUrl = `${env.siteUrl}/?m=${match.id}`;
   const scoreLine = typeof score === "number" ? `I scored ${score}/${match.config.questionCount}. ` : "";
-  const message = `${scoreLine}Can you beat me on this Flaggo round? ${link}`;
+  const message = `${scoreLine}Can you beat me on this Flaggo round? ${webUrl}`;
 
   if (Platform.OS === "web") {
     const nav = typeof navigator !== "undefined" ? navigator : undefined;
@@ -42,7 +43,7 @@ export async function shareChallenge(match: Match, score?: number) {
         // user dismissed the share sheet or it failed — fall through to copy
       }
     }
-    if (nav?.clipboard) await nav.clipboard.writeText(link);
+    if (nav?.clipboard) await nav.clipboard.writeText(webUrl);
     notify("Challenge link copied", message);
     return;
   }

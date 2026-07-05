@@ -114,7 +114,7 @@ export default function HomeScreen() {
           </View>
 
           <Text className="mt-3 text-center text-[13px] font-semibold text-white/70">
-            {doneToday ? `You scored ${doneToday.score}/${doneToday.total} today` : "12,438 playing today"}
+            {doneToday ? `You scored ${doneToday.score}/${doneToday.total} today` : "Same 5 questions for everyone today"}
           </Text>
         </View>
 

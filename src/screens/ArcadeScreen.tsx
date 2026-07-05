@@ -4,6 +4,7 @@ import FlagImage from "../components/FlagImage";
 import Icon, { type IconName } from "../components/Icon";
 import QuestionCard from "../components/QuestionCard";
 import { useAuth } from "../auth/AuthProvider";
+import { useNameClaim } from "../components/NameClaimProvider";
 import type { ArcadeMode } from "../types/arcade";
 import { ARCADE_MODES, arcadeKey } from "../types/arcade";
 import type { Country } from "../types/country";
@@ -15,7 +16,7 @@ import { generateMapQuestions, generateReviewQuestions, type MapQuestion, type Q
 import { updateReviewState } from "../utils/spacedRepetition";
 import { seededShuffle, hashStringToSeed, mulberry32 } from "../utils/seededRandom";
 import { trackEvent } from "../lib/analytics";
-import { arcadeBoard, submitScore, updateDisplayName } from "../lib/leaderboard";
+import { arcadeBoard, submitScore } from "../lib/leaderboard";
 
 const WorldMap = lazy(() => import("../components/WorldMap"));
 
@@ -66,7 +67,8 @@ export default function ArcadeScreen({
   onSignIn: () => void;
   onChallenge: () => void;
 }) {
-  const { user, displayName, setDisplayName } = useAuth();
+  const { user } = useAuth();
+  const { ensureName } = useNameClaim();
   const [mode, setMode] = useState<ArcadeMode>("timed");
   const [topic, setTopic] = useState<Topic>(progress.selectedTopic);
   const [running, setRunning] = useState(false);
@@ -96,16 +98,6 @@ export default function ArcadeScreen({
   useEffect(() => {
     if (running && remaining === 0) void finish();
   }, [remaining, running]);
-
-  async function ensureName() {
-    if (!user) return null;
-    if (displayName?.trim()) return displayName;
-    const entered = window.prompt("Choose a leaderboard display name");
-    if (!entered) return null;
-    const clean = await updateDisplayName(user.id, entered);
-    setDisplayName(clean);
-    return clean;
-  }
 
   function start() {
     setRunning(true);

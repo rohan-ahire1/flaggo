@@ -1,5 +1,7 @@
-import { createContext, useContext, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useRef, type ReactNode } from "react";
+import { useAuth } from "../auth/AuthProvider";
 import { useSyncedProgress } from "../hooks/useSyncedProgress";
+import { submitScore, xpBoard } from "../lib/leaderboard";
 
 // Shares ONE useSyncedProgress instance across every tab and the quiz screen,
 // so a round finished in /quiz is immediately reflected on Home and Profile.
@@ -9,6 +11,20 @@ const ProgressContext = createContext<ProgressContextValue | null>(null);
 
 export function ProgressProvider({ children }: { children: ReactNode }) {
   const value = useSyncedProgress();
+  const { user, displayName } = useAuth();
+  const lastSubmittedXp = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (!user || !displayName?.trim() || value.progress.xp <= 0) return;
+    if (lastSubmittedXp.current === value.progress.xp) return;
+    const id = setTimeout(() => {
+      if (lastSubmittedXp.current === value.progress.xp) return;
+      lastSubmittedXp.current = value.progress.xp;
+      void submitScore(xpBoard(), value.progress.xp, displayName).catch(() => undefined);
+    }, 5000);
+    return () => clearTimeout(id);
+  }, [displayName, user, value.progress.xp]);
+
   return <ProgressContext.Provider value={value}>{children}</ProgressContext.Provider>;
 }
 

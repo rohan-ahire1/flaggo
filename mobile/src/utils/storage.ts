@@ -2,7 +2,7 @@ import { eq } from "drizzle-orm";
 import { getDb, initDb } from "../db/client";
 import { progress as progressTable, reviewItems, type ProgressRow } from "../db/schema";
 import { defaultProgress, type AppProgress, type ReviewState } from "../types/progress";
-import type { Topic } from "../types/topic";
+import { reviewKey, type Topic } from "../types/topic";
 import { normalizeProgress } from "./progressMerge";
 
 // Storage is now SQLite (via Drizzle) instead of localStorage, so every export
@@ -57,9 +57,10 @@ async function readReview(): Promise<Record<string, ReviewState>> {
   const rows = await db.select().from(reviewItems);
   const map: Record<string, ReviewState> = {};
   for (const r of rows) {
-    map[r.countryCode] = {
+    const topic = (r.topic ?? "flag") as Topic;
+    map[reviewKey(r.countryCode, topic)] = {
       countryCode: r.countryCode,
-      topic: (r.topic ?? undefined) as Topic | undefined,
+      topic,
       box: r.box,
       correctCount: r.correctCount,
       wrongCount: r.wrongCount,
@@ -111,7 +112,7 @@ async function writeRow(progress: AppProgress, meta: ProgressMeta, needsMerge: b
     await db.insert(reviewItems).values(
       entries.map((r) => ({
         countryCode: r.countryCode,
-        topic: r.topic ?? null,
+        topic: r.topic ?? "flag",
         box: r.box,
         correctCount: r.correctCount,
         wrongCount: r.wrongCount,
