@@ -1,10 +1,10 @@
 import { useMemo, useState } from "react";
 import FlagCard from "../components/FlagCard";
 import Icon from "../components/Icon";
-import type { Country } from "../types/country";
-import type { AppProgress } from "../types/progress";
-import { reviewKey } from "../types/topic";
-import { isStarred, toggleStarredDeck } from "../utils/decks";
+import type { Country } from "@flaggo/core/types/country";
+import type { AppProgress } from "@flaggo/core/types/progress";
+import { reviewKey } from "@flaggo/core/types/topic";
+import { isStarred, toggleStarredDeck } from "@flaggo/core/utils/decks";
 
 export default function FlagsLibraryScreen({
   countries,

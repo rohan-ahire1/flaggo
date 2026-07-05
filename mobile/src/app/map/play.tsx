@@ -7,10 +7,10 @@ import FlagImage from "@/components/FlagImage";
 import WorldMap from "@/components/WorldMap";
 import RoundResults, { type RoundResultItem } from "@/components/RoundResults";
 import { Badge, PillButton, Pill } from "@/components/ui";
-import { countries } from "@/data/countries";
+import { countries } from "@flaggo/core/data/countries";
 import { useProgress } from "@/state/ProgressProvider";
-import { generateMapQuestions, type MapMode } from "@/utils/quiz";
-import { updateReviewState } from "@/utils/spacedRepetition";
+import { generateMapQuestions, type MapMode } from "@flaggo/core/utils/quiz";
+import { updateReviewState } from "@flaggo/core/utils/spacedRepetition";
 
 export default function MapPlayScreen() {
   const params = useLocalSearchParams<{ mode?: string; codes?: string }>();

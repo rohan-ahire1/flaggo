@@ -5,16 +5,17 @@ import Icon, { type IconName } from "../components/Icon";
 import QuestionCard from "../components/QuestionCard";
 import { useAuth } from "../auth/AuthProvider";
 import { useNameClaim } from "../components/NameClaimProvider";
-import type { ArcadeMode } from "../types/arcade";
-import { ARCADE_MODES, arcadeKey } from "../types/arcade";
-import type { Country } from "../types/country";
-import type { AppProgress } from "../types/progress";
-import type { Topic } from "../types/topic";
-import { TOPICS } from "../types/topic";
-import { arcadePool, arcadeScore, persistArcadeBest } from "../utils/arcade";
-import { generateMapQuestions, generateReviewQuestions, type MapQuestion, type Question } from "../utils/quiz";
-import { updateReviewState } from "../utils/spacedRepetition";
-import { seededShuffle, hashStringToSeed, mulberry32 } from "../utils/seededRandom";
+import type { ArcadeMode } from "@flaggo/core/types/arcade";
+import { ARCADE_MODES, arcadeKey } from "@flaggo/core/types/arcade";
+import type { Country } from "@flaggo/core/types/country";
+import type { AppProgress } from "@flaggo/core/types/progress";
+import type { Topic } from "@flaggo/core/types/topic";
+import { TOPICS } from "@flaggo/core/types/topic";
+import { arcadePool, arcadeScore, persistArcadeBest } from "@flaggo/core/utils/arcade";
+import { generateMapQuestions, generateReviewQuestions, type MapQuestion, type Question } from "@flaggo/core/utils/quiz";
+import { updateReviewState } from "@flaggo/core/utils/spacedRepetition";
+import { seededShuffle, hashStringToSeed, mulberry32 } from "@flaggo/core/utils/seededRandom";
+import { answerLabelForWrapper } from "@flaggo/core/game/answerLabel";
 import { trackEvent } from "../lib/analytics";
 import { arcadeBoard, submitScore } from "../lib/leaderboard";
 
@@ -38,17 +39,6 @@ const TOPIC_META: Record<Topic, { label: string; icon: IconName }> = {
 type ArcadeQuestion =
   | { topic: Exclude<Topic, "location">; country: Country; question: Question }
   | { topic: "location"; country: Country; question: MapQuestion };
-
-function answerLabel(question: ArcadeQuestion) {
-  if (question.topic === "location") return question.country.name;
-  const q = question.question;
-  if (q.type === "guess-currency") return q.correctCurrency;
-  if (q.type === "guess-language") return q.correctLanguage;
-  if (q.type === "guess-capital" || q.type === "flag-to-capital") return q.correctCapital;
-  if (q.type === "capital-true-false") return q.correctCountry.capital ?? q.correctCountry.name;
-  if (q.type === "pick-neighbor" || q.type === "not-neighbor") return q.correctNeighbor.name;
-  return q.correctCountry.name;
-}
 
 export default function ArcadeScreen({
   countries,
@@ -248,7 +238,7 @@ export default function ArcadeScreen({
           <QuestionCard question={question.question} disabled={Boolean(feedback)} onAnswer={answer} />
         )}
       </section>
-      {feedback && <FeedbackPanel correct={feedback.ok} country={feedback.question.country} xp={10} answerLabel={answerLabel(feedback.question)} onContinue={continueNext} />}
+      {feedback && <FeedbackPanel correct={feedback.ok} country={feedback.question.country} xp={10} answerLabel={answerLabelForWrapper(feedback.question)} onContinue={continueNext} />}
     </main>
   );
 }

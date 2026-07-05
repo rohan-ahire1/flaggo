@@ -13,10 +13,15 @@
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "resolveJsonModule": true,
+    "baseUrl": ".",
+    "paths": {
+      "@flaggo/core": ["./packages/core/src/index.ts"],
+      "@flaggo/core/*": ["./packages/core/src/*"]
+    },
     "types": ["vite/client", "vitest/globals"],
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx"
   },
-  "include": ["src", "vite.config.ts"]
+  "include": ["src", "packages/core/src", "vite.config.ts"]
 }

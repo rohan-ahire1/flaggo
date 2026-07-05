@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import Icon from "../components/Icon";
 import StatCard from "../components/StatCard";
-import type { Country } from "../types/country";
-import type { Lesson } from "../types/lesson";
-import type { AppProgress } from "../types/progress";
-import { parseReviewKey, reviewKey } from "../types/topic";
-import { lessonsForTopic } from "../utils/lessonGenerator";
-import { getMasteredCountries, getWeakCountries } from "../utils/spacedRepetition";
+import type { Country } from "@flaggo/core/types/country";
+import type { Lesson } from "@flaggo/core/types/lesson";
+import type { AppProgress } from "@flaggo/core/types/progress";
+import { parseReviewKey, reviewKey } from "@flaggo/core/types/topic";
+import { lessonsForTopic } from "@flaggo/core/utils/lessonGenerator";
+import { getMasteredCountries, getWeakCountries } from "@flaggo/core/utils/spacedRepetition";
 
 export default function StatsScreen({ progress, countries, lessons, onBack }: { progress: AppProgress; countries: Country[]; lessons: Lesson[]; onBack: () => void }) {
   const total = progress.totalCorrect + progress.totalWrong;
@@ -24,7 +24,7 @@ export default function StatsScreen({ progress, countries, lessons, onBack }: { 
 
   useEffect(() => {
     let active = true;
-    Promise.all([import("../data/world-110m.json"), import("../utils/geo")]).then(([{ default: world110m }, geo]) => {
+    Promise.all([import("@flaggo/core/data/world-110m.json"), import("@flaggo/core/utils/geo")]).then(([{ default: world110m }, geo]) => {
       if (!active) return;
       const mapCountries = geo.mapPresentCountries(countries, world110m);
       setMapCountryCount(mapCountries.length);

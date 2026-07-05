@@ -7,7 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import Icon from "@/components/Icon";
 import { Card, SectionLabel } from "@/components/ui";
 import { dailyBoard, fetchTopScores, xpBoard } from "@/lib/leaderboard";
-import { dateKey } from "@/utils/dailyChallenge";
+import { dateKey } from "@flaggo/core/utils/dailyChallenge";
 import { themeColor } from "@/theme/palettes";
 import { useThemeStore } from "@/theme/store";
 

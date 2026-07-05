@@ -4,13 +4,13 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import Icon from "@/components/Icon";
 import { Card } from "@/components/ui";
-import { countries } from "@/data/countries";
-import { generateLessons, lessonsForTopic } from "@/utils/lessonGenerator";
+import { countries } from "@flaggo/core/data/countries";
+import { generateLessons, lessonsForTopic } from "@flaggo/core/utils/lessonGenerator";
 import { useProgress } from "@/state/ProgressProvider";
 import { themeColor } from "@/theme/palettes";
 import { useThemeStore } from "@/theme/store";
-import type { Lesson } from "@/types/lesson";
-import type { Topic } from "@/types/topic";
+import type { Lesson } from "@flaggo/core/types/lesson";
+import type { Topic } from "@flaggo/core/types/topic";
 
 const REGION_ORDER = ["World", "Asia", "Europe", "Africa", "Americas", "Oceania", "Territories"];
 const LEARN_TOPICS: { key: Topic; label: string }[] = [

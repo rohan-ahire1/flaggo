@@ -1,5 +1,5 @@
-import type { Country } from "../types/country";
-import type { ReviewState } from "../types/progress";
+import type { Country } from "@flaggo/core/types/country";
+import type { ReviewState } from "@flaggo/core/types/progress";
 import FlagImage from "./FlagImage";
 import Icon from "./Icon";
 

@@ -4,10 +4,10 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import ScreenHeader from "@/components/ScreenHeader";
 import { PillButton, SectionLabel } from "@/components/ui";
-import { countries } from "@/data/countries";
+import { countries } from "@flaggo/core/data/countries";
 import { useProgress } from "@/state/ProgressProvider";
-import { getPopularityGroups } from "@/utils/popularity";
-import type { Topic } from "@/types/topic";
+import { getPopularityGroups } from "@flaggo/core/utils/popularity";
+import type { Topic } from "@flaggo/core/types/topic";
 
 type TestMode = "recall" | "options";
 

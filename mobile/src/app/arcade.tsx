@@ -7,8 +7,8 @@ import ScreenHeader from "@/components/ScreenHeader";
 import { useProgress } from "@/state/ProgressProvider";
 import { themeColor } from "@/theme/palettes";
 import { useThemeStore } from "@/theme/store";
-import { ARCADE_MODES, arcadeKey, type ArcadeMode } from "@/types/arcade";
-import type { Topic } from "@/types/topic";
+import { ARCADE_MODES, arcadeKey, type ArcadeMode } from "@flaggo/core/types/arcade";
+import type { Topic } from "@flaggo/core/types/topic";
 
 const MODE_INFO: Record<ArcadeMode, { label: string; desc: string; icon: IconName }> = {
   timed: { label: "Timed", desc: "As many as you can, quickly.", icon: "clock" },

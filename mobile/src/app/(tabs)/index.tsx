@@ -8,12 +8,12 @@ import { useEffect } from "react";
 import { useProgress } from "@/state/ProgressProvider";
 import { useOnboardStore } from "@/state/onboarding";
 import { promptChallenge } from "@/social/challenge";
-import { countries } from "@/data/countries";
-import { dateKey } from "@/utils/dailyChallenge";
-import { getDueCountries, getMasteredCountries, getWeakCountries } from "@/utils/spacedRepetition";
+import { countries } from "@flaggo/core/data/countries";
+import { DAILY_QUESTION_COUNT, dateKey } from "@flaggo/core/utils/dailyChallenge";
+import { getDueCountries, getMasteredCountries, getWeakCountries } from "@flaggo/core/utils/spacedRepetition";
 import { themeColor } from "@/theme/palettes";
 import { useThemeStore } from "@/theme/store";
-import type { Topic } from "@/types/topic";
+import type { Topic } from "@flaggo/core/types/topic";
 
 const CORE_ACTIONS: { key: string; label: string; desc: string; icon: IconName; topic?: Topic; route?: string }[] = [
   { key: "review", label: "Review due", desc: "Lock in weak flags", icon: "review", route: "/review" },
@@ -31,7 +31,7 @@ const MORE: { key: string; label: string; icon: IconName; route: string }[] = [
 function hoursToMidnight() {
   const now = new Date();
   const end = new Date(now);
-  end.setHours(24, 0, 0, 0);
+  end.setUTCHours(24, 0, 0, 0);
   return Math.max(1, Math.round((end.getTime() - now.getTime()) / 3600000));
 }
 
@@ -92,11 +92,11 @@ export default function HomeScreen() {
           </View>
           <Text className="mt-2 text-[30px] font-black text-white">Today's Five</Text>
           <Text className="mt-1 text-[15px] font-semibold text-white/80">
-            5 mixed questions · same for everyone, everywhere
+            {DAILY_QUESTION_COUNT} mixed questions · same for everyone, everywhere
           </Text>
 
           <View className="mt-4 flex-row gap-1.5">
-            {Array.from({ length: 5 }).map((_, i) => (
+            {Array.from({ length: DAILY_QUESTION_COUNT }).map((_, i) => (
               <View
                 key={i}
                 className={`h-1.5 flex-1 rounded-full ${doneToday && i < doneToday.score ? "bg-accent" : "bg-white/25"}`}
@@ -114,7 +114,7 @@ export default function HomeScreen() {
           </View>
 
           <Text className="mt-3 text-center text-[13px] font-semibold text-white/70">
-            {doneToday ? `You scored ${doneToday.score}/${doneToday.total} today` : "Same 5 questions for everyone today"}
+            {doneToday ? `You scored ${doneToday.score}/${doneToday.total} today` : `Same ${DAILY_QUESTION_COUNT} questions for everyone today`}
           </Text>
         </View>
 

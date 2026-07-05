@@ -2,11 +2,11 @@ import { useMemo, useState } from "react";
 import FlagImage from "../components/FlagImage";
 import Icon from "../components/Icon";
 import ProgressBar from "../components/ProgressBar";
-import type { Country } from "../types/country";
-import type { AppProgress } from "../types/progress";
-import type { Topic } from "../types/topic";
-import { getCapitalDistractors, getDistractors, shuffleArray } from "../utils/quiz";
-import { updateReviewState } from "../utils/spacedRepetition";
+import type { Country } from "@flaggo/core/types/country";
+import type { AppProgress } from "@flaggo/core/types/progress";
+import type { Topic } from "@flaggo/core/types/topic";
+import { getCapitalDistractors, getDistractors, shuffleArray } from "@flaggo/core/utils/quiz";
+import { updateReviewState } from "@flaggo/core/utils/spacedRepetition";
 import type { TestMode } from "./TestSetupScreen";
 
 export default function FlagTestScreen({

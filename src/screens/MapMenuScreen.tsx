@@ -1,10 +1,10 @@
 import { useMemo, useState } from "react";
 import Icon from "../components/Icon";
-import world110m from "../data/world-110m.json";
-import type { Country } from "../types/country";
-import type { MapMode } from "../utils/quiz";
-import { mapPresentCountries } from "../utils/geo";
-import { getPopularityGroups } from "../utils/popularity";
+import world110m from "@flaggo/core/data/world-110m.json";
+import type { Country } from "@flaggo/core/types/country";
+import type { MapMode } from "@flaggo/core/utils/quiz";
+import { mapPresentCountries } from "@flaggo/core/utils/geo";
+import { getPopularityGroups } from "@flaggo/core/utils/popularity";
 
 type PickerMode = "tier" | "region";
 

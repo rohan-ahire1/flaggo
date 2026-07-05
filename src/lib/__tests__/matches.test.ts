@@ -1,7 +1,8 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { countries } from "../../data/countries";
+import { countries } from "@flaggo/core/data/countries";
+import { DAILY_QUESTION_COUNT } from "@flaggo/core/utils/dailyChallenge";
 import { buildMatchQuestions, defaultMatchConfig, matchUrl, normalizeMatchConfig, winnerFromResults, type MatchConfig } from "../matches";
 
 describe("match helpers", () => {
@@ -11,12 +12,12 @@ describe("match helpers", () => {
   });
 
   it("builds identical questions for the same seed and config", () => {
-    const config: MatchConfig = { topics: ["flag", "capital", "currency", "language", "neighbor"], mode: "daily", questionCount: 10 };
+    const config: MatchConfig = { topics: ["flag", "capital", "currency", "language", "neighbor"], mode: "daily", questionCount: DAILY_QUESTION_COUNT };
 
     const a = buildMatchQuestions("seed-123", config, countries);
     const b = buildMatchQuestions("seed-123", config, countries);
 
-    expect(a).toHaveLength(10);
+    expect(a).toHaveLength(DAILY_QUESTION_COUNT);
     expect(JSON.stringify(a)).toBe(JSON.stringify(b));
   });
 
@@ -46,7 +47,7 @@ describe("match helpers", () => {
   it("normalizes configs and formats match links", () => {
     vi.stubGlobal("window", { location: { origin: "https://example.test" } });
 
-    expect(defaultMatchConfig()).toMatchObject({ mode: "daily", questionCount: 10 });
+    expect(defaultMatchConfig()).toMatchObject({ mode: "daily", questionCount: DAILY_QUESTION_COUNT });
     expect(normalizeMatchConfig({ topics: ["flag", "bad-topic" as "flag"], mode: "arcade", questionCount: 99 })).toEqual({
       topics: ["flag"],
       mode: "arcade",

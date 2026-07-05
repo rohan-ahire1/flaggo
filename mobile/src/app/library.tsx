@@ -4,9 +4,9 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import Icon from "@/components/Icon";
 import FlagImage from "@/components/FlagImage";
 import ScreenHeader from "@/components/ScreenHeader";
-import { countries } from "@/data/countries";
+import { countries } from "@flaggo/core/data/countries";
 import { useProgress } from "@/state/ProgressProvider";
-import { isStarred, toggleStarredDeck } from "@/utils/decks";
+import { isStarred, toggleStarredDeck } from "@flaggo/core/utils/decks";
 import { themeColor } from "@/theme/palettes";
 import { useThemeStore } from "@/theme/store";
 

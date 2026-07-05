@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useAuth } from "../auth/AuthProvider";
 import { supabase } from "../lib/supabase";
-import { defaultProgress, type AppProgress } from "../types/progress";
+import { defaultProgress, type AppProgress } from "@flaggo/core/types/progress";
 import { clearAnonymousMergeMarker, loadProgress, loadProgressMeta, needsAnonymousMerge, resetProgress, saveProgress, saveSyncedProgress } from "../utils/storage";
-import { mergeProgress, normalizeProgress } from "../utils/progressMerge";
+import { mergeProgress, normalizeProgress } from "@flaggo/core/utils/progressMerge";
 
 type SyncState = "local" | "loading" | "saved" | "saving" | "error";
 

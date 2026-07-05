@@ -5,7 +5,7 @@ import { router } from "expo-router";
 import Icon from "@/components/Icon";
 import ScreenHeader from "@/components/ScreenHeader";
 import { Card, PillButton, SectionLabel } from "@/components/ui";
-import { countries } from "@/data/countries";
+import { countries } from "@flaggo/core/data/countries";
 import { useProgress } from "@/state/ProgressProvider";
 import {
   buildWeakDeck,
@@ -13,11 +13,11 @@ import {
   createDeck,
   deckCountries,
   STARRED_DECK_ID
-} from "@/utils/decks";
+} from "@flaggo/core/utils/decks";
 import { themeColor } from "@/theme/palettes";
 import { useThemeStore } from "@/theme/store";
-import type { Deck } from "@/types/progress";
-import type { Topic } from "@/types/topic";
+import type { Deck } from "@flaggo/core/types/progress";
+import type { Topic } from "@flaggo/core/types/topic";
 
 const REGIONS = ["Africa", "Americas", "Asia", "Europe", "Oceania"];
 

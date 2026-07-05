@@ -2,6 +2,7 @@ import { defineConfig } from "vitest/config";
 import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
 import { BRAND } from "./src/config/brand";
+import path from "node:path";
 
 export default defineConfig({
   plugins: [
@@ -38,9 +39,20 @@ export default defineConfig({
       }
     })
   ],
+  resolve: {
+    alias: {
+      "@flaggo/core": path.resolve(__dirname, "packages/core/src")
+    }
+  },
+  server: {
+    fs: {
+      allow: [__dirname]
+    }
+  },
   test: {
     environment: "jsdom",
     globals: true,
-    setupFiles: ["./src/test/setup.ts"]
+    setupFiles: ["./src/test/setup.ts"],
+    include: ["src/**/*.test.{ts,tsx}", "netlify/functions/**/*.test.{ts,tsx}", "packages/core/**/*.test.{ts,tsx}"]
   }
 });

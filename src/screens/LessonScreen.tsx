@@ -3,13 +3,14 @@ import FeedbackPanel from "../components/FeedbackPanel";
 import Icon from "../components/Icon";
 import ProgressBar from "../components/ProgressBar";
 import QuestionCard from "../components/QuestionCard";
-import type { Country } from "../types/country";
-import type { Lesson } from "../types/lesson";
-import type { AppProgress } from "../types/progress";
-import type { Topic } from "../types/topic";
-import { updateStreak } from "../utils/date";
-import { generateLessonQuestions, generateReviewQuestions, type Question } from "../utils/quiz";
-import { updateReviewState } from "../utils/spacedRepetition";
+import type { Country } from "@flaggo/core/types/country";
+import type { Lesson } from "@flaggo/core/types/lesson";
+import type { AppProgress } from "@flaggo/core/types/progress";
+import type { Topic } from "@flaggo/core/types/topic";
+import { updateStreak } from "@flaggo/core/utils/date";
+import { generateLessonQuestions, generateReviewQuestions, type Question } from "@flaggo/core/utils/quiz";
+import { updateReviewState } from "@flaggo/core/utils/spacedRepetition";
+import { answerLabel } from "@flaggo/core/game/answerLabel";
 import type { LessonResult } from "./LessonCompleteScreen";
 
 export const TOPIC_LABEL: Record<string, string> = {
@@ -54,15 +55,6 @@ export default function LessonScreen({
   const question = questions[index];
   const topicLabel = TOPIC_LABEL[activeTopic] ?? activeTopic;
   const contextTitle = mode === "review" ? `Review · ${topicLabel}` : `${lesson?.title ?? "Lesson"} · ${topicLabel}`;
-  const correctAnswerLabel = (q: Question) => {
-    if (q.type === "guess-currency") return q.correctCurrency;
-    if (q.type === "guess-language") return q.correctLanguage;
-    if (q.type === "guess-capital" || q.type === "flag-to-capital") return q.correctCapital;
-    if (q.type === "capital-true-false") return q.correctCountry.capital ?? q.correctCountry.name;
-    if (q.type === "pick-neighbor" || q.type === "not-neighbor") return q.correctNeighbor.name;
-    return q.correctCountry.name;
-  };
-
   function answer(wasCorrect: boolean) {
     if (!question || feedback) return;
     const earned = wasCorrect ? 10 : 0;
@@ -130,7 +122,7 @@ export default function LessonScreen({
           correct={feedback.ok}
           country={feedback.question.correctCountry}
           xp={10}
-          answerLabel={correctAnswerLabel(feedback.question)}
+          answerLabel={answerLabel(feedback.question)}
           onContinue={continueNext}
         />
       )}

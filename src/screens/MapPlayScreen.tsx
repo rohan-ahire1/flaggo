@@ -3,11 +3,11 @@ import FeedbackPanel from "../components/FeedbackPanel";
 import FlagImage from "../components/FlagImage";
 import Icon from "../components/Icon";
 import ProgressBar from "../components/ProgressBar";
-import type { Country } from "../types/country";
-import type { AppProgress } from "../types/progress";
-import { updateStreak } from "../utils/date";
-import { generateMapQuestions, type MapMode, type MapQuestion } from "../utils/quiz";
-import { updateReviewState } from "../utils/spacedRepetition";
+import type { Country } from "@flaggo/core/types/country";
+import type { AppProgress } from "@flaggo/core/types/progress";
+import { updateStreak } from "@flaggo/core/utils/date";
+import { generateMapQuestions, type MapMode, type MapQuestion } from "@flaggo/core/utils/quiz";
+import { updateReviewState } from "@flaggo/core/utils/spacedRepetition";
 import type { LessonResult } from "./LessonCompleteScreen";
 
 const WorldMap = lazy(() => import("../components/WorldMap"));

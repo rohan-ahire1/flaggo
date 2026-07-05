@@ -1,4 +1,4 @@
-import type { Country } from "../types/country";
+import type { Country } from "@flaggo/core/types/country";
 
 const loaded = new Set<string>();
 

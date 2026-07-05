@@ -5,11 +5,11 @@ import Icon, { type IconName } from "@/components/Icon";
 import FlagImage from "@/components/FlagImage";
 import ScreenHeader from "@/components/ScreenHeader";
 import { Card, SectionLabel } from "@/components/ui";
-import { countries } from "@/data/countries";
+import { countries } from "@flaggo/core/data/countries";
 import { useProgress } from "@/state/ProgressProvider";
-import { generateLessons, lessonsForTopic } from "@/utils/lessonGenerator";
-import { getMasteredCountries, getWeakCountries } from "@/utils/spacedRepetition";
-import { parseReviewKey, reviewKey } from "@/types/topic";
+import { generateLessons, lessonsForTopic } from "@flaggo/core/utils/lessonGenerator";
+import { getMasteredCountries, getWeakCountries } from "@flaggo/core/utils/spacedRepetition";
+import { parseReviewKey, reviewKey } from "@flaggo/core/types/topic";
 import { themeColor } from "@/theme/palettes";
 import { useThemeStore } from "@/theme/store";
 

@@ -6,11 +6,11 @@ import Animated, { FadeIn } from "react-native-reanimated";
 import FlagImage from "@/components/FlagImage";
 import ScreenHeader from "@/components/ScreenHeader";
 import { Badge, Card, PillButton, Pill, SectionLabel } from "@/components/ui";
-import { countries } from "@/data/countries";
+import { countries } from "@flaggo/core/data/countries";
 import { useProgress } from "@/state/ProgressProvider";
-import { arcadeScore } from "@/utils/arcade";
-import { hashStringToSeed, mulberry32 } from "@/utils/seededRandom";
-import { buildTrivia, type TriviaMode, type TriviaRound } from "@/utils/trivia";
+import { arcadeScore } from "@flaggo/core/utils/arcade";
+import { hashStringToSeed, mulberry32 } from "@flaggo/core/utils/seededRandom";
+import { buildTrivia, type TriviaMode, type TriviaRound } from "@flaggo/core/utils/trivia";
 
 const MODES: { mode: TriviaMode; label: string }[] = [
   { mode: "higher-lower", label: "Higher/Lower" },

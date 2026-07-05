@@ -18,7 +18,7 @@ app works fully offline/anonymous; signing in just adds cloud sync and social fe
    flagcdn.com  ───flag SVGs───▶ │  AppShell (Router + Theme + Auth)           │
    (CacheFirst SW cache)         │    └─ App.tsx  ── screen state machine ──┐   │
                                   │         screens/ • components/           │   │
-   bundled at build time:        │         utils/ (quiz, SRS, seeded RNG)   │   │
+   bundled at build time:        │         packages/core (quiz, SRS, seeded RNG)   │   │
    countries.ts, world-110m ────▶│         hooks/useSyncedProgress          │   │
                                   └───────┬───────────────────────┬─────────────┘
                                           │                       │
@@ -61,43 +61,42 @@ event, and reads `?m=<matchId>` to jump into a multiplayer match (then strips th
 ### Directories
 - `screens/` — one component per mode.
 - `components/` — reusable presentational pieces (FlagCard, FlagImage, WorldMap,
-  QuestionCard, AnswerOption, HeaderStats, ProgressBar, Toast, BottomNav, etc.).
+  QuestionCard, AnswerOption, ProgressBar, Toast, BottomNav, etc.).
 - `pages/` — route-level pages.
 - `hooks/` — `useSyncedProgress`, `useEntitlement`.
 - `lib/` — Supabase client + data-access (`leaderboard`, `matches`), analytics, sentry.
-- `utils/` — pure game logic (tested).
-- `types/`, `config/`, `auth/`, `ads/`, `theme/`.
+- `packages/core/src/utils/` — shared pure game logic (tested).
+- `packages/core/src/types/`, `config/`, `auth/`, `ads/`, `theme/`.
 
 ## 3. Game logic & flow
 
-Topics (`types/topic.ts`): `flag`, `capital`, `location`, `currency`, `language`, `neighbor`.
+Topics (`packages/core/src/types/topic.ts`): `flag`, `capital`, `location`, `currency`, `language`, `neighbor`.
 
-- **Lessons / Paths:** `utils/lessonGenerator` builds an ordered lesson list per topic
-  from the country set; `App.openLesson` gates progression (you can only open the next
-  uncompleted lesson in a topic). Completing a lesson → `LessonCompleteScreen`.
-- **Question generation:** `utils/quiz` produces multiple-choice questions per topic
+- **Lessons / Paths:** `packages/core/src/utils/lessonGenerator` builds an ordered lesson list per topic
+  from the country set; `App.openLesson` opens any lesson. Completing a lesson → `LessonCompleteScreen`.
+- **Question generation:** `packages/core/src/utils/quiz` produces multiple-choice questions per topic
   (flag, capital, currency, language, neighbor) plus map questions. Distractors use
-  `data/lookalikes.ts` for visually similar flags and pool filtering for plausibility.
-- **Spaced repetition:** `utils/spacedRepetition` implements Leitner boxes over
+  `packages/core/src/data/lookalikes.ts` for visually similar flags and pool filtering for plausibility.
+- **Spaced repetition:** `packages/core/src/utils/spacedRepetition` implements Leitner boxes over
   `progress.review[code:topic]` (box, correct/wrong counts, `nextReviewAt`). The Review
   and Map-review flows pull "due" then "weak" countries.
-- **Daily challenge:** `utils/dailyChallenge` builds a fixed 10-question quiz seeded by
-  the date, so every player gets the same quiz. Tracks streak/best/history in `progress.daily`.
-- **Arcade:** `utils/arcade` — timed/score modes drawing from topic pools.
+- **Daily challenge:** `packages/core/src/utils/dailyChallenge` builds a fixed 5-question quiz seeded by
+  UTC date, so every player gets the same quiz. Tracks streak/best/history in `progress.daily`.
+- **Arcade:** `packages/core/src/utils/arcade` — timed/score modes drawing from topic pools.
 - **Trivia, Map play/explore, Decks:** additional modes; Decks are user-defined country
   groups (`progress.decks`) practiced like reviews.
-- **Determinism:** `utils/seededRandom` (`hashStringToSeed`, `mulberry32`, `seededPick`,
+- **Determinism:** `packages/core/src/utils/seededRandom` (`hashStringToSeed`, `mulberry32`, `seededPick`,
   `seededShuffle`) makes daily and match quizzes reproducible across devices/players.
 
 ### Progress model & sync
-`types/progress.ts` defines `AppProgress` (xp, coins, streak, completed lessons, selected
+`packages/core/src/types/progress.ts` defines `AppProgress` (xp, coins, streak, completed lessons, selected
 topic, `review` map, totals, daily, arcade scores, decks). It is stored:
 - **Locally** in `localStorage` via `utils/storage` (always, even anonymous).
 - **Remotely** as a single JSONB blob in `public.progress.data` when signed in.
 
 `hooks/useSyncedProgress` is the sync engine:
 1. On sign-in it fetches server progress; if this is a new user for this device or an
-   anonymous session is being claimed, it **merges** local + server (`utils/progressMerge`),
+   anonymous session is being claimed, it **merges** local + server (`packages/core/src/utils/progressMerge`),
    otherwise it takes whichever side is newer (by `updated_at`), then upserts the result.
 2. Subsequent local mutations debounce (~2s) into a server upsert; sync state surfaces as a
    "Progress saved" / "Sync needs attention" toast.
@@ -159,18 +158,18 @@ Netlify functions instead. (`supabase/` contains only SQL migrations + `setup.sq
 ## 6. Data pipeline (countries & flags)
 
 ```
-countries.raw.json  ──npm run generate:countries──▶  src/data/countries.ts  ──bundled──▶ app
+countries.raw.json  ──npm run generate:countries──▶  packages/core/src/data/countries.ts  ──bundled──▶ app
  (repo root, raw)        (scripts/generateCountries.ts)     (typed Country[])
 
-flag images:  src/data/countries.ts -> flagcdn.com/<cc>.svg  (runtime, SW-cached)
-map geometry: src/data/world-110m.json (TopoJSON, bundled)
+flag images:  packages/core/src/data/countries.ts -> flagcdn.com/<cc>.svg  (runtime, SW-cached)
+map geometry: packages/core/src/data/world-110m.json (TopoJSON, bundled)
 ```
 
 `scripts/generateCountries.ts` filters/normalizes the raw source (valid continent, cca2,
 name), assigns difficulty buckets (a hardcoded "easy" list; non-independent/non-UN → "hard"),
 maps neighbor cca3 codes to cca2, builds `flagcdn` URLs, and writes the typed array.
 Regenerate via `npm run generate:countries` whenever the raw data changes — do not hand-edit
-`src/data/countries.ts`.
+`packages/core/src/data/countries.ts`.
 
 ## 7. Build & deploy pipeline
 
@@ -188,7 +187,7 @@ Regenerate via `npm run generate:countries` whenever the raw data changes — do
 
 ## 8. Extension points
 
-- **New topic:** extend `Topic` in `types/topic.ts`, add a generator in `utils/quiz` (+ to
+- **New topic:** extend `Topic` in `packages/core/src/types/topic.ts`, add a generator in `packages/core/src/utils/quiz` (+ to
   `lessonGenerator`/`dailyChallenge`/`matches` topic handling), and surface it in the relevant
   screens.
 - **New screen/mode:** add a value to the `Screen` union in `App.tsx`, render it in the switch
@@ -197,7 +196,7 @@ Regenerate via `npm run generate:countries` whenever the raw data changes — do
   `lib/leaderboard.ts`) and call `submitScore`/`fetchTopScores`; no schema change needed
   (board is just a text key).
 - **New synced data:** extend `AppProgress` (it's one JSONB blob — no migration), and update
-  `defaultProgress` + `utils/progressMerge` so merges stay correct. For relational data instead,
+  `defaultProgress` + `packages/core/src/utils/progressMerge` so merges stay correct. For relational data instead,
   add a migration + RLS policies mirroring the existing owner-write/public-read patterns.
 - **Enable monetization:** set `VITE_MONETIZATION_ENABLED=true` / `VITE_ADS_ENABLED=true`,
   populate the Stripe + AdSense env, and unhide the gated CTAs.
