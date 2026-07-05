@@ -36,9 +36,19 @@ export default function LessonScreen() {
   const routeState = state as LessonRouteState;
   const lesson = routeState && "lessonId" in routeState ? lessons.find((item) => item.id === routeState.lessonId) : undefined;
   const mode = routeState && "mode" in routeState ? routeState.mode : "lesson";
-  const reviewCountries = routeState && "countryCodes" in routeState
-    ? routeState.countryCodes.map((code) => countries.find((country) => country.code === code)).filter((country): country is (typeof countries)[number] => Boolean(country))
-    : [];
+  // Keyed memo: a fresh array here each render would retrigger the questions
+  // memo below, regenerating (unseeded) questions mid-round on every answer.
+  const reviewCodesKey = routeState && "countryCodes" in routeState ? routeState.countryCodes.join(",") : "";
+  const reviewCountries = useMemo(
+    () =>
+      reviewCodesKey
+        ? reviewCodesKey
+            .split(",")
+            .map((code) => countries.find((country) => country.code === code))
+            .filter((country): country is (typeof countries)[number] => Boolean(country))
+        : [],
+    [countries, reviewCodesKey]
+  );
   const reviewTopic = routeState && "topic" in routeState ? routeState.topic : "flag";
 
   const invalidRoute = !routeState || (mode === "lesson" && !lesson);

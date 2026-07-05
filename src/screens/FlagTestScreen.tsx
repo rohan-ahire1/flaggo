@@ -19,7 +19,18 @@ export default function FlagTestScreen() {
   const { state } = useLocation();
   const { countries: allCountries, progress, setProgress, startReview } = useGame();
   const routeState = state as TestRouteState;
-  const countries = routeState?.countryCodes.map((code) => allCountries.find((country) => country.code === code)).filter((country): country is (typeof allCountries)[number] => Boolean(country)) ?? [];
+  // Keyed memo: a fresh array each render would reshuffle the test mid-round.
+  const codesKey = routeState?.countryCodes.join(",") ?? "";
+  const countries = useMemo(
+    () =>
+      codesKey
+        ? codesKey
+            .split(",")
+            .map((code) => allCountries.find((country) => country.code === code))
+            .filter((country): country is (typeof allCountries)[number] => Boolean(country))
+        : [],
+    [allCountries, codesKey]
+  );
   const mode = routeState?.mode ?? "recall";
   const topic = routeState?.topic ?? "flag";
   const onDone = () => navigate("/review");

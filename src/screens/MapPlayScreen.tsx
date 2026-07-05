@@ -22,7 +22,18 @@ export default function MapPlayScreen() {
   const { state } = useLocation();
   const { countries: allCountries, progress, setProgress, startMapPractice } = useGame();
   const routeState = state as MapRouteState;
-  const countries = routeState?.countryCodes.map((code) => allCountries.find((country) => country.code === code)).filter((country): country is Country => Boolean(country)) ?? [];
+  // Keyed memo: a fresh array each render would regenerate questions mid-round.
+  const codesKey = routeState?.countryCodes.join(",") ?? "";
+  const countries = useMemo(
+    () =>
+      codesKey
+        ? codesKey
+            .split(",")
+            .map((code) => allCountries.find((country) => country.code === code))
+            .filter((country): country is Country => Boolean(country))
+        : [],
+    [allCountries, codesKey]
+  );
   const mode = routeState?.mode ?? "locate";
   const onExit = () => navigate("/map");
   const questions = useMemo(() => generateMapQuestions(countries, mode), [countries, mode]);
