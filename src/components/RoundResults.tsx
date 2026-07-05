@@ -1,6 +1,8 @@
+import { useEffect } from "react";
 import FlagImage from "./FlagImage";
 import Icon, { type IconName } from "./Icon";
 import ScoreRing from "./ScoreRing";
+import { playComplete } from "../lib/sfx";
 
 export type RoundResultItem = {
   label: string;
@@ -51,6 +53,9 @@ export default function RoundResults({
   actions: ResultAction[];
 }) {
   const missed = items.filter((item) => !item.correct);
+  useEffect(() => {
+    playComplete();
+  }, []);
   return (
     <main className="relative flex min-h-screen flex-col bg-paper p-5">
       {score === total && total > 0 ? (

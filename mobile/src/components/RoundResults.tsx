@@ -1,5 +1,6 @@
 import { ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import Animated, { FadeInUp, ZoomIn } from "react-native-reanimated";
 import Icon, { type IconName } from "./Icon";
 import FlagImage from "./FlagImage";
 import { Card, PillButton, ScoreRing, SectionLabel } from "./ui";
@@ -49,11 +50,11 @@ export default function RoundResults({
     <SafeAreaView className="flex-1 bg-paper" edges={["top", "bottom"]}>
       <View className="w-full max-w-[820px] flex-1 gap-4 self-center p-5 lg:p-8">
         {/* Hero */}
-        <View className="items-center gap-2 pt-1">
+        <Animated.View entering={ZoomIn.springify()} className="items-center gap-2 pt-1">
           <SectionLabel>Round complete</SectionLabel>
           <Text className="text-[26px] font-black text-ink">{title(score, total)}</Text>
           <ScoreRing score={score} total={total} caption={caption} />
-        </View>
+        </Animated.View>
 
         {typeof streak === "number" ? (
           <Card className="flex-row items-center gap-3 py-3">
@@ -94,7 +95,7 @@ export default function RoundResults({
           </View>
           <ScrollView className="flex-1" contentContainerClassName="pb-1">
             {items.map((it, i) => (
-              <View key={i} className="flex-row items-start gap-3 border-t border-line px-4 py-3">
+              <Animated.View key={i} entering={i < 10 ? FadeInUp.delay(i * 30) : undefined} className="flex-row items-start gap-3 border-t border-line px-4 py-3">
                 {it.countryCode ? (
                   <View className="mt-0.5 w-12">
                     <FlagImage code={it.countryCode} width={120} className="rounded-lg" />
@@ -131,7 +132,7 @@ export default function RoundResults({
                     </View>
                   ) : null}
                 </View>
-              </View>
+              </Animated.View>
             ))}
           </ScrollView>
         </Card>

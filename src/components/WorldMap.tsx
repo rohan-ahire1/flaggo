@@ -12,7 +12,7 @@ type Rotation = [number, number, number];
 const DEFAULT_ROTATION: Rotation = [-10, -18, 0];
 const DEFAULT_SCALE = 300;
 const MIN_SCALE = 210;
-const MAX_SCALE = 820;
+const MAX_SCALE = 1600;
 
 const countriesFeatureCollection = feature(
   world110m as never,
@@ -49,6 +49,9 @@ export default function WorldMap({
   const draggingRef = useRef(false);
   const didDragRef = useRef(false);
   const lastPtRef = useRef<{ x: number; y: number } | null>(null);
+  const mapRef = useRef<HTMLDivElement | null>(null);
+  const pointersRef = useRef(new Map<number, { x: number; y: number }>());
+  const pinchDistanceRef = useRef<number | null>(null);
 
   // When a country is highlighted (identify mode), ease the globe to face it and
   // drop a marker. In locate mode there is no highlight, so the globe free-spins
@@ -99,6 +102,14 @@ export default function WorldMap({
   }
 
   function onPointerDown(event: React.PointerEvent) {
+    pointersRef.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
+    if (pointersRef.current.size >= 2) {
+      draggingRef.current = false;
+      didDragRef.current = true;
+      pinchDistanceRef.current = distanceBetweenPointers();
+      event.currentTarget.setPointerCapture?.(event.pointerId);
+      return;
+    }
     draggingRef.current = true;
     didDragRef.current = false;
     focusRef.current = null;
@@ -107,6 +118,20 @@ export default function WorldMap({
   }
 
   function onPointerMove(event: React.PointerEvent) {
+    if (pointersRef.current.has(event.pointerId)) {
+      pointersRef.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
+    }
+    if (pointersRef.current.size >= 2) {
+      event.preventDefault();
+      const nextDistance = distanceBetweenPointers();
+      const previousDistance = pinchDistanceRef.current;
+      if (nextDistance && previousDistance) {
+        zoom(nextDistance / previousDistance);
+      }
+      pinchDistanceRef.current = nextDistance;
+      didDragRef.current = true;
+      return;
+    }
     if (!draggingRef.current || !lastPtRef.current) return;
     const dx = event.clientX - lastPtRef.current.x;
     const dy = event.clientY - lastPtRef.current.y;
@@ -117,9 +142,18 @@ export default function WorldMap({
     applyRotation([cur[0] + dx * sensitivity, Math.max(-89, Math.min(89, cur[1] - dy * sensitivity)), 0]);
   }
 
-  function endDrag() {
+  function endDrag(event?: React.PointerEvent) {
+    if (event) pointersRef.current.delete(event.pointerId);
+    if (pointersRef.current.size < 2) pinchDistanceRef.current = null;
     draggingRef.current = false;
     lastPtRef.current = null;
+  }
+
+  function distanceBetweenPointers() {
+    const points = Array.from(pointersRef.current.values());
+    if (points.length < 2) return null;
+    const [a, b] = points;
+    return Math.hypot(a.x - b.x, a.y - b.y);
   }
 
   function zoom(factor: number) {
@@ -131,6 +165,17 @@ export default function WorldMap({
     applyRotation(DEFAULT_ROTATION);
     setScale(DEFAULT_SCALE);
   }
+
+  useEffect(() => {
+    const node = mapRef.current;
+    if (!node) return;
+    const wheel = (event: WheelEvent) => {
+      event.preventDefault();
+      zoom(event.deltaY < 0 ? 1.15 : 1 / 1.15);
+    };
+    node.addEventListener("wheel", wheel, { passive: false });
+    return () => node.removeEventListener("wheel", wheel);
+  }, []);
 
   // Deep-ocean atlas palette — fixed, independent of the active theme so the
   // globe always reads with strong land/water contrast.
@@ -159,6 +204,7 @@ export default function WorldMap({
 
   return (
     <div
+      ref={mapRef}
       className={`relative touch-none select-none overflow-hidden rounded-[24px] border border-line shadow-card ${mapClassName}`}
       style={{ backgroundColor: OCEAN_RIM, cursor: draggingRef.current ? "grabbing" : "grab" }}
       onPointerDown={onPointerDown}
@@ -166,6 +212,7 @@ export default function WorldMap({
       onPointerUp={endDrag}
       onPointerLeave={endDrag}
       onPointerCancel={endDrag}
+      onDoubleClick={() => zoom(1.6)}
     >
       <div className="pointer-events-none absolute right-3 top-3 z-10 grid gap-2">
         <button

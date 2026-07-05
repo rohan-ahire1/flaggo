@@ -1,6 +1,6 @@
 import "../global.css";
 import { useEffect, useState } from "react";
-import { AppState, LogBox, Platform, Text, View } from "react-native";
+import { AppState, LogBox, Text, View } from "react-native";
 import { Stack, router } from "expo-router";
 import * as Linking from "expo-linking";
 import * as SplashScreen from "expo-splash-screen";
@@ -64,38 +64,6 @@ export default function RootLayout() {
     if (fontsLoaded && (dbReady || dbError)) void SplashScreen.hideAsync();
   }, [dbError, dbReady, fontsLoaded]);
 
-  // On web the local DB (OPFS) can fail to open when another document still
-  // holds the exclusive handle (hard refresh, deep link, second tab). A reload
-  // recovers once the old handle releases, so auto-reload a couple of times
-  // before falling back to the error screen. Cleared once the DB opens.
-  const RELOAD_KEY = "worldly-db-reload";
-  useEffect(() => {
-    if (Platform.OS !== "web" || typeof window === "undefined") return;
-    if (dbReady) {
-      try {
-        window.sessionStorage.removeItem(RELOAD_KEY);
-      } catch {
-        // ignore storage access errors
-      }
-      return;
-    }
-    if (!dbError) return;
-    let count = 0;
-    try {
-      count = Number(window.sessionStorage.getItem(RELOAD_KEY) ?? "0");
-    } catch {
-      count = 0;
-    }
-    if (count >= 2) return;
-    try {
-      window.sessionStorage.setItem(RELOAD_KEY, String(count + 1));
-    } catch {
-      // ignore storage access errors
-    }
-    const timer = setTimeout(() => window.location.reload(), 500);
-    return () => clearTimeout(timer);
-  }, [dbError, dbReady]);
-
   // Handle auth callbacks that open the app via deep link.
   useEffect(() => {
     if (!url) return;
@@ -134,7 +102,7 @@ export default function RootLayout() {
                   textAlign: "center"
                 }}
               >
-                Flaggo could not open its local database.
+                Flaggo could not initialize local storage.
               </Text>
               <Text
                 style={{

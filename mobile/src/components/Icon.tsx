@@ -1,4 +1,6 @@
 import Svg, { Circle, Path, Rect } from "react-native-svg";
+import { themeColor } from "@/theme/palettes";
+import { useThemeStore } from "@/theme/store";
 
 export type IconName =
   | "today"
@@ -42,13 +44,14 @@ type Props = {
 
 // Minimal react-native-svg icon set (subset of the web Icon.tsx path data),
 // stroked with currentColor-style `color` so it inherits the theme.
-export default function Icon({ name, size = 24, color = "#20303a" }: Props) {
+export default function Icon({ name, size = 24, color }: Props) {
+  const resolvedColor = color ?? themeColor(useThemeStore((s) => s.theme), "ink");
   const common = {
     width: size,
     height: size,
     viewBox: "0 0 24 24",
     fill: "none",
-    stroke: color,
+    stroke: resolvedColor,
     strokeWidth: 2,
     strokeLinecap: "round" as const,
     strokeLinejoin: "round" as const
@@ -64,7 +67,7 @@ export default function Icon({ name, size = 24, color = "#20303a" }: Props) {
       );
     case "play":
       return (
-        <Svg width={size} height={size} viewBox="0 0 24 24" fill={color}>
+        <Svg width={size} height={size} viewBox="0 0 24 24" fill={resolvedColor}>
           <Path d="M7 4.5v15l12-7.5z" />
         </Svg>
       );
@@ -109,7 +112,7 @@ export default function Icon({ name, size = 24, color = "#20303a" }: Props) {
       );
     case "star":
       return (
-        <Svg width={size} height={size} viewBox="0 0 24 24" fill={color}>
+        <Svg width={size} height={size} viewBox="0 0 24 24" fill={resolvedColor}>
           <Path d="M12 3l2.6 5.6 6.1.7-4.5 4.1 1.2 6-5.4-3-5.4 3 1.2-6L3.3 9.3l6.1-.7z" />
         </Svg>
       );
@@ -189,7 +192,7 @@ export default function Icon({ name, size = 24, color = "#20303a" }: Props) {
       );
     case "sparkle":
       return (
-        <Svg width={size} height={size} viewBox="0 0 24 24" fill={color}>
+        <Svg width={size} height={size} viewBox="0 0 24 24" fill={resolvedColor}>
           <Path d="M12 2l1.8 5.2L19 9l-5.2 1.8L12 16l-1.8-5.2L5 9l5.2-1.8z" />
         </Svg>
       );
@@ -209,13 +212,13 @@ export default function Icon({ name, size = 24, color = "#20303a" }: Props) {
       );
     case "heart":
       return (
-        <Svg width={size} height={size} viewBox="0 0 24 24" fill={color}>
+        <Svg width={size} height={size} viewBox="0 0 24 24" fill={resolvedColor}>
           <Path d="M12 20s-7-4.4-7-9.5A3.5 3.5 0 0 1 12 7a3.5 3.5 0 0 1 7 3.5C19 15.6 12 20 12 20z" />
         </Svg>
       );
     case "bolt":
       return (
-        <Svg width={size} height={size} viewBox="0 0 24 24" fill={color}>
+        <Svg width={size} height={size} viewBox="0 0 24 24" fill={resolvedColor}>
           <Path d="M13 2L4 14h6l-1 8 9-12h-6z" />
         </Svg>
       );
@@ -224,7 +227,7 @@ export default function Icon({ name, size = 24, color = "#20303a" }: Props) {
         <Svg {...common}>
           <Circle cx="12" cy="12" r="8.5" />
           <Circle cx="12" cy="12" r="4.5" />
-          <Circle cx="12" cy="12" r="1" fill={color} />
+          <Circle cx="12" cy="12" r="1" fill={resolvedColor} />
         </Svg>
       );
     case "review":

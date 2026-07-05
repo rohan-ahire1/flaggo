@@ -35,6 +35,7 @@ export default function ReviewScreen() {
   const due = getDueCountries(progress, topicCountries, topic).slice(0, 12);
   const weak = getWeakCountries(progress, topicCountries, topic).slice(0, 6);
   const label = TOPICS.find((t) => t.key === topic)?.label.toLowerCase() ?? "flags";
+  const reviewCodes = due.length ? due.map((c) => c.code).join(",") : weak.length ? weak.map((c) => c.code).join(",") : undefined;
 
   return (
     <SafeAreaView className="flex-1 bg-paper" edges={["top"]}>
@@ -76,10 +77,10 @@ export default function ReviewScreen() {
             </View>
           </View>
           <PillButton
-            label="Start review"
+            label={due.length ? "Start review" : "Practice anyway"}
             variant="primary"
             icon="bolt"
-            onPress={() => router.push({ pathname: "/quiz", params: { mode: "lesson", topic } })}
+            onPress={() => router.push({ pathname: "/quiz", params: reviewCodes ? { mode: "lesson", topic, codes: reviewCodes } : { mode: "lesson", topic } })}
           />
         </Card>
 
@@ -106,7 +107,7 @@ export default function ReviewScreen() {
               {weak.map((c) => (
                 <Pressable
                   key={c.code}
-                  onPress={() => router.push({ pathname: "/quiz", params: { mode: "lesson", topic } })}
+                  onPress={() => router.push({ pathname: "/quiz", params: { mode: "lesson", topic, codes: c.code } })}
                   className="w-[31%] md:w-[15%]"
                 >
                   <FlagImage code={c.code} width={160} />

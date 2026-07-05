@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import { useAuth } from "../auth/AuthProvider";
 import Icon, { type IconName } from "../components/Icon";
@@ -7,6 +7,7 @@ import { useConfirm } from "../components/ConfirmDialog";
 import { useInstallPrompt } from "../components/InstallPromptProvider";
 import { BRAND } from "../config/brand";
 import { supabase } from "../lib/supabase";
+import { isSfxEnabled, setSfxEnabled } from "../lib/sfx";
 import { isSyntheticEmail } from "../lib/username";
 import { useGame } from "../state/GameProvider";
 
@@ -17,6 +18,10 @@ export default function ProfileScreen() {
   const { progress, resetAll, syncState, syncError, openSignIn, signOutUser, deleteAccount } = useGame();
   const userEmail = user?.email ?? null;
   const synthetic = isSyntheticEmail(userEmail);
+  const [sfxOn, setSfxOn] = useState(true);
+  useEffect(() => {
+    setSfxOn(isSfxEnabled());
+  }, []);
   const stats: { label: string; value: number; icon: IconName; color: string }[] = [
     { label: "XP", value: progress.xp, icon: "bolt", color: "text-primary" },
     { label: "Streak", value: progress.streak, icon: "flame", color: "text-accent" },
@@ -55,6 +60,20 @@ export default function ProfileScreen() {
         <h2 className="text-xs font-bold uppercase tracking-[0.1em] text-muted">Appearance — Theme</h2>
         <p className="mb-3 mt-1 text-sm font-medium text-muted">Re-themes every screen instantly.</p>
         <ThemeSwitcher />
+        <label className="mt-4 flex items-center justify-between gap-3 border-t border-line pt-4">
+          <span>
+            <span className="block font-display text-[17px] font-semibold text-ink">Sound effects</span>
+          </span>
+          <input
+            type="checkbox"
+            checked={sfxOn}
+            onChange={(event) => {
+              setSfxOn(event.currentTarget.checked);
+              setSfxEnabled(event.currentTarget.checked);
+            }}
+            className="h-5 w-5 accent-primary"
+          />
+        </label>
       </section>
 
       <section className="mt-5 rounded-[22px] border border-line bg-paper p-4 shadow-card">

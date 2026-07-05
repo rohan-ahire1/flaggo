@@ -13,12 +13,14 @@ export default function QuestionCard({
   question,
   revealed,
   selectedKey,
-  onSelect
+  onSelect,
+  onOptionPressIn
 }: {
   question: Question;
   revealed: boolean;
   selectedKey: string | null;
   onSelect: (option: QuizOption) => void;
+  onOptionPressIn?: () => void;
 }) {
   const described = describeQuestion(question);
 
@@ -38,10 +40,10 @@ export default function QuestionCard({
   }
 
   return (
-    <View className="gap-4 lg:gap-5">
+    <Animated.View key={question.id} entering={FadeInDown.duration(220)}>
+      <View className="gap-4 lg:gap-5">
       {/* Prompt */}
-      <Animated.View key={question.id} entering={FadeInDown.duration(220)}>
-        <View className="gap-3 lg:items-center">
+      <View className="gap-3 lg:items-center">
           <Text className="text-[19px] font-extrabold text-ink lg:text-center">{described.subText}</Text>
           {described.promptFlagCode ? (
             <MapPanel height={190}>
@@ -53,8 +55,7 @@ export default function QuestionCard({
               <Text className="px-4 text-center text-3xl font-black text-ink">{described.promptText}</Text>
             </MapPanel>
           ) : null}
-        </View>
-      </Animated.View>
+      </View>
 
       {/* Options */}
       {described.layout === "flags" ? (
@@ -68,7 +69,7 @@ export default function QuestionCard({
                 key={o.key}
                 className={`w-[48%] rounded-2xl border-2 bg-paper p-2 md:w-[23.5%] ${ring} ${revealed && st === "idle" ? "opacity-45" : ""}`}
               >
-                <Pressable disabled={revealed} onPress={() => onSelect(o)}>
+                <Pressable disabled={revealed} onPressIn={onOptionPressIn} onPress={() => onSelect(o)}>
                   <FlagImage code={o.flagCode!} width={320} className="border-0" />
                 </Pressable>
               </View>
@@ -81,6 +82,7 @@ export default function QuestionCard({
             <View key={o.key} className="md:w-[48.5%]">
               <Pressable
                 disabled={revealed}
+                onPressIn={onOptionPressIn}
                 onPress={() => onSelect(o)}
                 className={`flex-row items-center gap-3.5 rounded-2xl border-2 px-4 py-3.5 ${rowClasses(o)}`}
               >
@@ -91,6 +93,7 @@ export default function QuestionCard({
           ))}
         </View>
       )}
-    </View>
+      </View>
+    </Animated.View>
   );
 }

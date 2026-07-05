@@ -1,13 +1,21 @@
 import { useEffect, useState } from "react";
-import { Alert, Platform, ScrollView, Switch, Text, TextInput, View } from "react-native";
+import { Alert, Platform, Pressable, ScrollView, Switch, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import Icon, { type IconName } from "@/components/Icon";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
 import { Card, PillButton, SectionLabel } from "@/components/ui";
-import { signInWithPassword, signOut, signUpWithPassword } from "@/auth/actions";
+import {
+  deleteAccount,
+  resetPasswordForEmail,
+  signInWithPassword,
+  signOut,
+  signUpWithPassword,
+  signUpWithUsername
+} from "@/auth/actions";
 import { useAuth } from "@/auth/AuthProvider";
 import { hasSupabaseConfig } from "@/lib/supabase";
+import { isSyntheticEmail, isValidUsername } from "@/lib/username";
 import { isStreakReminderEnabled, setStreakReminderEnabled, syncStreakReminder } from "@/lib/streakReminder";
 import { useProgress } from "@/state/ProgressProvider";
 import { themeColor } from "@/theme/palettes";
@@ -30,7 +38,10 @@ export default function ProfileScreen() {
   const name = displayName ?? (user ? "Flaggo learner" : "Guest");
   const [authMode, setAuthMode] = useState<"signin" | "signup">("signin");
   const [signupName, setSignupName] = useState("");
+  const [usernameOnly, setUsernameOnly] = useState(false);
   const [password, setPassword] = useState("");
+  const syncLabel = syncState === "local" ? "Saved on device" : syncState === "loading" || syncState === "saving" ? "Syncing..." : syncState === "saved" ? "Synced" : "Sync issue";
+  const synthetic = isSyntheticEmail(user?.email);
 
   useEffect(() => {
     void isStreakReminderEnabled().then(setReminderEnabled).catch(() => undefined);
@@ -39,10 +50,34 @@ export default function ProfileScreen() {
   async function submitAuth() {
     setBusy(true);
     setNotice(null);
-    const { error, message } =
-      authMode === "signin" ? await signInWithPassword(email, password) : await signUpWithPassword(email, password, signupName);
-    setNotice(error ?? message ?? null);
-    setBusy(false);
+    try {
+      let result: { error?: string; message?: string };
+      if (authMode === "signin") {
+        result = await signInWithPassword(email, password);
+      } else if (usernameOnly) {
+        if (!isValidUsername(signupName)) {
+          result = { error: "Use 3-20 letters, numbers, or underscores." };
+        } else {
+          result = await signUpWithUsername(signupName, password);
+        }
+      } else {
+        result = await signUpWithPassword(email, password, signupName);
+      }
+      setNotice(result.error ?? result.message ?? null);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function forgotPassword() {
+    setBusy(true);
+    setNotice(null);
+    try {
+      const { error, message } = await resetPasswordForEmail(email);
+      setNotice(error ?? message ?? null);
+    } finally {
+      setBusy(false);
+    }
   }
 
   async function toggleReminder(on: boolean) {
@@ -65,6 +100,34 @@ export default function ProfileScreen() {
     ]);
   }
 
+  function confirmDeleteAccount() {
+    const run = async () => {
+      setBusy(true);
+      setNotice(null);
+      try {
+        const { error } = await deleteAccount();
+        if (error) {
+          setNotice(error);
+          return;
+        }
+        await resetAllProgress();
+        setNotice("Account deleted");
+      } finally {
+        setBusy(false);
+      }
+    };
+
+    const message = "This removes your synced progress, scores and matches permanently.";
+    if (Platform.OS === "web") {
+      if (typeof window !== "undefined" && window.confirm(`Delete account?\n\n${message}`)) void run();
+      return;
+    }
+    Alert.alert("Delete account?", message, [
+      { text: "Cancel", style: "cancel" },
+      { text: "Delete", style: "destructive", onPress: () => void run() }
+    ]);
+  }
+
   return (
     <SafeAreaView className="flex-1 bg-paper" edges={["top"]}>
       <ScrollView contentContainerClassName="w-full max-w-[1120px] self-center p-5 pb-8 gap-5 lg:p-8">
@@ -79,14 +142,14 @@ export default function ProfileScreen() {
             <View className="flex-1">
               <Text className="text-[19px] font-black text-ink">{name}</Text>
               <Text className="text-[13px] font-semibold text-muted">
-                {user?.email ??
+                {synthetic ? "Username account · no email" : user?.email ??
                   (hasSupabaseConfig
                     ? "Sign in to sync progress"
                     : "Playing locally · progress saved on this device")}
               </Text>
             </View>
             <View className="rounded-full border border-line bg-surface px-3 py-1">
-              <Text className="text-[12px] font-bold text-muted">sync: {syncState}</Text>
+              <Text className="text-[12px] font-bold text-muted">{syncLabel}</Text>
             </View>
           </View>
 
@@ -99,27 +162,38 @@ export default function ProfileScreen() {
                 <PillButton label="Create account" variant={authMode === "signup" ? "primary" : "secondary"} onPress={() => setAuthMode("signup")} className="flex-1" />
               </View>
               {authMode === "signup" ? (
+                <>
+                  <View className="flex-row items-center gap-3 rounded-2xl border border-line bg-paper px-4 py-3">
+                    <View className="flex-1">
+                      <Text className="text-[15px] font-black text-ink">Username only</Text>
+                      <Text className="text-[12px] font-semibold text-muted">No email</Text>
+                    </View>
+                    <Switch value={usernameOnly} onValueChange={setUsernameOnly} disabled={busy} />
+                  </View>
+                  <TextInput
+                    value={signupName}
+                    onChangeText={setSignupName}
+                    placeholder="Username"
+                    placeholderTextColor={themeColor(theme, "muted")}
+                    autoCapitalize="none"
+                    editable={!busy}
+                    maxLength={32}
+                    className="rounded-2xl border-2 border-line bg-paper px-4 py-3 text-[16px] font-semibold text-ink"
+                  />
+                </>
+              ) : null}
+              {authMode === "signup" && usernameOnly ? null : (
                 <TextInput
-                  value={signupName}
-                  onChangeText={setSignupName}
-                  placeholder="Username"
+                  value={email}
+                  onChangeText={setEmail}
+                  placeholder="you@email.com"
                   placeholderTextColor={themeColor(theme, "muted")}
-                  autoCapitalize="words"
+                  autoCapitalize="none"
+                  keyboardType="email-address"
                   editable={!busy}
-                  maxLength={32}
                   className="rounded-2xl border-2 border-line bg-paper px-4 py-3 text-[16px] font-semibold text-ink"
                 />
-              ) : null}
-              <TextInput
-                value={email}
-                onChangeText={setEmail}
-                placeholder="you@email.com"
-                placeholderTextColor={themeColor(theme, "muted")}
-                autoCapitalize="none"
-                keyboardType="email-address"
-                editable={!busy}
-                className="rounded-2xl border-2 border-line bg-paper px-4 py-3 text-[16px] font-semibold text-ink"
-              />
+              )}
               <TextInput
                 value={password}
                 onChangeText={setPassword}
@@ -131,6 +205,11 @@ export default function ProfileScreen() {
                 className="rounded-2xl border-2 border-line bg-paper px-4 py-3 text-[16px] font-semibold text-ink"
               />
               <PillButton label={authMode === "signin" ? "Sign in" : "Create account"} variant="primary" onPress={submitAuth} />
+              {authMode === "signin" ? (
+                <Pressable onPress={forgotPassword} disabled={busy || !email.trim()}>
+                  <Text className="text-center text-[14px] font-black text-primary">Forgot password?</Text>
+                </Pressable>
+              ) : null}
               {notice ? <Text className="font-bold text-primary">{notice}</Text> : null}
             </View>
           ) : null}
@@ -171,7 +250,17 @@ export default function ProfileScreen() {
           </Card>
         </View>
 
-        <PillButton label="Reset progress" variant="secondary" onPress={confirmReset} className="border-error/40" />
+        <View className="gap-3">
+          <PillButton label="Reset progress" variant="secondary" onPress={confirmReset} className="border-error/40" />
+          {user ? (
+            <View className="gap-2">
+              <SectionLabel>Danger zone</SectionLabel>
+              <Pressable onPress={confirmDeleteAccount} disabled={busy} className="items-center rounded-2xl px-5 py-4">
+                <Text className="font-black text-error">Delete my account & data</Text>
+              </Pressable>
+            </View>
+          ) : null}
+        </View>
       </ScrollView>
     </SafeAreaView>
   );

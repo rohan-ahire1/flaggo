@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import type { Country } from "@flaggo/core/types/country";
 import FlagImage from "./FlagImage";
 import Icon from "./Icon";
+import { playCorrect, playWrong } from "../lib/sfx";
 
 export default function FeedbackPanel({
   correct,
@@ -21,6 +22,8 @@ export default function FeedbackPanel({
   const buttonRef = useRef<HTMLButtonElement | null>(null);
 
   useEffect(() => {
+    if (correct) playCorrect();
+    else playWrong();
     buttonRef.current?.focus();
     function keydown(event: KeyboardEvent) {
       if (event.key !== "Enter" || document.querySelector('[role="dialog"]')) return;
