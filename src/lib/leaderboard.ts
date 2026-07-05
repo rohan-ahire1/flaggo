@@ -1,7 +1,6 @@
 import { supabase } from "./supabase";
 import { trackEvent } from "./analytics";
-import type { ArcadeMode } from "../types/arcade";
-import type { Topic } from "../types/topic";
+export { arcadeBoard, dailyBoard, xpBoard } from "@flaggo/core/game/boards";
 
 export type LeaderboardRow = {
   rank: number;
@@ -9,10 +8,6 @@ export type LeaderboardRow = {
   score: number;
   is_me: boolean;
 };
-
-export const dailyBoard = (dateStr: string) => `daily-${dateStr}`;
-export const arcadeBoard = (mode: ArcadeMode, topic: Topic) => `arcade-${mode}-${topic}`;
-export const xpBoard = () => "xp-alltime";
 
 export function sanitizeDisplayName(value: string) {
   return value.replace(/[\u0000-\u001f\u007f]/g, "").trim().slice(0, 24);

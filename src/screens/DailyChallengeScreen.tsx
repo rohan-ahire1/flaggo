@@ -1,31 +1,18 @@
-import { lazy, Suspense, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import FeedbackPanel from "../components/FeedbackPanel";
-import FlagImage from "../components/FlagImage";
 import Icon from "../components/Icon";
 import ProgressBar from "../components/ProgressBar";
 import QuestionCard from "../components/QuestionCard";
 import { useAuth } from "../auth/AuthProvider";
 import { useNameClaim } from "../components/NameClaimProvider";
-import type { Country } from "../types/country";
-import type { AppProgress } from "../types/progress";
-import { applyDailyResult, buildDailyQuiz, dateKey, type DailyQuestion } from "../utils/dailyChallenge";
-import { updateReviewState } from "../utils/spacedRepetition";
+import type { Country } from "@flaggo/core/types/country";
+import type { AppProgress } from "@flaggo/core/types/progress";
+import { applyDailyResult, buildDailyQuiz, dateKey, type DailyQuestion } from "@flaggo/core/utils/dailyChallenge";
+import { updateReviewState } from "@flaggo/core/utils/spacedRepetition";
+import { answerLabelForWrapper } from "@flaggo/core/game/answerLabel";
 import { trackEvent } from "../lib/analytics";
 import { dailyBoard, submitScore } from "../lib/leaderboard";
 import { BRAND } from "../config/brand";
-
-const WorldMap = lazy(() => import("../components/WorldMap"));
-
-function answerLabel(question: DailyQuestion) {
-  if (question.topic === "location") return question.country.name;
-  const q = question.question;
-  if (q.type === "guess-currency") return q.correctCurrency;
-  if (q.type === "guess-language") return q.correctLanguage;
-  if (q.type === "guess-capital" || q.type === "flag-to-capital") return q.correctCapital;
-  if (q.type === "capital-true-false") return q.correctCountry.capital ?? q.correctCountry.name;
-  if (q.type === "pick-neighbor" || q.type === "not-neighbor") return q.correctNeighbor.name;
-  return q.correctCountry.name;
-}
 
 export default function DailyChallengeScreen({
   countries,
@@ -129,30 +116,9 @@ export default function DailyChallengeScreen({
         </div>
       </header>
       <section key={question.id} className="animate-fade-in p-5">
-        {question.topic === "location" ? (
-          <>
-            <div className="mb-4 rounded-[24px] border border-flaggo-border bg-white p-4 shadow-card">
-              <p className="flex items-center gap-1.5 text-xs font-display font-extrabold uppercase tracking-wide text-flaggo-blue"><Icon name="globe" size={14} /> Locate</p>
-              <div className="mt-2 flex items-center gap-3">
-                <FlagImage code={question.country.code} name={question.country.name} src={question.country.flagUrl} className="h-14 w-20 rounded-xl p-1" />
-                <h1 className="font-display text-2xl font-black">Tap {question.country.name}</h1>
-              </div>
-            </div>
-            <Suspense fallback={<div className="h-[360px] animate-pulse rounded-[24px] bg-white shadow-card" />}>
-              <WorldMap
-                countries={countries}
-                correctCode={feedback?.ok ? question.country.code : undefined}
-                wrongCode={feedback?.wrongCode}
-                interactive={!feedback}
-                onCountryTap={(code) => answer(code === question.country.code, code)}
-              />
-            </Suspense>
-          </>
-        ) : (
-          <QuestionCard question={question.question} disabled={Boolean(feedback)} onAnswer={answer} />
-        )}
+        <QuestionCard question={question.question} disabled={Boolean(feedback)} onAnswer={answer} />
       </section>
-      {feedback && <FeedbackPanel correct={feedback.ok} country={feedback.question.country} xp={10} answerLabel={answerLabel(feedback.question)} onContinue={continueNext} />}
+      {feedback && <FeedbackPanel correct={feedback.ok} country={feedback.question.country} xp={10} answerLabel={answerLabelForWrapper(feedback.question)} onContinue={continueNext} />}
     </main>
   );
 }

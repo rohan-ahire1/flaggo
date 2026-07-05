@@ -1,0 +1,13 @@
+{
+  "name": "@flaggo/core",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./*": "./src/*.ts",
+    "./data/world-110m.json": "./src/data/world-110m.json"
+  }
+}

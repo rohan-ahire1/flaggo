@@ -1,9 +1,9 @@
 import { useMemo, useState } from "react";
 import Icon from "../components/Icon";
-import type { Country } from "../types/country";
-import type { AppProgress, Deck } from "../types/progress";
-import type { Topic } from "../types/topic";
-import { createDeck, buildWeakDeck, countryCodesByRegion, deckCountries, STARRED_DECK_ID } from "../utils/decks";
+import type { Country } from "@flaggo/core/types/country";
+import type { AppProgress, Deck } from "@flaggo/core/types/progress";
+import type { Topic } from "@flaggo/core/types/topic";
+import { createDeck, buildWeakDeck, countryCodesByRegion, deckCountries, STARRED_DECK_ID } from "@flaggo/core/utils/decks";
 import { trackEvent } from "../lib/analytics";
 
 const regions = ["Africa", "Americas", "Asia", "Europe", "Oceania"];

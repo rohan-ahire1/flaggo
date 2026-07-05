@@ -1,7 +1,7 @@
 import { lazy, Suspense, useMemo, useState } from "react";
 import FlagImage from "../components/FlagImage";
 import Icon from "../components/Icon";
-import type { Country } from "../types/country";
+import type { Country } from "@flaggo/core/types/country";
 
 const WorldMap = lazy(() => import("../components/WorldMap"));
 

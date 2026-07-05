@@ -5,19 +5,19 @@ import SignInModal from "./auth/SignInModal";
 import BottomNav from "./components/BottomNav";
 import AppFooter from "./components/AppFooter";
 import Toast from "./components/Toast";
-import { countries } from "./data/countries";
+import { countries } from "@flaggo/core/data/countries";
 import { useSyncedProgress } from "./hooks/useSyncedProgress";
 import { trackEvent } from "./lib/analytics";
 import { BRAND } from "./config/brand";
 import { supabase } from "./lib/supabase";
-import type { Country } from "./types/country";
-import type { Lesson } from "./types/lesson";
-import type { AppProgress } from "./types/progress";
-import type { Topic } from "./types/topic";
-import { generateLessons, lessonsForTopic } from "./utils/lessonGenerator";
+import type { Country } from "@flaggo/core/types/country";
+import type { Lesson } from "@flaggo/core/types/lesson";
+import type { AppProgress } from "@flaggo/core/types/progress";
+import type { Topic } from "@flaggo/core/types/topic";
+import { generateLessons, lessonsForTopic } from "@flaggo/core/utils/lessonGenerator";
 import { preloadFlags } from "./utils/preloadFlags";
 import { loadProgress } from "./utils/storage";
-import { deckCountries } from "./utils/decks";
+import { deckCountries } from "@flaggo/core/utils/decks";
 import { submitScore, xpBoard } from "./lib/leaderboard";
 import { createMatch, defaultMatchConfig, matchUrl } from "./lib/matches";
 import FlagsLibraryScreen from "./screens/FlagsLibraryScreen";
@@ -30,8 +30,8 @@ import StatsScreen from "./screens/StatsScreen";
 import FlagTestScreen from "./screens/FlagTestScreen";
 import TestSetupScreen, { type TestMode } from "./screens/TestSetupScreen";
 import WelcomeScreen from "./screens/WelcomeScreen";
-import type { PopularityGroup } from "./utils/popularity";
-import type { MapMode } from "./utils/quiz";
+import type { PopularityGroup } from "@flaggo/core/utils/popularity";
+import type { MapMode } from "@flaggo/core/utils/quiz";
 
 const MapMenuScreen = lazy(() => import("./screens/MapMenuScreen"));
 const MapPlayScreen = lazy(() => import("./screens/MapPlayScreen"));
@@ -99,11 +99,6 @@ export default function App() {
   }
 
   function openLesson(lesson: Lesson) {
-    const completed = new Set(progress.completedLessonIds);
-    const topicLessons = lessonsForTopic(lessons, lesson.topic);
-    const index = topicLessons.findIndex((item) => item.id === lesson.id);
-    const firstOpen = topicLessons.findIndex((item) => !completed.has(item.id));
-    if (!completed.has(lesson.id) && index !== Math.max(0, firstOpen)) return;
     setActiveLesson(lesson);
     setScreen("lesson");
   }
@@ -164,9 +159,9 @@ export default function App() {
 
   async function startMapReview() {
     const [{ default: world110m }, geo, srs] = await Promise.all([
-      import("./data/world-110m.json"),
-      import("./utils/geo"),
-      import("./utils/spacedRepetition")
+      import("@flaggo/core/data/world-110m.json"),
+      import("@flaggo/core/utils/geo"),
+      import("@flaggo/core/utils/spacedRepetition")
     ]);
     const available = geo.mapPresentCountries(countries, world110m);
     const due = srs.getDueCountries(progress, available, "location").slice(0, 8);

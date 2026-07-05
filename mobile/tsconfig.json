@@ -3,6 +3,12 @@
   "compilerOptions": {
     "strict": true,
     "paths": {
+      "@flaggo/core": [
+        "../packages/core/src/index.ts"
+      ],
+      "@flaggo/core/*": [
+        "../packages/core/src/*"
+      ],
       "@/*": [
         "./src/*"
       ],

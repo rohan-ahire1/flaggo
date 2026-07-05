@@ -1,6 +1,6 @@
 import { Pressable, Text, View } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
-import type { Question } from "../utils/quiz";
+import type { Question } from "@flaggo/core/utils/quiz";
 import { describeQuestion, type QuizOption } from "../quiz/describeQuestion";
 import FlagImage from "./FlagImage";
 import { Badge, MapPanel } from "./ui";

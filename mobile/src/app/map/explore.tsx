@@ -5,8 +5,8 @@ import FlagImage from "@/components/FlagImage";
 import ScreenHeader from "@/components/ScreenHeader";
 import { Card } from "@/components/ui";
 import WorldMap from "@/components/WorldMap";
-import { countries } from "@/data/countries";
-import type { Country } from "@/types/country";
+import { countries } from "@flaggo/core/data/countries";
+import type { Country } from "@flaggo/core/types/country";
 
 export default function ExploreMapScreen() {
   const { width } = useWindowDimensions();

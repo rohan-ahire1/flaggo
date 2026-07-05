@@ -1,8 +1,8 @@
 import Icon, { type IconName } from "../components/Icon";
-import { DAILY_QUESTION_COUNT } from "../utils/dailyChallenge";
-import type { Lesson } from "../types/lesson";
-import type { AppProgress } from "../types/progress";
-import type { Topic } from "../types/topic";
+import { DAILY_QUESTION_COUNT } from "@flaggo/core/utils/dailyChallenge";
+import type { Lesson } from "@flaggo/core/types/lesson";
+import type { AppProgress } from "@flaggo/core/types/progress";
+import type { Topic } from "@flaggo/core/types/topic";
 
 const DOW = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 const MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -42,13 +42,13 @@ export default function HomeScreen({
   onChallenge: () => void;
 }) {
   const today = new Date();
-  const todayKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+  const todayKey = today.toISOString().slice(0, 10);
   const dailyResult = progress.daily.history[todayKey];
   const played = Boolean(dailyResult);
   const total = dailyResult?.total ?? DAILY_QUESTION_COUNT;
   const score = dailyResult?.score ?? 0;
   const streak = progress.daily.streak;
-  const hoursToReset = 24 - today.getHours();
+  const hoursToReset = 24 - today.getUTCHours();
 
   const completed = new Set(progress.completedLessonIds);
   const learnTopic: Topic = progress.selectedTopic === "capital" ? "capital" : "flag";

@@ -1,5 +1,5 @@
-import { defaultProgress, type AppProgress } from "../types/progress";
-import { normalizeProgress } from "./progressMerge";
+import { defaultProgress, type AppProgress } from "@flaggo/core/types/progress";
+import { normalizeProgress } from "@flaggo/core/utils/progressMerge";
 
 const STORAGE_KEY = "flaggo-progress";
 const META_KEY = "flaggo-progress-meta";

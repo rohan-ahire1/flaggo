@@ -84,5 +84,5 @@ const output = `import type { Country } from "../types/country";
 export const countries: Country[] = ${JSON.stringify(countries, null, 2)};
 `;
 
-writeFileSync(resolve("src/data/countries.ts"), output);
+writeFileSync(resolve("packages/core/src/data/countries.ts"), output);
 console.log(`Generated ${countries.length} countries and territories.`);

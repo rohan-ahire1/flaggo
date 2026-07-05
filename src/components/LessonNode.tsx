@@ -1,4 +1,4 @@
-import type { Lesson } from "../types/lesson";
+import type { Lesson } from "@flaggo/core/types/lesson";
 import Icon from "./Icon";
 
 export type LessonNodeState = "locked" | "current" | "completed" | "review-needed" | "upcoming";
@@ -16,7 +16,6 @@ export default function LessonNode({
   total?: number;
   onClick: () => void;
 }) {
-  const unlocked = state !== "locked";
   const isFirst = index === 0;
   const isLast = total ? index === total - 1 : false;
   const done = state === "completed";
@@ -62,8 +61,7 @@ export default function LessonNode({
       {/* lesson card */}
       <button
         onClick={onClick}
-        disabled={!unlocked}
-        className={`my-2 flex flex-1 items-center gap-3 rounded-2xl p-4 text-left transition-all duration-150 active:translate-y-[1px] disabled:active:translate-y-0 ${card}`}
+        className={`my-2 flex flex-1 items-center gap-3 rounded-2xl p-4 text-left transition-all duration-150 active:translate-y-[1px] ${card}`}
       >
         <span className="min-w-0 flex-1">
           <span className="block truncate font-display text-[16px] font-extrabold leading-tight text-ink">{lesson.title}</span>

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { Country } from "../../types/country";
 import { defaultProgress } from "../../types/progress";
-import { applyDailyResult, buildDailyQuiz, dailyTopics } from "../dailyChallenge";
+import { applyDailyResult, buildDailyQuiz, DAILY_QUESTION_COUNT, dailyTopics } from "../dailyChallenge";
 
 function country(code: string, continent: Country["continent"] = "Europe", capital = "Capital"): Country {
   return {
@@ -24,16 +24,19 @@ const countries = Array.from({ length: 20 }, (_, index) => country(`C${index}`, 
 
 describe("dailyChallenge", () => {
   it("builds deterministic daily quizzes by date", () => {
-    const a = buildDailyQuiz("2026-06-18", countries).map((q) => [q.country.code, q.topic, JSON.stringify(q.question)]);
-    const b = buildDailyQuiz("2026-06-18", countries).map((q) => [q.country.code, q.topic, JSON.stringify(q.question)]);
+    const a = buildDailyQuiz("2026-06-18", countries).map((q) => q.id);
+    const b = buildDailyQuiz("2026-06-18", countries).map((q) => q.id);
     const c = buildDailyQuiz("2026-06-19", countries).map((q) => [q.country.code, q.topic, JSON.stringify(q.question)]);
     expect(a).toEqual(b);
     expect(a).not.toEqual(c);
   });
 
-  it("switches location topic with map availability", () => {
-    expect(dailyTopics(false)).toEqual(["flag", "capital", "currency", "language", "neighbor"]);
-    expect(dailyTopics(true)).toContain("location");
+  it("builds exactly five non-location questions", () => {
+    const quiz = buildDailyQuiz("2026-06-18", countries);
+    expect(quiz).toHaveLength(DAILY_QUESTION_COUNT);
+    expect(quiz).toHaveLength(5);
+    expect(quiz.some((question) => (question.topic as string) === "location")).toBe(false);
+    expect(dailyTopics()).toEqual(["flag", "capital", "currency", "language", "neighbor"]);
   });
 
   it("applies streak rules and keeps best same-day score", () => {

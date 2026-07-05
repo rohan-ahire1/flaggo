@@ -2,9 +2,9 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { ComposableMap, Geographies, Geography, Graticule, Marker, Sphere } from "react-simple-maps";
 import { geoCentroid } from "d3-geo";
 import { feature } from "topojson-client";
-import world110m from "../data/world-110m.json";
-import type { Country } from "../types/country";
-import { buildCcn3Index, geoIdToCountry, normalizeCcn3 } from "../utils/geo";
+import world110m from "@flaggo/core/data/world-110m.json";
+import type { Country } from "@flaggo/core/types/country";
+import { buildCcn3Index, geoIdToCountry, normalizeCcn3 } from "@flaggo/core/utils/geo";
 import Icon from "./Icon";
 
 type Rotation = [number, number, number];

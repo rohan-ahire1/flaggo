@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import Icon from "../components/Icon";
-import type { Country } from "../types/country";
-import type { Topic } from "../types/topic";
-import { getPopularityGroups, type PopularityGroup } from "../utils/popularity";
+import type { Country } from "@flaggo/core/types/country";
+import type { Topic } from "@flaggo/core/types/topic";
+import { getPopularityGroups, type PopularityGroup } from "@flaggo/core/utils/popularity";
 
 export type TestMode = "recall" | "options";
 

@@ -5,13 +5,13 @@ import { router } from "expo-router";
 import Icon from "@/components/Icon";
 import ScreenHeader from "@/components/ScreenHeader";
 import { Card, PillButton, SectionLabel } from "@/components/ui";
-import world110m from "@/data/world-110m.json";
-import { countries } from "@/data/countries";
-import { mapPresentCountries } from "@/utils/geo";
-import { getPopularityGroups } from "@/utils/popularity";
+import world110m from "@flaggo/core/data/world-110m.json";
+import { countries } from "@flaggo/core/data/countries";
+import { mapPresentCountries } from "@flaggo/core/utils/geo";
+import { getPopularityGroups } from "@flaggo/core/utils/popularity";
 import { themeColor } from "@/theme/palettes";
 import { useThemeStore } from "@/theme/store";
-import type { MapMode } from "@/utils/quiz";
+import type { MapMode } from "@flaggo/core/utils/quiz";
 
 type PickerMode = "tier" | "region";
 

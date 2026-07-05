@@ -1,4 +1,4 @@
-import type { Question } from "../utils/quiz";
+import type { Question } from "@flaggo/core/utils/quiz";
 
 export type QuizOption = { key: string; label?: string; flagCode?: string; correct: boolean };
 

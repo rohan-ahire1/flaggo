@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import Icon, { type IconName } from "../components/Icon";
 import { TriviaCard } from "../components/QuestionCard";
-import type { Country } from "../types/country";
-import type { AppProgress } from "../types/progress";
-import { arcadeScore } from "../utils/arcade";
-import { hashStringToSeed, mulberry32 } from "../utils/seededRandom";
-import { buildTrivia, type TriviaMode, type TriviaRound } from "../utils/trivia";
+import type { Country } from "@flaggo/core/types/country";
+import type { AppProgress } from "@flaggo/core/types/progress";
+import { arcadeScore } from "@flaggo/core/utils/arcade";
+import { hashStringToSeed, mulberry32 } from "@flaggo/core/utils/seededRandom";
+import { buildTrivia, type TriviaMode, type TriviaRound } from "@flaggo/core/utils/trivia";
 import { trackEvent } from "../lib/analytics";
 
 const MODES: { mode: TriviaMode; label: string; desc: string; icon: IconName }[] = [

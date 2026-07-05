@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import Icon from "../components/Icon";
 import { useAuth } from "../auth/AuthProvider";
-import { ARCADE_MODES } from "../types/arcade";
-import { TOPICS } from "../types/topic";
+import { ARCADE_MODES } from "@flaggo/core/types/arcade";
+import { TOPICS } from "@flaggo/core/types/topic";
 import { arcadeBoard, dailyBoard, fetchTopScores, type LeaderboardRow, xpBoard } from "../lib/leaderboard";
-import { dateKey } from "../utils/dailyChallenge";
+import { dateKey } from "@flaggo/core/utils/dailyChallenge";
 import { trackEvent } from "../lib/analytics";
 
 export default function LeaderboardScreen({

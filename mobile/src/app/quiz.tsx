@@ -16,21 +16,21 @@ import { useNameClaim } from "@/components/NameClaimProvider";
 import { promptChallenge } from "@/social/challenge";
 import { themeColor } from "@/theme/palettes";
 import { useThemeStore } from "@/theme/store";
-import type { AppProgress } from "@/types/progress";
-import { arcadeKey, type ArcadeMode } from "@/types/arcade";
-import type { Country } from "@/types/country";
-import type { Topic } from "@/types/topic";
-import { generateLessonQuestions, generateReviewQuestions, type Question } from "@/utils/quiz";
-import { generateLessons } from "@/utils/lessonGenerator";
-import { deckCountries } from "@/utils/decks";
-import { countries } from "@/data/countries";
-import { buildDailyQuiz, dateKey, applyDailyResult } from "@/utils/dailyChallenge";
+import type { AppProgress } from "@flaggo/core/types/progress";
+import { arcadeKey, type ArcadeMode } from "@flaggo/core/types/arcade";
+import type { Country } from "@flaggo/core/types/country";
+import type { Topic } from "@flaggo/core/types/topic";
+import { generateLessonQuestions, generateReviewQuestions, type Question } from "@flaggo/core/utils/quiz";
+import { generateLessons } from "@flaggo/core/utils/lessonGenerator";
+import { deckCountries } from "@flaggo/core/utils/decks";
+import { countries } from "@flaggo/core/data/countries";
+import { buildDailyQuiz, dateKey, applyDailyResult } from "@flaggo/core/utils/dailyChallenge";
 import { buildMatchQuestions, normalizeMatchConfig, submitMatchResult, type MatchConfig } from "@/lib/matches";
 import { arcadeBoard, dailyBoard, submitScore } from "@/lib/leaderboard";
-import { persistArcadeBest } from "@/utils/arcade";
-import { updateReviewState } from "@/utils/spacedRepetition";
+import { persistArcadeBest } from "@flaggo/core/utils/arcade";
+import { updateStreak } from "@flaggo/core/utils/date";
+import { updateReviewState } from "@flaggo/core/utils/spacedRepetition";
 
-const DAILY_COUNT = 5;
 type QuizItem = { question: Question; topic: Topic };
 
 const XP_PER_CORRECT = 10;
@@ -40,14 +40,6 @@ function mmss(sec: number) {
   const m = Math.floor(sec / 60);
   const s = sec % 60;
   return `${m}:${String(s).padStart(2, "0")}`;
-}
-
-function bumpStreak(progress: AppProgress): AppProgress {
-  const today = new Date().toISOString().slice(0, 10);
-  if (progress.lastLessonDate === today) return progress;
-  const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
-  const streak = progress.lastLessonDate === yesterday ? (progress.streak ?? 0) + 1 : 1;
-  return { ...progress, streak, lastLessonDate: today };
 }
 
 function countryContext(country: Country) {
@@ -96,9 +88,7 @@ export default function QuizScreen() {
       }));
     }
     if (isDaily) {
-      return buildDailyQuiz(dateKey(), countries, false)
-        .slice(0, DAILY_COUNT)
-        .map((d) => ({ question: d.question as Question, topic: d.topic as Topic }));
+      return buildDailyQuiz(dateKey(), countries).map((d) => ({ question: d.question as Question, topic: d.topic as Topic }));
     }
     if (lesson) {
       return generateLessonQuestions(lesson, countries).map((question) => ({ question, topic }));
@@ -224,7 +214,7 @@ export default function QuizScreen() {
     } else if (isArcade) {
       done = persistArcadeBest(done, arcadeMode, topic, scoreToSubmit);
     } else {
-      done = bumpStreak(done);
+      done = updateStreak(done);
       if (lesson && !done.completedLessonIds.includes(lesson.id)) {
         done = { ...done, completedLessonIds: [...done.completedLessonIds, lesson.id] };
       }

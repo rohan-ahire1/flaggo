@@ -7,13 +7,13 @@ import Animated, { FadeIn } from "react-native-reanimated";
 import FlagImage from "@/components/FlagImage";
 import RoundResults, { type RoundResultItem } from "@/components/RoundResults";
 import { Badge, MapPanel, PillButton, Pill } from "@/components/ui";
-import { countries } from "@/data/countries";
+import { countries } from "@flaggo/core/data/countries";
 import { useProgress } from "@/state/ProgressProvider";
-import { getPopularityGroups } from "@/utils/popularity";
-import { getCapitalDistractors, getDistractors, shuffleArray } from "@/utils/quiz";
-import { updateReviewState } from "@/utils/spacedRepetition";
-import type { AppProgress } from "@/types/progress";
-import type { Topic } from "@/types/topic";
+import { getPopularityGroups } from "@flaggo/core/utils/popularity";
+import { getCapitalDistractors, getDistractors, shuffleArray } from "@flaggo/core/utils/quiz";
+import { updateReviewState } from "@flaggo/core/utils/spacedRepetition";
+import type { AppProgress } from "@flaggo/core/types/progress";
+import type { Topic } from "@flaggo/core/types/topic";
 
 const LETTERS = ["A", "B", "C", "D"];
 

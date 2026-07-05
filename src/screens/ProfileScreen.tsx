@@ -5,7 +5,7 @@ import ThemeSwitcher from "../components/ThemeSwitcher";
 import { BRAND } from "../config/brand";
 import { supabase } from "../lib/supabase";
 import { isSyntheticEmail } from "../lib/username";
-import type { AppProgress } from "../types/progress";
+import type { AppProgress } from "@flaggo/core/types/progress";
 
 type Props = {
   progress: AppProgress;

@@ -1,24 +1,19 @@
 import type { Country } from "../types/country";
 import type { AppProgress, DailyResult } from "../types/progress";
-import { TOPICS, type Topic } from "../types/topic";
-import { generateCapitalQuestions, generateCurrencyQuestions, generateFlagQuestions, generateLanguageQuestions, generateMapQuestions, generateNeighborQuestions, type MapQuestion, type Question } from "./quiz";
+import type { Topic } from "../types/topic";
+import { generateCapitalQuestions, generateCurrencyQuestions, generateFlagQuestions, generateLanguageQuestions, generateNeighborQuestions, type Question } from "./quiz";
 import { hashStringToSeed, mulberry32, seededPick } from "./seededRandom";
 
-export const DAILY_QUESTION_COUNT = 10;
+export const DAILY_QUESTION_COUNT = 5;
 
-export type DailyQuestion =
-  | { id: string; topic: Exclude<Topic, "location">; country: Country; question: Question }
-  | { id: string; topic: "location"; country: Country; question: MapQuestion };
+export type DailyQuestion = { id: string; topic: Exclude<Topic, "location">; country: Country; question: Question };
 
 export function dateKey(d = new Date()): string {
-  const year = d.getFullYear();
-  const month = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
+  return d.toISOString().slice(0, 10);
 }
 
-export function dailyTopics(mapShipped: boolean): Topic[] {
-  return mapShipped && TOPICS.includes("location") ? ["flag", "capital", "location", "currency", "language", "neighbor"] : ["flag", "capital", "currency", "language", "neighbor"];
+export function dailyTopics(): Exclude<Topic, "location">[] {
+  return ["flag", "capital", "currency", "language", "neighbor"];
 }
 
 function eligibleCountries(countries: Country[]) {
@@ -33,18 +28,14 @@ function topicPool(countries: Country[], topic: Topic) {
   return countries;
 }
 
-export function buildDailyQuiz(dateStr: string, countries: Country[], mapShipped = TOPICS.includes("location")): DailyQuestion[] {
+export function buildDailyQuiz(dateStr: string, countries: Country[]): DailyQuestion[] {
   const rng = mulberry32(hashStringToSeed(`flaggo-daily-${dateStr}`));
   const pool = eligibleCountries(countries);
-  const topics = dailyTopics(mapShipped);
+  const topics = dailyTopics();
   return Array.from({ length: DAILY_QUESTION_COUNT }, (_, index) => {
     const topic = topics[index % topics.length];
     const currentPool = topicPool(pool, topic);
     const country = seededPick(currentPool, 1, rng)[0];
-    if (topic === "location") {
-      const [question] = generateMapQuestions([country, ...pool.filter((item) => item.code !== country.code)], "locate", rng);
-      return { id: `daily-${dateStr}-${index}`, topic, country, question };
-    }
     const [question] = topic === "capital"
       ? generateCapitalQuestions(`daily-${dateStr}-${index}`, [country], topicPool(pool, "capital"), rng)
       : topic === "currency"
@@ -59,8 +50,8 @@ export function buildDailyQuiz(dateStr: string, countries: Country[], mapShipped
 }
 
 function previousDate(dateStr: string) {
-  const date = new Date(`${dateStr}T12:00:00`);
-  date.setDate(date.getDate() - 1);
+  const date = new Date(`${dateStr}T00:00:00.000Z`);
+  date.setUTCDate(date.getUTCDate() - 1);
   return dateKey(date);
 }
 

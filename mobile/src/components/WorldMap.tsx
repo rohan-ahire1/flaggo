@@ -5,9 +5,9 @@ import { geoEqualEarth, geoPath } from "d3-geo";
 import { feature } from "topojson-client";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
-import world110m from "@/data/world-110m.json";
-import type { Country } from "@/types/country";
-import { buildCcn3Index, geoIdToCountry } from "@/utils/geo";
+import world110m from "@flaggo/core/data/world-110m.json";
+import type { Country } from "@flaggo/core/types/country";
+import { buildCcn3Index, geoIdToCountry } from "@flaggo/core/utils/geo";
 import { themeColor } from "@/theme/palettes";
 import { useThemeStore } from "@/theme/store";
 

@@ -1,10 +1,10 @@
 import { useMemo, useState } from "react";
 import Icon from "../components/Icon";
 import LessonNode from "../components/LessonNode";
-import type { Lesson } from "../types/lesson";
-import type { AppProgress } from "../types/progress";
-import { PATH_TOPICS, type Topic } from "../types/topic";
-import { lessonsForTopic } from "../utils/lessonGenerator";
+import type { Lesson } from "@flaggo/core/types/lesson";
+import type { AppProgress } from "@flaggo/core/types/progress";
+import { PATH_TOPICS, type Topic } from "@flaggo/core/types/topic";
+import { lessonsForTopic } from "@flaggo/core/utils/lessonGenerator";
 import { trackEvent } from "../lib/analytics";
 
 const TOPIC_LABELS: Record<string, string> = { flag: "Flags", capital: "Capitals" };

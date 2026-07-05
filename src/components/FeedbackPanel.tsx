@@ -1,4 +1,4 @@
-import type { Country } from "../types/country";
+import type { Country } from "@flaggo/core/types/country";
 import FlagImage from "./FlagImage";
 import Icon from "./Icon";
 

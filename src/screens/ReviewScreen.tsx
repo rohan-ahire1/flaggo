@@ -1,9 +1,9 @@
 import FlagCard from "../components/FlagCard";
 import Icon from "../components/Icon";
-import type { Country } from "../types/country";
-import type { AppProgress } from "../types/progress";
-import { reviewKey } from "../types/topic";
-import { getDueCountries, getWeakCountries } from "../utils/spacedRepetition";
+import type { Country } from "@flaggo/core/types/country";
+import type { AppProgress } from "@flaggo/core/types/progress";
+import { reviewKey } from "@flaggo/core/types/topic";
+import { getDueCountries, getWeakCountries } from "@flaggo/core/utils/spacedRepetition";
 
 export default function ReviewScreen({
   countries,

@@ -1,9 +1,9 @@
-import { countries } from "../data/countries";
-import { arcadePool } from "../utils/arcade";
-import { generateReviewQuestions, type Question } from "../utils/quiz";
-import type { ArcadeMode } from "../types/arcade";
-import type { Topic } from "../types/topic";
-import { seededShuffle } from "../utils/seededRandom";
+import { countries } from "@flaggo/core/data/countries";
+import { arcadePool } from "@flaggo/core/utils/arcade";
+import { generateReviewQuestions, type Question } from "@flaggo/core/utils/quiz";
+import type { ArcadeMode } from "@flaggo/core/types/arcade";
+import type { Topic } from "@flaggo/core/types/topic";
+import { seededShuffle } from "@flaggo/core/utils/seededRandom";
 
 // A lesson round: due/new questions for the chosen topic.
 export function buildLessonQuestions(topic: Topic): Question[] {

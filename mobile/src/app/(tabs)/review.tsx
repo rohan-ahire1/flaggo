@@ -4,12 +4,12 @@ import { router } from "expo-router";
 import Icon, { type IconName } from "@/components/Icon";
 import FlagImage from "@/components/FlagImage";
 import { Card, PillButton, SectionLabel } from "@/components/ui";
-import { countries } from "@/data/countries";
+import { countries } from "@flaggo/core/data/countries";
 import { useProgress } from "@/state/ProgressProvider";
-import { getDueCountries, getWeakCountries } from "@/utils/spacedRepetition";
+import { getDueCountries, getWeakCountries } from "@flaggo/core/utils/spacedRepetition";
 import { themeColor } from "@/theme/palettes";
 import { useThemeStore } from "@/theme/store";
-import type { Topic } from "@/types/topic";
+import type { Topic } from "@flaggo/core/types/topic";
 
 const TOPICS: { key: Topic; label: string }[] = [
   { key: "flag", label: "Flags" },

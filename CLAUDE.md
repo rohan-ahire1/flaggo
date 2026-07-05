@@ -19,7 +19,7 @@ Stripe checkout and AdSense code in the repo but disabled behind feature flags.
 - **UI:** React 18, `react-router-dom` 7, Tailwind CSS 3 (`tailwind.config.js`).
 - **PWA:** `vite-plugin-pwa` (autoUpdate; CacheFirst for `flagcdn.com` flag assets).
 - **Maps:** `react-simple-maps` + `d3-geo` + `topojson-client` + `world-atlas`
-  (TopoJSON in `src/data/world-110m.json`).
+  (TopoJSON in `packages/core/src/data/world-110m.json`).
 - **Backend:** `@supabase/supabase-js` (Auth + Postgres + RLS). No dedicated server-state
   lib — app state is plain React `useState`/context + a synced-progress hook.
 - **Payments (deferred):** `@stripe/stripe-js` (client), `stripe` (Netlify functions).
@@ -45,10 +45,10 @@ Stripe checkout and AdSense code in the repo but disabled behind feature flags.
   merge), `useEntitlement` (ads-removed entitlement).
 - `lib/` — `supabase.ts` (client, null if unconfigured), `leaderboard.ts`, `matches.ts`,
   `analytics.ts`, `sentry.ts`.
-- `utils/` — game logic: `quiz`, `lessonGenerator`, `spacedRepetition` (Leitner boxes),
+- `packages/core/src/utils/` — shared game logic: `quiz`, `lessonGenerator`, `spacedRepetition` (Leitner boxes),
   `dailyChallenge`, `arcade`, `trivia`, `geo`, `seededRandom` (deterministic seeded RNG so
   matches/daily are reproducible), `decks`, `storage` (localStorage), `progressMerge`.
-- `types/` — `country`, `topic`, `progress`, `lesson`, `arcade`.
+- `packages/core/src/types/` — `country`, `topic`, `progress`, `lesson`, `arcade`.
 - `config/` — `brand.ts` (name/url), `env.ts` (typed client env + required-key assertion).
 - `auth/` — `AuthProvider` (session + display_name), `SignInModal` (email/password auth).
 - `ads/`, `theme/` — feature-flagged ads, theme palettes/provider (light default).
@@ -57,10 +57,10 @@ Stripe checkout and AdSense code in the repo but disabled behind feature flags.
 
 - `countries.raw.json` (repo root, ~250 entries from restcountries-style source) is the input.
 - `scripts/generateCountries.ts` (`npm run generate:countries`) transforms it into
-  `src/data/countries.ts` (typed `Country[]`, the runtime source of truth). Adds difficulty
+  `packages/core/src/data/countries.ts` (typed `Country[]`, the runtime source of truth). Adds difficulty
   buckets, `flagcdn.com` flag URLs, normalized continents, neighbor codes, etc.
 - Flag images load from `https://flagcdn.com/<cc>.svg` (cached by the PWA service worker).
-- Map geometry: `src/data/world-110m.json` (TopoJSON). `src/data/lookalikes.ts` lists
+- Map geometry: `packages/core/src/data/world-110m.json` (TopoJSON). `packages/core/src/data/lookalikes.ts` lists
   visually similar flags for harder distractors.
 
 ### Supabase
@@ -101,7 +101,7 @@ npm run dev                  # Vite dev server (localhost:5173)
 npm run build                # tsc -b && vite build  -> dist/
 npm run preview              # preview the production build
 npm test                     # vitest run
-npm run generate:countries   # regenerate src/data/countries.ts from countries.raw.json
+npm run generate:countries   # regenerate packages/core/src/data/countries.ts from countries.raw.json
 ```
 
 **Deploy (Netlify):** build `npm run build`, publish `dist`, functions `netlify/functions`.
@@ -122,6 +122,6 @@ requested. For manual testing, use `netlify deploy` for preview deploys and avoi
   `VITE_MONETIZATION_ENABLED` is false.
 - Public display names must never be emails — use `sanitizeDisplayName` / `isPublicSafeHandle`.
 - Matches and the daily challenge are **seeded** (deterministic) so all players get the same
-  questions; preserve that when touching `utils/seededRandom`, `matches`, `dailyChallenge`.
+  questions; preserve that when touching `packages/core/src/utils/seededRandom`, `matches`, `dailyChallenge`.
 - Plans live in `plans/` (`*.plan.md`). See `plans/launch-free-mvp.plan.md` for launch intent.
 </content>

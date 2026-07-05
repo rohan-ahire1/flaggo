@@ -1,9 +1,9 @@
 import { eq } from "drizzle-orm";
 import { getDb, initDb } from "../db/client";
 import { progress as progressTable, reviewItems, type ProgressRow } from "../db/schema";
-import { defaultProgress, type AppProgress, type ReviewState } from "../types/progress";
-import { reviewKey, type Topic } from "../types/topic";
-import { normalizeProgress } from "./progressMerge";
+import { defaultProgress, type AppProgress, type ReviewState } from "@flaggo/core/types/progress";
+import { reviewKey, type Topic } from "@flaggo/core/types/topic";
+import { normalizeProgress } from "@flaggo/core/utils/progressMerge";
 
 // Storage is now SQLite (via Drizzle) instead of localStorage, so every export
 // is async. The public function names/shapes match the web version so the rest

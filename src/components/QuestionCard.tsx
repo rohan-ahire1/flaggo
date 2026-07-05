@@ -1,6 +1,6 @@
 import { useEffect } from "react";
-import type { Question } from "../utils/quiz";
-import type { TriviaRound } from "../utils/trivia";
+import type { Question } from "@flaggo/core/utils/quiz";
+import type { TriviaRound } from "@flaggo/core/utils/trivia";
 import AnswerOption from "./AnswerOption";
 import FlagImage from "./FlagImage";
 import Icon, { type IconName } from "./Icon";

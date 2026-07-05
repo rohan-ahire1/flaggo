@@ -6,22 +6,12 @@ import FlagImage from "../components/FlagImage";
 import Icon from "../components/Icon";
 import ProgressBar from "../components/ProgressBar";
 import QuestionCard from "../components/QuestionCard";
-import type { Country } from "../types/country";
+import type { Country } from "@flaggo/core/types/country";
+import { answerLabelForWrapper } from "@flaggo/core/game/answerLabel";
 import { getMatch, getMatchResults, buildMatchQuestions, submitMatchResult, type Match, type MatchQuestion, type MatchResult } from "../lib/matches";
 import { trackEvent } from "../lib/analytics";
 
 const WorldMap = lazy(() => import("../components/WorldMap"));
-
-function answerLabel(question: MatchQuestion) {
-  if (question.topic === "location") return question.country.name;
-  const q = question.question;
-  if (q.type === "guess-currency") return q.correctCurrency;
-  if (q.type === "guess-language") return q.correctLanguage;
-  if (q.type === "guess-capital" || q.type === "flag-to-capital") return q.correctCapital;
-  if (q.type === "capital-true-false") return q.correctCountry.capital ?? q.correctCountry.name;
-  if (q.type === "pick-neighbor" || q.type === "not-neighbor") return q.correctNeighbor.name;
-  return q.correctCountry.name;
-}
 
 export default function MatchScreen({
   matchId,
@@ -174,7 +164,7 @@ export default function MatchScreen({
           <QuestionCard question={question.question} disabled={Boolean(feedback) || submitting} onAnswer={answer} />
         )}
       </section>
-      {feedback && <FeedbackPanel correct={feedback.ok} country={feedback.question.country} xp={0} answerLabel={answerLabel(feedback.question)} onContinue={continueNext} />}
+      {feedback && <FeedbackPanel correct={feedback.ok} country={feedback.question.country} xp={0} answerLabel={answerLabelForWrapper(feedback.question)} onContinue={continueNext} />}
     </main>
   );
 }

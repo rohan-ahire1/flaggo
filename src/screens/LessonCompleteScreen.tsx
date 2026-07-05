@@ -1,5 +1,5 @@
 import Icon from "../components/Icon";
-import type { Topic } from "../types/topic";
+import type { Topic } from "@flaggo/core/types/topic";
 
 export type LessonResult = {
   xpEarned: number;
