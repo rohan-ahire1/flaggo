@@ -50,7 +50,7 @@ Stripe checkout and AdSense code in the repo but disabled behind feature flags.
   matches/daily are reproducible), `decks`, `storage` (localStorage), `progressMerge`.
 - `types/` — `country`, `topic`, `progress`, `lesson`, `arcade`.
 - `config/` — `brand.ts` (name/url), `env.ts` (typed client env + required-key assertion).
-- `auth/` — `AuthProvider` (session + display_name), `SignInModal` (Google OAuth + email magic link).
+- `auth/` — `AuthProvider` (session + display_name), `SignInModal` (email/password auth).
 - `ads/`, `theme/` — feature-flagged ads, theme palettes/provider (light default).
 
 ### Game data
@@ -107,6 +107,12 @@ npm run generate:countries   # regenerate src/data/countries.ts from countries.r
 **Deploy (Netlify):** build `npm run build`, publish `dist`, functions `netlify/functions`.
 SPA + function redirects in `netlify.toml`. Set the required `VITE_*` env in Netlify; set
 server-only keys for `delete-account` (and Stripe if/when monetization is enabled).
+
+Do not deploy to Netlify production unless explicitly asked to do so. Git-based
+production builds are skipped by default through `scripts/netlify-ignore-build.cjs`;
+include `[deploy]` in the commit message only when an intentional production release is
+requested. For manual testing, use `netlify deploy` for preview deploys and avoid
+`netlify deploy --prod` unless production deployment was explicitly requested.
 
 ## Conventions
 

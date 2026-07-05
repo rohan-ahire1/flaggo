@@ -123,9 +123,9 @@ export default function SignInModal({ open, onClose }: { open: boolean; onClose:
   }
 
   // Create a username-only (synthetic-email, auto-confirmed) account via the
-  // Netlify function. Falls back to a direct client signup when the function
-  // isn't reachable (e.g. plain `vite` dev) — that path needs email
-  // confirmation disabled. Returns an error message, or null on success.
+  // Netlify function. This must stay server-side because Supabase Auth may
+  // reject synthetic emails on direct client signup and because auto-confirming
+  // requires the service-role key. Returns an error message, or null on success.
   async function createUsernameAccount(name: string, pw: string): Promise<string | null> {
     try {
       const res = await fetch("/.netlify/functions/username-signup", {
@@ -133,17 +133,11 @@ export default function SignInModal({ open, onClose }: { open: boolean; onClose:
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ username: name, password: pw })
       });
-      if (res.status === 404) throw new Error("fn-unavailable");
       const body = (await res.json().catch(() => ({}))) as { error?: string };
+      if (res.status === 404) return "Username signup is not available in this environment. Run with Netlify Dev or deploy the server function.";
       return res.ok ? null : body.error ?? "Could not create account.";
     } catch {
-      if (!supabase) return "Supabase is not configured yet.";
-      const { error } = await supabase.auth.signUp({
-        email: usernameToEmail(name),
-        password: pw,
-        options: { data: { full_name: name, username: name } }
-      });
-      return error?.message ?? null;
+      return "Username signup is not available right now. Please try again in a moment.";
     }
   }
 

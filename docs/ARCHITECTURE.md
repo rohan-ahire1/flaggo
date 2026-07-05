@@ -47,7 +47,7 @@ app works fully offline/anonymous; signing in just adds cloud sync and social fe
 |------|-----------|
 | `/` | `App` (the game) |
 | `/privacy`, `/terms` | `LegalPages` |
-| `/auth/callback` | `AuthCallbackPage` (OAuth/magic-link return) |
+| `/auth/callback` | `AuthCallbackPage` (reserved auth callback route) |
 | `*` | `NotFoundPage` |
 
 ### The game shell — `App.tsx`
@@ -133,7 +133,7 @@ combined idempotent version for the SQL editor. **Every table has RLS enabled.**
 
 ### Auth
 Supabase Auth via `AuthProvider` (tracks session + fetches `profiles.display_name`).
-Sign-in methods in `SignInModal`: **Google OAuth** and **email magic link** (OTP).
+Sign-in methods in `SignInModal`: **email/password** account creation and sign-in.
 Callback handled at `/auth/callback`. `supabase` client is `null` when env is missing,
 in which case the whole app runs local-only and all cloud features no-op gracefully.
 
@@ -182,7 +182,7 @@ Regenerate via `npm run generate:countries` whenever the raw data changes — do
 - **Deploy (Netlify):** build `npm run build`, publish `dist`, functions dir `netlify/functions`.
   `netlify.toml` adds the `/stripe-webhook` redirect and the SPA fallback (`/* → /index.html`).
 - **DB:** apply the four migrations (or `setup.sql`) to the Supabase project; configure Auth
-  providers (Google + email magic link) to match `SignInModal`.
+  for email/password accounts to match `SignInModal`.
 - **Tests:** `npm test` (Vitest/jsdom). Game-logic utils, leaderboard/match libs, ads, and the
   stripe-webhook handler have unit tests.
 

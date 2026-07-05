@@ -53,3 +53,6 @@ begin
   return new;
 end;
 $$;
+
+-- Preserve the previous function hardening after replacing the trigger function.
+revoke execute on function public.handle_new_user() from public, anon, authenticated;

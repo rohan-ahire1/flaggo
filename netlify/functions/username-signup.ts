@@ -39,7 +39,14 @@ export async function handler(event: { httpMethod: string; body: string | null }
   if (error) {
     // Duplicate synthetic email or username unique-index violation => taken.
     const taken = /already|exists|duplicate|registered|unique/i.test(error.message);
-    return json(taken ? 409 : 500, { error: taken ? "That username is taken." : error.message });
+    const invalidSyntheticEmail = /email.*invalid|invalid.*email/i.test(error.message);
+    return json(taken ? 409 : 500, {
+      error: taken
+        ? "That username is taken."
+        : invalidSyntheticEmail
+          ? "Username signup is not configured correctly yet."
+          : error.message
+    });
   }
 
   return json(200, { ok: true });

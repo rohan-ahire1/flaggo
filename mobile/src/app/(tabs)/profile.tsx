@@ -5,7 +5,7 @@ import { router } from "expo-router";
 import Icon, { type IconName } from "@/components/Icon";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
 import { Card, PillButton, SectionLabel } from "@/components/ui";
-import { signInWithEmail, signInWithGoogle, signOut } from "@/auth/actions";
+import { signInWithPassword, signOut, signUpWithPassword } from "@/auth/actions";
 import { useAuth } from "@/auth/AuthProvider";
 import { hasSupabaseConfig } from "@/lib/supabase";
 import { useProgress } from "@/state/ProgressProvider";
@@ -26,19 +26,15 @@ export default function ProfileScreen() {
       ? Math.round((progress.totalCorrect / (progress.totalCorrect + progress.totalWrong)) * 100)
       : 0;
   const name = displayName ?? (user ? "Flaggo learner" : "Guest");
+  const [authMode, setAuthMode] = useState<"signin" | "signup">("signin");
+  const [signupName, setSignupName] = useState("");
+  const [password, setPassword] = useState("");
 
-  async function google() {
+  async function submitAuth() {
     setBusy(true);
     setNotice(null);
-    const { error } = await signInWithGoogle();
-    if (error) setNotice(error);
-    setBusy(false);
-  }
-
-  async function magicLink() {
-    setBusy(true);
-    setNotice(null);
-    const { error, message } = await signInWithEmail(email);
+    const { error, message } =
+      authMode === "signin" ? await signInWithPassword(email, password) : await signUpWithPassword(email, password, signupName);
     setNotice(error ?? message ?? null);
     setBusy(false);
   }
@@ -86,7 +82,22 @@ export default function ProfileScreen() {
             <PillButton label="Sign out" variant="secondary" onPress={() => void signOut()} />
           ) : hasSupabaseConfig ? (
             <View className="gap-3">
-              <PillButton label="Continue with Google" variant="primary" onPress={google} />
+              <View className="flex-row gap-2">
+                <PillButton label="Sign in" variant={authMode === "signin" ? "primary" : "secondary"} onPress={() => setAuthMode("signin")} className="flex-1" />
+                <PillButton label="Create account" variant={authMode === "signup" ? "primary" : "secondary"} onPress={() => setAuthMode("signup")} className="flex-1" />
+              </View>
+              {authMode === "signup" ? (
+                <TextInput
+                  value={signupName}
+                  onChangeText={setSignupName}
+                  placeholder="Username"
+                  placeholderTextColor={themeColor(theme, "muted")}
+                  autoCapitalize="words"
+                  editable={!busy}
+                  maxLength={32}
+                  className="rounded-2xl border-2 border-line bg-paper px-4 py-3 text-[16px] font-semibold text-ink"
+                />
+              ) : null}
               <TextInput
                 value={email}
                 onChangeText={setEmail}
@@ -97,7 +108,17 @@ export default function ProfileScreen() {
                 editable={!busy}
                 className="rounded-2xl border-2 border-line bg-paper px-4 py-3 text-[16px] font-semibold text-ink"
               />
-              <PillButton label="Email me a sign-in link" variant="secondary" onPress={magicLink} />
+              <TextInput
+                value={password}
+                onChangeText={setPassword}
+                placeholder="Password"
+                placeholderTextColor={themeColor(theme, "muted")}
+                autoCapitalize="none"
+                secureTextEntry
+                editable={!busy}
+                className="rounded-2xl border-2 border-line bg-paper px-4 py-3 text-[16px] font-semibold text-ink"
+              />
+              <PillButton label={authMode === "signin" ? "Sign in" : "Create account"} variant="primary" onPress={submitAuth} />
               {notice ? <Text className="font-bold text-primary">{notice}</Text> : null}
             </View>
           ) : null}
