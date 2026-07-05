@@ -59,12 +59,12 @@ npm test
 | `VITE_ADSENSE_CLIENT_ID` | No |  | Only used when ads are explicitly enabled. |
 | `VITE_STRIPE_PUBLISHABLE_KEY` | No |  | Reserved for future checkout UI. |
 
-Server-only Netlify function values are only needed when monetization or account deletion is active:
+Server-only Netlify function values are needed for username-only signup, account deletion, and monetization:
 
 | Variable | Used by | Notes |
 | --- | --- | --- |
 | `SUPABASE_URL` | Netlify functions | Supabase project URL. |
-| `SUPABASE_SERVICE_ROLE_KEY` | Netlify functions | Required for account deletion and Stripe webhook writes. |
+| `SUPABASE_SERVICE_ROLE_KEY` | Netlify functions | Required for username-only signup, account deletion, and Stripe webhook writes. |
 | `STRIPE_SECRET_KEY` | Stripe functions | Deferred for the free MVP. |
 | `STRIPE_PRICE_ID` | Checkout function | Deferred for the free MVP. |
 | `STRIPE_WEBHOOK_SECRET` | Webhook function | Deferred for the free MVP. |
@@ -78,7 +78,7 @@ Apply the migrations in order to a fresh project:
 3. `supabase/migrations/202606180003_matches.sql`
 4. `supabase/migrations/202606180004_handle_no_email.sql`
 
-The migrations enable Row Level Security for profiles, progress, entitlements, purchases, leaderboards, matches, match results, and friend links. Configure Supabase Auth for Google OAuth and email magic links, matching the providers used by `src/auth/SignInModal.tsx`.
+The migrations enable Row Level Security for profiles, progress, entitlements, purchases, leaderboards, matches, match results, and friend links. Configure Supabase Auth for email/password accounts, matching the provider used by `src/auth/SignInModal.tsx`.
 
 ## Deploy
 

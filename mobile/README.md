@@ -10,7 +10,7 @@ pick), a lesson/quiz flow, Arcade, and Profile — sharing the web app's game lo
 - **Drizzle ORM + expo-sqlite** — on-device, offline-first progress store (`src/db`)
 - **TanStack Query** — Supabase server-state; **Zustand** — client/UI state (theme)
 - **Reanimated + Gesture Handler** — question/answer animations
-- **Supabase** — auth (Google OAuth + email magic link via deep links) + progress sync
+- **Supabase** — email/password auth + progress sync
 
 ### Reused from web (copied, unchanged)
 

@@ -93,7 +93,7 @@ export default function RootLayout() {
     return () => clearTimeout(timer);
   }, [dbError, dbReady]);
 
-  // Handle OAuth / magic-link callbacks that open the app via deep link.
+  // Handle auth callbacks that open the app via deep link.
   useEffect(() => {
     if (url) void createSessionFromUrl(url);
   }, [url]);

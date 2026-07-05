@@ -5,8 +5,7 @@ import { env } from "../config/env";
 export const hasSupabaseConfig = Boolean(env.supabaseUrl && env.supabaseAnonKey);
 
 // React Native has no URL bar, so the session lives in AsyncStorage and we must
-// disable detectSessionInUrl (that's a web-only OAuth-redirect concern). The
-// OAuth/magic-link callback is handled explicitly via deep links instead.
+// disable detectSessionInUrl. OAuth is hidden until a custom auth domain exists.
 export const supabase = hasSupabaseConfig
   ? createClient(env.supabaseUrl, env.supabaseAnonKey, {
       auth: {

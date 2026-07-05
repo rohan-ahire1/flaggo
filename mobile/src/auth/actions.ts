@@ -1,6 +1,5 @@
 import { getQueryParams } from "expo-auth-session/build/QueryParams";
 import * as Linking from "expo-linking";
-import * as WebBrowser from "expo-web-browser";
 import { Platform } from "react-native";
 import { env } from "../config/env";
 import { supabase } from "../lib/supabase";
@@ -26,34 +25,29 @@ export async function createSessionFromUrl(url: string): Promise<Result> {
   return error ? { error: error.message } : {};
 }
 
-export async function signInWithGoogle(): Promise<Result> {
-  if (!supabase) return { error: "Sign-in is not configured." };
-  const redirectTo = getAuthRedirectUrl();
-  const { data, error } = await supabase.auth.signInWithOAuth({
-    provider: "google",
-    options: { redirectTo, skipBrowserRedirect: Platform.OS !== "web" }
-  });
-  if (error) return { error: error.message };
-  if (Platform.OS === "web") return {};
-  if (!data?.url) return { error: "Could not start Google sign-in." };
-
-  const result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo);
-  if (result.type === "success" && result.url) {
-    return createSessionFromUrl(result.url);
-  }
-  return {};
-}
-
-export async function signInWithEmail(email: string): Promise<Result> {
+export async function signInWithPassword(email: string, password: string): Promise<Result> {
   if (!supabase) return { error: "Sign-in is not configured." };
   const clean = email.trim();
   if (!clean) return { error: "Enter your email." };
-  const redirectTo = getAuthRedirectUrl();
-  const { error } = await supabase.auth.signInWithOtp({
+  if (!password) return { error: "Enter your password." };
+  const { error } = await supabase.auth.signInWithPassword({
     email: clean,
-    options: { emailRedirectTo: redirectTo }
+    password
   });
-  return error ? { error: error.message } : { message: "Check your email for a sign-in link." };
+  return error ? { error: error.message } : {};
+}
+
+export async function signUpWithPassword(email: string, password: string, displayName: string): Promise<Result> {
+  if (!supabase) return { error: "Sign-in is not configured." };
+  const clean = email.trim();
+  if (!clean) return { error: "Enter your email." };
+  if (password.length < 6) return { error: "Use a password with at least 6 characters." };
+  const { error } = await supabase.auth.signUp({
+    email: clean,
+    password,
+    options: { data: { full_name: displayName.trim() || null } }
+  });
+  return error ? { error: error.message } : { message: "Account created. Check your email if confirmation is required." };
 }
 
 export async function signOut(): Promise<void> {
