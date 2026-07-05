@@ -1,6 +1,10 @@
+import { useState } from "react";
+import type { FormEvent } from "react";
 import Icon, { type IconName } from "../components/Icon";
 import ThemeSwitcher from "../components/ThemeSwitcher";
 import { BRAND } from "../config/brand";
+import { supabase } from "../lib/supabase";
+import { isSyntheticEmail } from "../lib/username";
 import type { AppProgress } from "../types/progress";
 
 type Props = {
@@ -15,6 +19,7 @@ type Props = {
 };
 
 export default function ProfileScreen({ progress, onReset, userEmail, syncState, syncError, onSignIn, onSignOut, onDeleteAccount }: Props) {
+  const synthetic = isSyntheticEmail(userEmail);
   const stats: { label: string; value: number; icon: IconName; color: string }[] = [
     { label: "XP", value: progress.xp, icon: "bolt", color: "text-flaggo-blue" },
     { label: "Streak", value: progress.streak, icon: "flame", color: "text-flaggo-orange" },
@@ -29,7 +34,7 @@ export default function ProfileScreen({ progress, onReset, userEmail, syncState,
           <Icon name="user" size={48} />
         </div>
         <h1 className="mt-4 screen-title">{BRAND.name} learner</h1>
-        <p className="font-bold text-flaggo-muted">{userEmail ?? "Sign in to sync progress"}</p>
+        <p className="font-bold text-flaggo-muted">{synthetic ? "Username account · no email" : userEmail ?? "Sign in to sync progress"}</p>
       </section>
 
       <section className="mt-5 rounded-[22px] border border-flaggo-border bg-white p-4 shadow-card">
@@ -46,6 +51,7 @@ export default function ProfileScreen({ progress, onReset, userEmail, syncState,
             <button onClick={onSignIn} className="rounded-2xl bg-primary px-4 py-2 font-display font-black text-white">Sign in</button>
           )}
         </div>
+        {synthetic && <AddRecoveryEmail />}
       </section>
 
       <section className="mt-5 rounded-[22px] border border-line bg-paper p-4 shadow-card">
@@ -86,5 +92,53 @@ export default function ProfileScreen({ progress, onReset, userEmail, syncState,
         </button>
       )}
     </main>
+  );
+}
+
+// Username-only accounts have no real email, so no password recovery. This lets
+// them attach one later via Supabase's native email-change flow (a confirmation
+// link is sent to the new address; the change applies once they click it).
+function AddRecoveryEmail() {
+  const [email, setEmail] = useState("");
+  const [status, setStatus] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  async function submit(event: FormEvent) {
+    event.preventDefault();
+    if (!supabase) {
+      setStatus("Supabase is not configured yet.");
+      return;
+    }
+    if (!email.trim()) return;
+    setBusy(true);
+    setStatus("");
+    const { error } = await supabase.auth.updateUser({ email: email.trim() });
+    setBusy(false);
+    setStatus(error ? error.message : `Confirmation sent to ${email.trim()}. Click the link to finish.`);
+    if (!error) setEmail("");
+  }
+
+  return (
+    <form onSubmit={submit} className="mt-4 border-t border-flaggo-border pt-4">
+      <label className="text-sm font-display font-extrabold text-flaggo-muted" htmlFor="recovery-email">
+        Add a recovery email
+      </label>
+      <p className="mt-0.5 text-xs font-bold text-flaggo-muted">Optional — enables password reset if you forget it.</p>
+      <div className="mt-2 flex gap-2">
+        <input
+          id="recovery-email"
+          type="email"
+          value={email}
+          onChange={(event) => setEmail(event.target.value)}
+          placeholder="you@example.com"
+          autoComplete="email"
+          className="min-w-0 flex-1 rounded-2xl border-2 border-flaggo-border bg-white px-4 py-2.5 font-bold outline-none transition focus:border-flaggo-green"
+        />
+        <button disabled={busy || !email.trim()} className="flaggo-button bg-green-grad px-4 text-white shadow-button-green disabled:opacity-50">
+          Add
+        </button>
+      </div>
+      {status && <p className="mt-2 text-xs font-bold text-flaggo-muted">{status}</p>}
+    </form>
   );
 }
