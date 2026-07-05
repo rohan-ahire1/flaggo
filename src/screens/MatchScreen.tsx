@@ -1,4 +1,5 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../auth/AuthProvider";
 import { useNameClaim } from "../components/NameClaimProvider";
 import FeedbackPanel from "../components/FeedbackPanel";
@@ -6,28 +7,19 @@ import FlagImage from "../components/FlagImage";
 import Icon from "../components/Icon";
 import ProgressBar from "../components/ProgressBar";
 import QuestionCard from "../components/QuestionCard";
-import type { Country } from "@flaggo/core/types/country";
 import { answerLabelForWrapper } from "@flaggo/core/game/answerLabel";
 import { getMatch, getMatchResults, buildMatchQuestions, submitMatchResult, type Match, type MatchQuestion, type MatchResult } from "../lib/matches";
 import { trackEvent } from "../lib/analytics";
+import { useGame } from "../state/GameProvider";
 
 const WorldMap = lazy(() => import("../components/WorldMap"));
 
-export default function MatchScreen({
-  matchId,
-  countries,
-  onDone,
-  onBack,
-  onSignIn
-}: {
-  matchId: string | null;
-  countries: Country[];
-  onDone: (matchId: string) => void;
-  onBack: () => void;
-  onSignIn: () => void;
-}) {
+export default function MatchScreen() {
+  const navigate = useNavigate();
+  const { id: matchId = null } = useParams();
   const { user } = useAuth();
   const { ensureName } = useNameClaim();
+  const { countries, openSignIn } = useGame();
   const [match, setMatch] = useState<Match | null>(null);
   const [results, setResults] = useState<MatchResult[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -72,13 +64,13 @@ export default function MatchScreen({
     if (!matchId || submitting) return;
     const name = await ensureName();
     if (!name) {
-      onSignIn();
+      openSignIn();
       return;
     }
     setSubmitting(true);
     try {
       await submitMatchResult(matchId, finalScore, questions.length, name);
-      onDone(matchId);
+      navigate(`/match/${matchId}/result`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not submit result.");
       setSubmitting(false);
@@ -96,7 +88,7 @@ export default function MatchScreen({
   if (!matchId || error) {
     return (
       <main className="p-5">
-        <button onClick={onBack} className="mb-4 grid h-10 w-10 place-items-center rounded-full bg-white text-flaggo-muted shadow-card" aria-label="Back"><Icon name="chevron" className="rotate-180" /></button>
+        <button onClick={() => navigate("/")} className="mb-4 grid h-10 w-10 place-items-center rounded-full bg-white text-flaggo-muted shadow-card" aria-label="Back"><Icon name="chevron" className="rotate-180" /></button>
         <section className="rounded-[24px] bg-white p-6 text-center shadow-card">
           <h1 className="font-display text-2xl font-black">Challenge unavailable</h1>
           <p className="mt-2 font-bold text-flaggo-muted">{error ?? "No match link was provided."}</p>
@@ -113,7 +105,7 @@ export default function MatchScreen({
     const challenger = results[0];
     return (
       <main className="p-5">
-        <button onClick={onBack} className="mb-4 grid h-10 w-10 place-items-center rounded-full bg-white text-flaggo-muted shadow-card" aria-label="Back"><Icon name="chevron" className="rotate-180" /></button>
+        <button onClick={() => navigate("/")} className="mb-4 grid h-10 w-10 place-items-center rounded-full bg-white text-flaggo-muted shadow-card" aria-label="Back"><Icon name="chevron" className="rotate-180" /></button>
         <section className="rounded-[28px] bg-white p-6 text-center shadow-card-lg">
           <Icon name="trophy" size={44} className="mx-auto text-flaggo-blue" />
           <h1 className="mt-3 screen-title">Friend challenge</h1>
@@ -121,7 +113,7 @@ export default function MatchScreen({
             {challenger ? `${challenger.display_name} scored ${challenger.score}/${challenger.total}.` : "Play the same seeded quiz and compare scores."}
           </p>
           <p className="mt-2 font-medium text-flaggo-muted">Sign in to accept this challenge and save your score to the leaderboard.</p>
-          <button onClick={onSignIn} className="flaggo-button mt-5 w-full bg-flaggo-green text-white">Sign in to accept &amp; save your score</button>
+          <button onClick={openSignIn} className="flaggo-button mt-5 w-full bg-flaggo-green text-white">Sign in to accept &amp; save your score</button>
         </section>
       </main>
     );
@@ -130,7 +122,7 @@ export default function MatchScreen({
   if (!question) {
     return (
       <main className="grid min-h-screen place-items-center p-5">
-        <button onClick={onBack} className="flaggo-button bg-flaggo-green text-white">Go Home</button>
+        <button onClick={() => navigate("/")} className="flaggo-button bg-flaggo-green text-white">Go Home</button>
       </main>
     );
   }
@@ -140,7 +132,7 @@ export default function MatchScreen({
       <header className="sticky top-0 z-20 bg-flaggo-bg/85 p-4 backdrop-blur-md">
         <p className="mb-2.5 text-center font-display text-[13px] font-extrabold uppercase tracking-wide text-flaggo-muted">Friend Challenge</p>
         <div className="flex items-center gap-3">
-          <button onClick={onBack} aria-label="Close match" className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-white text-flaggo-muted shadow-card">
+          <button onClick={() => navigate("/")} aria-label="Close match" className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-white text-flaggo-muted shadow-card">
             <Icon name="close" size={20} />
           </button>
           <div className="flex-1"><ProgressBar value={(index / questions.length) * 100} /></div>

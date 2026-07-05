@@ -1,24 +1,17 @@
 import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Icon from "../components/Icon";
 import world110m from "@flaggo/core/data/world-110m.json";
-import type { Country } from "@flaggo/core/types/country";
 import type { MapMode } from "@flaggo/core/utils/quiz";
 import { mapPresentCountries } from "@flaggo/core/utils/geo";
 import { getPopularityGroups } from "@flaggo/core/utils/popularity";
+import { useGame } from "../state/GameProvider";
 
 type PickerMode = "tier" | "region";
 
-export default function MapMenuScreen({
-  countries,
-  onStart,
-  onExplore,
-  onBack
-}: {
-  countries: Country[];
-  onStart: (mode: MapMode, countries: Country[]) => void;
-  onExplore: () => void;
-  onBack: () => void;
-}) {
+export default function MapMenuScreen() {
+  const navigate = useNavigate();
+  const { countries, startMapPractice } = useGame();
   const mapCountries = useMemo(() => mapPresentCountries(countries, world110m), [countries]);
   const groups = useMemo(() => getPopularityGroups(mapCountries), [mapCountries]);
   const regions = useMemo(() => ["World", ...Array.from(new Set(mapCountries.map((country) => country.continent)))], [mapCountries]);
@@ -36,7 +29,7 @@ export default function MapMenuScreen({
 
   return (
     <main className="p-5">
-      <button onClick={onBack} className="mb-4 grid h-10 w-10 place-items-center rounded-full bg-white text-flaggo-muted shadow-card" aria-label="Back">
+      <button onClick={() => navigate(-1)} className="mb-4 grid h-10 w-10 place-items-center rounded-full bg-white text-flaggo-muted shadow-card" aria-label="Back">
         <Icon name="chevron" size={20} className="rotate-180" />
       </button>
       <h1 className="screen-title">World Map</h1>
@@ -93,14 +86,14 @@ export default function MapMenuScreen({
             : regions.map((region) => <option key={region} value={region}>{region} ({region === "World" ? mapCountries.length : mapCountries.filter((country) => country.continent === region).length})</option>)}
         </select>
         <button
-          onClick={() => onStart(mode, selectedCountries)}
+          onClick={() => startMapPractice(mode, selectedCountries)}
           className="btn-primary mt-4 flex w-full items-center justify-center gap-2"
         >
           <Icon name="bolt" size={20} /> Start map practice
         </button>
       </section>
 
-      <button onClick={onExplore} className="btn-secondary mt-5 flex w-full items-center justify-center gap-2">
+      <button onClick={() => navigate("/map/explore")} className="btn-secondary mt-5 flex w-full items-center justify-center gap-2">
         <Icon name="globe" size={20} /> Explore map
       </button>
     </main>

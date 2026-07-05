@@ -1,23 +1,13 @@
+import { useNavigate } from "react-router-dom";
 import FlagCard from "../components/FlagCard";
 import Icon from "../components/Icon";
-import type { Country } from "@flaggo/core/types/country";
-import type { AppProgress } from "@flaggo/core/types/progress";
 import { reviewKey } from "@flaggo/core/types/topic";
 import { getDueCountries, getWeakCountries } from "@flaggo/core/utils/spacedRepetition";
+import { useGame } from "../state/GameProvider";
 
-export default function ReviewScreen({
-  countries,
-  progress,
-  onStart,
-  onOpenTest,
-  onOpenMapPractice
-}: {
-  countries: Country[];
-  progress: AppProgress;
-  onStart: (countries: Country[]) => void;
-  onOpenTest: () => void;
-  onOpenMapPractice: () => void;
-}) {
+export default function ReviewScreen() {
+  const navigate = useNavigate();
+  const { countries, progress, startReview, startMapReview } = useGame();
   const topic = progress.selectedTopic;
   const topicCountries = topic === "capital" ? countries.filter((country) => country.capital?.trim()) : countries;
   const label = topic === "capital" ? "capitals" : "flags";
@@ -38,14 +28,14 @@ export default function ReviewScreen({
             <p className="mt-1 font-bold text-flaggo-muted">{due.length ? `${label} due for review` : "No reviews due today."}</p>
           </div>
         </div>
-        <button onClick={() => onStart(practice)} className="btn-primary mt-5 flex w-full items-center justify-center gap-2">
+        <button onClick={() => startReview(practice)} className="btn-primary mt-5 flex w-full items-center justify-center gap-2">
           <Icon name="bolt" size={20} /> Start Review
         </button>
       </section>
       <section className="mt-5 rounded-[24px] border border-flaggo-border bg-white p-5 shadow-card-lg">
         <h2 className="font-display text-2xl font-black">Map practice</h2>
         <p className="mt-1 font-bold text-flaggo-muted">Review country locations with the same spaced-repetition schedule.</p>
-        <button onClick={onOpenMapPractice} className="btn-secondary mt-5 flex w-full items-center justify-center gap-2">
+        <button onClick={() => void startMapReview()} className="btn-secondary mt-5 flex w-full items-center justify-center gap-2">
           <Icon name="globe" size={18} /> Start map practice
         </button>
       </section>
@@ -55,7 +45,7 @@ export default function ReviewScreen({
         </p>
         <h2 className="mt-2 font-display text-2xl font-black">50-country test</h2>
         <p className="mt-1 font-bold text-flaggo-muted">Choose Top 50, 51-100, and beyond. Practice with typed recall or answer choices.</p>
-        <button onClick={onOpenTest} className="btn-secondary mt-5 flex w-full items-center justify-center gap-2">
+        <button onClick={() => navigate("/test-setup")} className="btn-secondary mt-5 flex w-full items-center justify-center gap-2">
           <Icon name="target" size={18} /> Configure test
         </button>
       </section>
@@ -64,7 +54,7 @@ export default function ReviewScreen({
       </h2>
       {weak.length ? (
         <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-          {weak.map((country) => <FlagCard key={country.code} country={country} review={progress.review[reviewKey(country.code, topic)]} onClick={() => onStart([country])} />)}
+          {weak.map((country) => <FlagCard key={country.code} country={country} review={progress.review[reviewKey(country.code, topic)]} onClick={() => startReview([country])} />)}
         </div>
       ) : <p className="mt-3 font-bold text-flaggo-muted">Practice will include new {label} until weak {label} appear.</p>}
     </main>

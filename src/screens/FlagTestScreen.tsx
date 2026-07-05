@@ -1,31 +1,25 @@
 import { useMemo, useState } from "react";
+import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import FlagImage from "../components/FlagImage";
 import Icon from "../components/Icon";
 import ProgressBar from "../components/ProgressBar";
-import type { Country } from "@flaggo/core/types/country";
-import type { AppProgress } from "@flaggo/core/types/progress";
 import type { Topic } from "@flaggo/core/types/topic";
 import { getCapitalDistractors, getDistractors, shuffleArray } from "@flaggo/core/utils/quiz";
 import { updateReviewState } from "@flaggo/core/utils/spacedRepetition";
+import { useGame } from "../state/GameProvider";
 import type { TestMode } from "./TestSetupScreen";
 
-export default function FlagTestScreen({
-  countries,
-  allCountries,
-  mode,
-  topic,
-  progress,
-  onProgress,
-  onDone
-}: {
-  countries: Country[];
-  allCountries: Country[];
-  mode: TestMode;
-  topic: Topic;
-  progress: AppProgress;
-  onProgress: (progress: AppProgress) => void;
-  onDone: () => void;
-}) {
+type TestRouteState = { countryCodes: string[]; mode: TestMode; topic: Topic } | null;
+
+export default function FlagTestScreen() {
+  const navigate = useNavigate();
+  const { state } = useLocation();
+  const { countries: allCountries, progress, setProgress } = useGame();
+  const routeState = state as TestRouteState;
+  const countries = routeState?.countryCodes.map((code) => allCountries.find((country) => country.code === code)).filter((country): country is (typeof allCountries)[number] => Boolean(country)) ?? [];
+  const mode = routeState?.mode ?? "recall";
+  const topic = routeState?.topic ?? "flag";
+  const onDone = () => navigate("/review");
   const questions = useMemo(() => shuffleArray(countries), [countries]);
   const [index, setIndex] = useState(0);
   const [selectedValue, setSelectedValue] = useState<string | null>(null);
@@ -57,7 +51,7 @@ export default function FlagTestScreen({
     setGraded(ok);
     setCorrectCount((value) => value + (ok ? 1 : 0));
     const next = updateReviewState(country.code, topic, ok, progress);
-    onProgress({ ...next, xp: next.xp + (ok ? 5 : 0) });
+    setProgress({ ...next, xp: next.xp + (ok ? 5 : 0) });
   }
 
   function next() {
@@ -70,6 +64,8 @@ export default function FlagTestScreen({
     setRevealed(false);
     setGraded(null);
   }
+
+  if (!routeState) return <Navigate to="/test-setup" replace />;
 
   if (!country) {
     return (

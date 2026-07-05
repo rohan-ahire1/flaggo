@@ -1,14 +1,15 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Icon from "../components/Icon";
 import StatCard from "../components/StatCard";
-import type { Country } from "@flaggo/core/types/country";
-import type { Lesson } from "@flaggo/core/types/lesson";
-import type { AppProgress } from "@flaggo/core/types/progress";
 import { parseReviewKey, reviewKey } from "@flaggo/core/types/topic";
 import { lessonsForTopic } from "@flaggo/core/utils/lessonGenerator";
 import { getMasteredCountries, getWeakCountries } from "@flaggo/core/utils/spacedRepetition";
+import { useGame } from "../state/GameProvider";
 
-export default function StatsScreen({ progress, countries, lessons, onBack }: { progress: AppProgress; countries: Country[]; lessons: Lesson[]; onBack: () => void }) {
+export default function StatsScreen() {
+  const navigate = useNavigate();
+  const { progress, countries, lessons } = useGame();
   const total = progress.totalCorrect + progress.totalWrong;
   const topic = progress.selectedTopic;
   const topicCountries = topic === "capital" ? countries.filter((country) => country.capital?.trim()) : countries;
@@ -37,7 +38,7 @@ export default function StatsScreen({ progress, countries, lessons, onBack }: { 
 
   return (
     <main className="p-5">
-      <button onClick={onBack} className="mb-4 grid h-10 w-10 place-items-center rounded-full bg-white text-flaggo-muted shadow-card" aria-label="Back">
+      <button onClick={() => navigate(-1)} className="mb-4 grid h-10 w-10 place-items-center rounded-full bg-white text-flaggo-muted shadow-card" aria-label="Back">
         <Icon name="chevron" size={20} className="rotate-180" />
       </button>
       <h1 className="screen-title">Stats</h1>

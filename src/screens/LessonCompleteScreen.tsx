@@ -1,5 +1,7 @@
+import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import Icon from "../components/Icon";
 import type { Topic } from "@flaggo/core/types/topic";
+import { useGame } from "../state/GameProvider";
 
 export type LessonResult = {
   xpEarned: number;
@@ -13,8 +15,18 @@ export type LessonResult = {
 
 const CONFETTI = ["#58CC02", "#1CB0F6", "#FFC800", "#FF9600", "#CE82FF", "#FF4B4B"];
 
-export default function LessonCompleteScreen({ result, onContinueLearning, onBackHome, adSlot }: { result: LessonResult; onContinueLearning: () => void; onBackHome: () => void; adSlot?: React.ReactNode }) {
+export default function LessonCompleteScreen({ adSlot }: { adSlot?: React.ReactNode }) {
+  const navigate = useNavigate();
+  const { state } = useLocation();
+  const { nextLearningLesson, openLesson } = useGame();
+  const result = (state as { result?: LessonResult } | null)?.result;
+  if (!result) return <Navigate to="/" replace />;
   const perfect = result.correct === result.total;
+  const continueLearning = () => {
+    const next = nextLearningLesson(result.topic);
+    if (next) openLesson(next);
+    else navigate("/");
+  };
   return (
     <main className="relative grid min-h-screen place-items-center overflow-hidden bg-hero-sky p-5">
       {/* Confetti burst */}
@@ -57,10 +69,10 @@ export default function LessonCompleteScreen({ result, onContinueLearning, onBac
           <Stat icon="coin" label="Coins" value={`+${result.coinsEarned}`} tone="text-flaggo-yellow" />
         </div>
 
-        <button onClick={onContinueLearning} className="flaggo-button mt-6 w-full bg-green-grad text-white shadow-button-green">
+        <button onClick={continueLearning} className="flaggo-button mt-6 w-full bg-green-grad text-white shadow-button-green">
           Continue learning
         </button>
-        <button onClick={onBackHome} className="btn-secondary mt-3 w-full">
+        <button onClick={() => navigate("/")} className="btn-secondary mt-3 w-full">
           Back to Today
         </button>
         {adSlot}

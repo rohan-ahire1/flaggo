@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import Icon from "../components/Icon";
 import { BRAND } from "../config/brand";
 import { createMatch, getMatch, getMatchResults, matchUrl, winnerFromResults, buildRematchConfig, type Match, type MatchResult } from "../lib/matches";
+import { useGame } from "../state/GameProvider";
 
 async function shareMatch(id: string) {
   const url = matchUrl(id);
@@ -10,17 +12,10 @@ async function shareMatch(id: string) {
   else await navigator.clipboard?.writeText(text);
 }
 
-export default function MatchResultScreen({
-  matchId,
-  onBack,
-  onOpenMatch,
-  onSignIn
-}: {
-  matchId: string | null;
-  onBack: () => void;
-  onOpenMatch: (matchId: string) => void;
-  onSignIn: () => void;
-}) {
+export default function MatchResultScreen() {
+  const navigate = useNavigate();
+  const { id: matchId = null } = useParams();
+  const { openSignIn } = useGame();
   const [match, setMatch] = useState<Match | null>(null);
   const [results, setResults] = useState<MatchResult[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -50,9 +45,9 @@ export default function MatchResultScreen({
     try {
       const next = await createMatch(buildRematchConfig(match));
       await shareMatch(next.id);
-      onOpenMatch(next.id);
+      navigate(`/match/${next.id}`);
     } catch (err) {
-      if (err instanceof Error && err.message.includes("Sign in")) onSignIn();
+      if (err instanceof Error && err.message.includes("Sign in")) openSignIn();
       else setError(err instanceof Error ? err.message : "Could not create rematch.");
     } finally {
       setWorking(false);
@@ -61,7 +56,7 @@ export default function MatchResultScreen({
 
   return (
     <main className="p-5">
-      <button onClick={onBack} className="mb-4 grid h-10 w-10 place-items-center rounded-full bg-white text-flaggo-muted shadow-card" aria-label="Back"><Icon name="chevron" className="rotate-180" /></button>
+      <button onClick={() => navigate("/")} className="mb-4 grid h-10 w-10 place-items-center rounded-full bg-white text-flaggo-muted shadow-card" aria-label="Back"><Icon name="chevron" className="rotate-180" /></button>
       <section className="rounded-[28px] bg-white p-6 text-center shadow-card-lg">
         <Icon name="trophy" size={44} className="mx-auto text-flaggo-green" />
         <h1 className="mt-3 screen-title">Match results</h1>

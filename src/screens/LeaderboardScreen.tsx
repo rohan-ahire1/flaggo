@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Icon from "../components/Icon";
 import { useAuth } from "../auth/AuthProvider";
 import { ARCADE_MODES } from "@flaggo/core/types/arcade";
@@ -6,19 +7,12 @@ import { TOPICS } from "@flaggo/core/types/topic";
 import { arcadeBoard, dailyBoard, fetchTopScores, type LeaderboardRow, xpBoard } from "../lib/leaderboard";
 import { dateKey } from "@flaggo/core/utils/dailyChallenge";
 import { trackEvent } from "../lib/analytics";
+import { useGame } from "../state/GameProvider";
 
-export default function LeaderboardScreen({
-  onBack,
-  onSignIn,
-  onChallenge,
-  onOpenFriends
-}: {
-  onBack: () => void;
-  onSignIn: () => void;
-  onChallenge: () => void;
-  onOpenFriends: () => void;
-}) {
+export default function LeaderboardScreen() {
+  const navigate = useNavigate();
   const { user } = useAuth();
+  const { openSignIn, createAndShareChallenge } = useGame();
   const boards = useMemo(
     () => [
       { id: dailyBoard(dateKey()), label: "Today" },
@@ -49,16 +43,16 @@ export default function LeaderboardScreen({
 
   return (
     <main className="p-5">
-      <button onClick={onBack} className="mb-4 grid h-10 w-10 place-items-center rounded-full bg-white text-flaggo-muted shadow-card" aria-label="Back"><Icon name="chevron" className="rotate-180" /></button>
+      <button onClick={() => navigate(-1)} className="mb-4 grid h-10 w-10 place-items-center rounded-full bg-white text-flaggo-muted shadow-card" aria-label="Back"><Icon name="chevron" className="rotate-180" /></button>
       <h1 className="screen-title">Leaderboards</h1>
       <select value={board} onChange={(event) => setBoard(event.target.value)} className="mt-4 w-full rounded-2xl border border-flaggo-border bg-white p-3 font-display font-black shadow-card">
         {boards.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}
       </select>
       <div className="mt-4 grid grid-cols-2 gap-3">
-        <button onClick={onChallenge} className="rounded-2xl bg-flaggo-green p-3 font-display font-black text-white shadow-card">Challenge a friend</button>
-        <button onClick={onOpenFriends} className="rounded-2xl bg-white p-3 font-display font-black text-flaggo-blue shadow-card">Friends</button>
+        <button onClick={() => void createAndShareChallenge()} className="rounded-2xl bg-flaggo-green p-3 font-display font-black text-white shadow-card">Challenge a friend</button>
+        <button onClick={() => navigate("/friends")} className="rounded-2xl bg-white p-3 font-display font-black text-flaggo-blue shadow-card">Friends</button>
       </div>
-      {!user && <button onClick={onSignIn} className="mt-4 w-full rounded-2xl bg-flaggo-green p-3 font-display font-black text-white">Sign in to compete</button>}
+      {!user && <button onClick={openSignIn} className="mt-4 w-full rounded-2xl bg-flaggo-green p-3 font-display font-black text-white">Sign in to compete</button>}
       {error && <div className="mt-4 rounded-2xl bg-error/10 p-4 font-bold text-error">{error}</div>}
       <section className="mt-5 grid gap-2">
         {rows.map((row) => (

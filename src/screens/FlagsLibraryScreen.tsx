@@ -1,26 +1,14 @@
 import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import FlagCard from "../components/FlagCard";
 import Icon from "../components/Icon";
-import type { Country } from "@flaggo/core/types/country";
-import type { AppProgress } from "@flaggo/core/types/progress";
 import { reviewKey } from "@flaggo/core/types/topic";
 import { isStarred, toggleStarredDeck } from "@flaggo/core/utils/decks";
+import { useGame } from "../state/GameProvider";
 
-export default function FlagsLibraryScreen({
-  countries,
-  progress,
-  onProgress,
-  onPractice,
-  onExploreMap,
-  onBack
-}: {
-  countries: Country[];
-  progress: AppProgress;
-  onProgress: (progress: AppProgress) => void;
-  onPractice: (country: Country) => void;
-  onExploreMap: () => void;
-  onBack: () => void;
-}) {
+export default function FlagsLibraryScreen() {
+  const navigate = useNavigate();
+  const { countries, progress, setProgress, startReview } = useGame();
   const [query, setQuery] = useState("");
   const [continent, setContinent] = useState("All");
   const [difficulty, setDifficulty] = useState("All");
@@ -47,13 +35,13 @@ export default function FlagsLibraryScreen({
 
   return (
     <main className="p-5">
-      <button onClick={onBack} className="mb-4 grid h-10 w-10 place-items-center rounded-full bg-white text-flaggo-muted shadow-card" aria-label="Back">
+      <button onClick={() => navigate(-1)} className="mb-4 grid h-10 w-10 place-items-center rounded-full bg-white text-flaggo-muted shadow-card" aria-label="Back">
         <Icon name="chevron" size={20} className="rotate-180" />
       </button>
       <h1 className="screen-title">Flag library</h1>
       <div className="mt-4 grid grid-cols-2 rounded-2xl bg-white p-1 shadow-card">
         <button className="rounded-xl bg-flaggo-green px-4 py-2 font-display text-sm font-extrabold text-white shadow-sm">Flags</button>
-        <button onClick={onExploreMap} className="rounded-xl px-4 py-2 font-display text-sm font-extrabold text-flaggo-muted hover:text-flaggo-text">Explore</button>
+        <button onClick={() => navigate("/map/explore")} className="rounded-xl px-4 py-2 font-display text-sm font-extrabold text-flaggo-muted hover:text-flaggo-text">Explore</button>
       </div>
       <div className="mt-4 grid gap-3">
         <div className="relative">
@@ -86,11 +74,11 @@ export default function FlagsLibraryScreen({
         <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
           {filtered.map((country) => (
             <div key={country.code} className="relative h-full min-w-0">
-              <FlagCard country={country} review={progress.review[reviewKey(country.code, topic)]} onClick={() => onPractice(country)} />
+              <FlagCard country={country} review={progress.review[reviewKey(country.code, topic)]} onClick={() => startReview([country], progress.selectedTopic)} />
               <button
                 onClick={(event) => {
                   event.stopPropagation();
-                  onProgress(toggleStarredDeck(progress, country.code, topic));
+                  setProgress(toggleStarredDeck(progress, country.code, topic));
                 }}
                 className={`absolute right-2 top-2 z-20 grid h-8 w-8 place-items-center rounded-full shadow-md ${isStarred(progress, country.code, topic) ? "bg-flaggo-yellow text-white" : "bg-white text-flaggo-muted"}`}
                 aria-label={isStarred(progress, country.code, topic) ? "Remove from starred deck" : "Add to starred deck"}

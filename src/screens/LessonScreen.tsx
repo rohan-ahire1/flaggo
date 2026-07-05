@@ -1,17 +1,15 @@
 import { useMemo, useState } from "react";
+import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import FeedbackPanel from "../components/FeedbackPanel";
 import Icon from "../components/Icon";
 import ProgressBar from "../components/ProgressBar";
 import QuestionCard from "../components/QuestionCard";
-import type { Country } from "@flaggo/core/types/country";
-import type { Lesson } from "@flaggo/core/types/lesson";
-import type { AppProgress } from "@flaggo/core/types/progress";
 import type { Topic } from "@flaggo/core/types/topic";
 import { updateStreak } from "@flaggo/core/utils/date";
 import { generateLessonQuestions, generateReviewQuestions, type Question } from "@flaggo/core/utils/quiz";
 import { updateReviewState } from "@flaggo/core/utils/spacedRepetition";
 import { answerLabel } from "@flaggo/core/game/answerLabel";
-import type { LessonResult } from "./LessonCompleteScreen";
+import { useGame } from "../state/GameProvider";
 
 export const TOPIC_LABEL: Record<string, string> = {
   flag: "Flags",
@@ -22,27 +20,24 @@ export const TOPIC_LABEL: Record<string, string> = {
   neighbor: "Neighbors"
 };
 
-export default function LessonScreen({
-  lesson,
-  countries,
-  progress,
-  mode = "lesson",
-  onProgress,
-  onComplete,
-  onHome,
-  reviewCountries = [],
-  reviewTopic = "flag"
-}: {
-  lesson?: Lesson;
-  countries: Country[];
-  progress: AppProgress;
-  mode?: "lesson" | "review";
-  onProgress: (progress: AppProgress) => void;
-  onComplete: (result: LessonResult) => void;
-  onHome: () => void;
-  reviewCountries?: Country[];
-  reviewTopic?: Topic;
-}) {
+type LessonRouteState =
+  | { lessonId: string }
+  | { mode: "review"; countryCodes: string[]; topic: Topic }
+  | null;
+
+export default function LessonScreen() {
+  const navigate = useNavigate();
+  const { state } = useLocation();
+  const { countries, lessons, progress, setProgress, completeLesson } = useGame();
+  const routeState = state as LessonRouteState;
+  const lesson = routeState && "lessonId" in routeState ? lessons.find((item) => item.id === routeState.lessonId) : undefined;
+  const mode = routeState && "mode" in routeState ? routeState.mode : "lesson";
+  const reviewCountries = routeState && "countryCodes" in routeState
+    ? routeState.countryCodes.map((code) => countries.find((country) => country.code === code)).filter((country): country is (typeof countries)[number] => Boolean(country))
+    : [];
+  const reviewTopic = routeState && "topic" in routeState ? routeState.topic : "flag";
+
+  const invalidRoute = !routeState || (mode === "lesson" && !lesson);
   const activeTopic = mode === "review" ? reviewTopic : lesson?.topic ?? "flag";
   const questions = useMemo<Question[]>(() => {
     if (mode === "review") return generateReviewQuestions(reviewCountries.length ? reviewCountries : countries, activeTopic);
@@ -55,12 +50,14 @@ export default function LessonScreen({
   const question = questions[index];
   const topicLabel = TOPIC_LABEL[activeTopic] ?? activeTopic;
   const contextTitle = mode === "review" ? `Review · ${topicLabel}` : `${lesson?.title ?? "Lesson"} · ${topicLabel}`;
+
+  if (invalidRoute) return <Navigate to="/learn" replace />;
   function answer(wasCorrect: boolean) {
     if (!question || feedback) return;
     const earned = wasCorrect ? 10 : 0;
     let next = updateReviewState(question.correctCountry.code, activeTopic, wasCorrect, progress);
     next = { ...next, xp: next.xp + earned };
-    onProgress(next);
+    setProgress(next);
     setXp((value) => value + earned);
     setCorrect((value) => value + (wasCorrect ? 1 : 0));
     setFeedback({ ok: wasCorrect, question });
@@ -78,8 +75,8 @@ export default function LessonScreen({
         completedLessonIds: Array.from(new Set([...next.completedLessonIds, lesson.id]))
       });
     }
-    onProgress(next);
-    onComplete({ xpEarned: xp + bonusXp, accuracy: Math.round((correct / total) * 100), correct, total, streak: next.streak, coinsEarned, topic: activeTopic });
+    setProgress(next);
+    completeLesson({ xpEarned: xp + bonusXp, accuracy: Math.round((correct / total) * 100), correct, total, streak: next.streak, coinsEarned, topic: activeTopic });
   }
 
   function continueNext() {
@@ -91,7 +88,7 @@ export default function LessonScreen({
   if (!question) {
     return (
       <main className="grid min-h-screen place-items-center p-5">
-        <button onClick={onHome} className="flaggo-button bg-flaggo-green text-white">Go Home</button>
+        <button onClick={() => navigate("/")} className="flaggo-button bg-flaggo-green text-white">Go Home</button>
       </main>
     );
   }
@@ -102,7 +99,7 @@ export default function LessonScreen({
         <p className="mb-2.5 text-center font-display text-[13px] font-extrabold uppercase tracking-wide text-flaggo-muted">{contextTitle}</p>
         <div className="flex items-center gap-3">
           <button
-            onClick={onHome}
+            onClick={() => navigate("/")}
             aria-label="Close lesson"
             className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-white text-flaggo-muted shadow-card transition active:translate-y-0.5 active:shadow-none hover:text-flaggo-text"
           >

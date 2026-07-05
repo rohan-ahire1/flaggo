@@ -1,24 +1,17 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
+import { useAuth } from "../auth/AuthProvider";
 import Icon, { type IconName } from "../components/Icon";
 import ThemeSwitcher from "../components/ThemeSwitcher";
 import { BRAND } from "../config/brand";
 import { supabase } from "../lib/supabase";
 import { isSyntheticEmail } from "../lib/username";
-import type { AppProgress } from "@flaggo/core/types/progress";
+import { useGame } from "../state/GameProvider";
 
-type Props = {
-  progress: AppProgress;
-  onReset: () => void;
-  userEmail: string | null;
-  syncState: string;
-  syncError: string | null;
-  onSignIn: () => void;
-  onSignOut: () => void;
-  onDeleteAccount: () => void;
-};
-
-export default function ProfileScreen({ progress, onReset, userEmail, syncState, syncError, onSignIn, onSignOut, onDeleteAccount }: Props) {
+export default function ProfileScreen() {
+  const { user } = useAuth();
+  const { progress, resetAll, syncState, syncError, openSignIn, signOutUser, deleteAccount } = useGame();
+  const userEmail = user?.email ?? null;
   const synthetic = isSyntheticEmail(userEmail);
   const stats: { label: string; value: number; icon: IconName; color: string }[] = [
     { label: "XP", value: progress.xp, icon: "bolt", color: "text-flaggo-blue" },
@@ -46,9 +39,9 @@ export default function ProfileScreen({ progress, onReset, userEmail, syncState,
             </p>
           </div>
           {userEmail ? (
-            <button onClick={onSignOut} className="rounded-2xl bg-surface px-4 py-2 font-display font-black text-ink">Sign out</button>
+            <button onClick={() => void signOutUser()} className="rounded-2xl bg-surface px-4 py-2 font-display font-black text-ink">Sign out</button>
           ) : (
-            <button onClick={onSignIn} className="rounded-2xl bg-primary px-4 py-2 font-display font-black text-white">Sign in</button>
+            <button onClick={openSignIn} className="rounded-2xl bg-primary px-4 py-2 font-display font-black text-white">Sign in</button>
           )}
         </div>
         {synthetic && <AddRecoveryEmail />}
@@ -79,7 +72,7 @@ export default function ProfileScreen({ progress, onReset, userEmail, syncState,
 
       <button
         onClick={() => {
-          if (window.confirm(`Reset all ${BRAND.name} progress?`)) onReset();
+          if (window.confirm(`Reset all ${BRAND.name} progress?`)) void resetAll();
         }}
         className="flaggo-button mt-8 w-full bg-flaggo-red text-white shadow-button-red"
       >
@@ -87,7 +80,7 @@ export default function ProfileScreen({ progress, onReset, userEmail, syncState,
       </button>
 
       {userEmail && (
-        <button onClick={onDeleteAccount} className="mt-3 w-full rounded-2xl px-5 py-4 font-display font-extrabold text-flaggo-red">
+        <button onClick={() => void deleteAccount()} className="mt-3 w-full rounded-2xl px-5 py-4 font-display font-extrabold text-flaggo-red">
           Delete my account & data
         </button>
       )}

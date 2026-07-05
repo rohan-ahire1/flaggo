@@ -1,26 +1,17 @@
 import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Icon from "../components/Icon";
-import type { Country } from "@flaggo/core/types/country";
-import type { AppProgress, Deck } from "@flaggo/core/types/progress";
+import type { Deck } from "@flaggo/core/types/progress";
 import type { Topic } from "@flaggo/core/types/topic";
 import { createDeck, buildWeakDeck, countryCodesByRegion, deckCountries, STARRED_DECK_ID } from "@flaggo/core/utils/decks";
 import { trackEvent } from "../lib/analytics";
+import { useGame } from "../state/GameProvider";
 
 const regions = ["Africa", "Americas", "Asia", "Europe", "Oceania"];
 
-export default function DecksScreen({
-  countries,
-  progress,
-  onProgress,
-  onPractice,
-  onBack
-}: {
-  countries: Country[];
-  progress: AppProgress;
-  onProgress: (progress: AppProgress) => void;
-  onPractice: (deck: Deck) => void;
-  onBack: () => void;
-}) {
+export default function DecksScreen() {
+  const navigate = useNavigate();
+  const { countries, progress, setProgress, startDeckPractice } = useGame();
   const [topic, setTopic] = useState<Topic>(progress.selectedTopic);
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<string[]>([]);
@@ -32,7 +23,7 @@ export default function DecksScreen({
   );
 
   function addDeck(deck: Deck, source: string) {
-    onProgress({ ...progress, decks: [...progress.decks.filter((item) => item.id !== deck.id || item.topic !== deck.topic), deck] });
+    setProgress({ ...progress, decks: [...progress.decks.filter((item) => item.id !== deck.id || item.topic !== deck.topic), deck] });
     trackEvent("deck_create", { source, size: deck.codes.length, topic: deck.topic });
   }
 
@@ -53,12 +44,12 @@ export default function DecksScreen({
   }
 
   function removeDeck(deck: Deck) {
-    onProgress({ ...progress, decks: progress.decks.filter((item) => item !== deck) });
+    setProgress({ ...progress, decks: progress.decks.filter((item) => item !== deck) });
   }
 
   return (
     <main className="p-5">
-      <button onClick={onBack} className="mb-4 grid h-10 w-10 place-items-center rounded-full bg-white text-flaggo-muted shadow-card" aria-label="Back"><Icon name="chevron" className="rotate-180" /></button>
+      <button onClick={() => navigate(-1)} className="mb-4 grid h-10 w-10 place-items-center rounded-full bg-white text-flaggo-muted shadow-card" aria-label="Back"><Icon name="chevron" className="rotate-180" /></button>
       <h1 className="screen-title">Decks</h1>
       <div className="mt-4 grid grid-cols-2 rounded-2xl bg-white p-1 shadow-card">
         {(["flag", "capital"] as const).map((item) => <button key={item} onClick={() => setTopic(item)} className={`rounded-xl px-4 py-2 font-display text-sm font-extrabold capitalize ${topic === item ? "bg-flaggo-green text-white" : "text-flaggo-muted"}`}>{item}</button>)}
@@ -77,7 +68,7 @@ export default function DecksScreen({
                 </div>
               </div>
               <div className="mt-3 grid grid-cols-[1fr_auto] gap-2">
-                <button onClick={() => onPractice(deck)} disabled={!size} className="flaggo-button bg-flaggo-green text-white disabled:opacity-50">Practice</button>
+                <button onClick={() => startDeckPractice(deck)} disabled={!size} className="flaggo-button bg-flaggo-green text-white disabled:opacity-50">Practice</button>
                 <button onClick={() => removeDeck(deck)} className="grid h-12 w-12 place-items-center rounded-2xl bg-surface text-flaggo-muted" aria-label="Delete deck"><Icon name="x" /></button>
               </div>
             </div>
