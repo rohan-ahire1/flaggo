@@ -30,7 +30,7 @@ export default function FlagImage({ code, name, src, className = "", imgClassNam
           <img
             src={src}
             alt={name}
-            loading="eager"
+            loading="lazy"
             decoding="async"
             onError={() => setFailed(true)}
             className={`block h-auto w-auto max-w-full rounded-[14px] ${imgClassName}`}
@@ -51,7 +51,7 @@ export default function FlagImage({ code, name, src, className = "", imgClassNam
         <img
           src={src}
           alt={name}
-          loading="eager"
+          loading="lazy"
           decoding="async"
           onError={() => setFailed(true)}
           className={`m-auto block h-full max-h-full w-full max-w-full ${cover ? "object-cover" : "object-contain"} ${imgClassName}`}

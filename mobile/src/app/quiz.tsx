@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { Platform, Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import * as Haptics from "expo-haptics";
 import { router, useLocalSearchParams } from "expo-router";
 import { dismiss } from "@/utils/nav";
 import QuestionCard from "@/components/QuestionCard";
@@ -60,6 +61,7 @@ export default function QuizScreen() {
     config?: string;
     lessonId?: string;
     deckId?: string;
+    codes?: string;
   }>();
   const lesson = useMemo(
     () => (params.lessonId ? generateLessons(countries).find((l) => l.id === params.lessonId) ?? null : null),
@@ -82,6 +84,12 @@ export default function QuizScreen() {
   const scoreRef = useRef(0);
 
   const items: QuizItem[] = useMemo(() => {
+    const requestedCodes = typeof params.codes === "string" ? params.codes.split(",").map((code) => code.trim()).filter(Boolean) : [];
+    if (requestedCodes.length) {
+      const codeSet = new Set(requestedCodes);
+      const pool = countries.filter((country) => codeSet.has(country.code)).slice(0, 12);
+      return generateReviewQuestions(pool, topic).map((question) => ({ question, topic }));
+    }
     if (isMatch && params.seed && params.config) {
       const config = normalizeMatchConfig(JSON.parse(params.config) as MatchConfig);
       return buildMatchQuestions(params.seed, config, countries).map((m) => ({
@@ -105,7 +113,7 @@ export default function QuizScreen() {
     const qs = isArcade ? buildArcadeQuestions(topic, arcadeMode) : buildLessonQuestions(topic);
     return qs.map((question) => ({ question, topic }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isMatch, isDaily, isArcade, topic, arcadeMode, params.seed, params.config, params.deckId, lesson]);
+  }, [isMatch, isDaily, isArcade, topic, arcadeMode, params.seed, params.config, params.deckId, params.codes, lesson]);
 
   const [index, setIndex] = useState(0);
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
@@ -161,6 +169,9 @@ export default function QuizScreen() {
     setRevealed(true);
 
     const correct = !!option.correct;
+    if (Platform.OS !== "web") {
+      void Haptics.notificationAsync(correct ? Haptics.NotificationFeedbackType.Success : Haptics.NotificationFeedbackType.Error).catch(() => undefined);
+    }
     let next = updateReviewState(q.correctCountry.code, qTopic, correct, draft.current);
     if (correct) {
       next = { ...next, xp: next.xp + XP_PER_CORRECT };
@@ -194,6 +205,12 @@ export default function QuizScreen() {
       setIndex((i) => i + 1);
       setSelectedKey(null);
       setRevealed(false);
+    }
+  }
+
+  function optionPressIn() {
+    if (Platform.OS !== "web") {
+      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => undefined);
     }
   }
 
@@ -355,7 +372,7 @@ export default function QuizScreen() {
       ) : null}
 
       <ScrollView contentContainerClassName="w-full max-w-[900px] self-center px-5 pb-3 lg:px-8">
-        <QuestionCard question={q} revealed={revealed} selectedKey={selectedKey} onSelect={select} />
+        <QuestionCard question={q} revealed={revealed} selectedKey={selectedKey} onSelect={select} onOptionPressIn={optionPressIn} />
       </ScrollView>
 
       {/* Footer: feedback + next */}

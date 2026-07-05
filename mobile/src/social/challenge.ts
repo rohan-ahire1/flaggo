@@ -1,7 +1,9 @@
 import { Alert, Platform, Share } from "react-native";
 import * as Linking from "expo-linking";
+import { router } from "expo-router";
 import { env } from "@/config/env";
 import { createMatch, normalizeMatchConfig, type Match, type MatchConfig } from "@/lib/matches";
+import { supabase } from "@/lib/supabase";
 
 // Alert.alert is a no-op on react-native-web, so notices from web silently
 // vanish. Route through window.alert on web, native Alert otherwise.
@@ -11,6 +13,18 @@ function notify(title: string, message: string) {
     return;
   }
   Alert.alert(title, message);
+}
+
+function confirmSignIn() {
+  const title = "Sign in to challenge friends";
+  if (Platform.OS === "web") {
+    if (typeof window !== "undefined" && window.confirm(title)) router.push("/profile");
+    return;
+  }
+  Alert.alert(title, undefined, [
+    { text: "Not now", style: "cancel" },
+    { text: "Go to sign in", onPress: () => router.push("/profile") }
+  ]);
 }
 
 // A challenge is today's daily-style round, trimmed to 5 questions to match the
@@ -63,9 +77,18 @@ export async function createAndShareChallenge(score?: number): Promise<Match> {
 // to sign in / Supabase isn't configured.
 export async function promptChallenge(score?: number): Promise<void> {
   try {
+    const { data } = supabase ? await supabase.auth.getSession() : { data: { session: null } };
+    if (!data.session) {
+      confirmSignIn();
+      return;
+    }
     await createAndShareChallenge(score);
   } catch (error) {
     const message = error instanceof Error ? error.message : "Sign in to challenge a friend.";
+    if (/sign in/i.test(message)) {
+      confirmSignIn();
+      return;
+    }
     notify("Challenge a friend", message);
   }
 }

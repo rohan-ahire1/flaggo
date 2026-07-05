@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { Platform, View } from "react-native";
+import { Platform, Pressable, Text, View } from "react-native";
 import Svg, { Path, Rect } from "react-native-svg";
 import { geoEqualEarth, geoPath } from "d3-geo";
 import { feature } from "topojson-client";
@@ -13,6 +13,10 @@ import { useThemeStore } from "@/theme/store";
 
 const W = 800;
 const H = 440;
+const BASE_SCALE = 300;
+const MAX_SCALE = 1600;
+const MIN_ZOOM = 1;
+const MAX_ZOOM = MAX_SCALE / BASE_SCALE;
 
 const AnimatedPath = Animated.createAnimatedComponent(Path);
 
@@ -88,7 +92,7 @@ export default function WorldMap({
       startScale.value = scale.value;
     })
     .onUpdate((e) => {
-      scale.value = Math.max(1, Math.min(6, startScale.value * e.scale));
+      scale.value = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, startScale.value * e.scale));
     });
   const pan = Gesture.Pan()
     .minPointers(1)
@@ -104,9 +108,7 @@ export default function WorldMap({
   const doubleTap = Gesture.Tap()
     .numberOfTaps(2)
     .onEnd(() => {
-      scale.value = withTiming(1);
-      tx.value = withTiming(0);
-      ty.value = withTiming(0);
+      scale.value = withTiming(Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, scale.value * 1.6)));
     });
   const gesture = Gesture.Simultaneous(pinch, pan, doubleTap);
 
@@ -118,11 +120,20 @@ export default function WorldMap({
       ? ({
           onWheel: (event: { preventDefault: () => void; deltaY: number }) => {
             event.preventDefault();
-            const next = scale.value + (event.deltaY > 0 ? -0.25 : 0.25);
-            scale.value = Math.max(1, Math.min(6, next));
+            scale.value = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, scale.value * (event.deltaY < 0 ? 1.15 : 1 / 1.15)));
           }
         } as Record<string, unknown>)
       : {};
+
+  function zoom(factor: number) {
+    scale.value = withTiming(Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, scale.value * factor)));
+  }
+
+  function resetView() {
+    scale.value = withTiming(1);
+    tx.value = withTiming(0);
+    ty.value = withTiming(0);
+  }
 
   return (
     <View
@@ -130,6 +141,17 @@ export default function WorldMap({
       style={{ height, backgroundColor: ocean }}
       className="overflow-hidden rounded-[24px] border border-line"
     >
+      <View className="absolute right-3 top-3 z-10 gap-2">
+        <Pressable onPress={() => zoom(1.3)} className="h-10 w-10 items-center justify-center rounded-full border border-line bg-paper">
+          <Text className="text-xl font-black text-ink">+</Text>
+        </Pressable>
+        <Pressable onPress={() => zoom(1 / 1.3)} className="h-10 w-10 items-center justify-center rounded-full border border-line bg-paper">
+          <Text className="text-xl font-black text-ink">-</Text>
+        </Pressable>
+        <Pressable onPress={resetView} className="h-10 w-10 items-center justify-center rounded-full border border-line bg-paper">
+          <Text className="text-[11px] font-black text-muted">1x</Text>
+        </Pressable>
+      </View>
       <GestureDetector gesture={gesture}>
         <Animated.View style={[{ flex: 1 }, animatedStyle]}>
           <Svg width="100%" height="100%" viewBox={`0 0 ${W} ${H}`}>
