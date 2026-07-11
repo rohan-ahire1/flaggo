@@ -48,7 +48,7 @@ export default function MatchResultScreen() {
   const refetchResults = resultsQuery.refetch;
 
   useEffect(() => {
-    setError(matchQuery.error?.message ?? resultsQuery.error?.message ?? null);
+    setError(matchQuery.error || resultsQuery.error ? "We couldn't load these results. Check your connection and try again." : null);
   }, [matchQuery.error, resultsQuery.error]);
 
   useEffect(() => {
@@ -92,6 +92,20 @@ export default function MatchResultScreen() {
     } finally {
       setWorking(false);
     }
+  }
+
+  const matchMissing = matchQuery.isSuccess && !match && guestScore == null;
+  if (!matchId || matchMissing) {
+    return (
+      <main className="p-5">
+        <button onClick={() => navigate("/")} className="icon-btn mb-4" aria-label="Back"><Icon name="chevron" className="rotate-180" /></button>
+        <section className="rounded-[24px] bg-paper p-6 text-center shadow-card">
+          <h1 className="font-display text-2xl font-black">Challenge unavailable</h1>
+          <p className="mt-2 font-bold text-muted">This challenge link is invalid or has expired.</p>
+          <button onClick={() => navigate("/")} className="btn-primary mt-4 w-full">Go home</button>
+        </section>
+      </main>
+    );
   }
 
   return (

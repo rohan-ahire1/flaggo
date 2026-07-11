@@ -3,15 +3,31 @@ import ReactDOM from "react-dom/client";
 import AppShell from "./AppShell";
 import "./index.css";
 import { BRAND } from "./config/brand";
-import { initSentry, Sentry } from "./lib/sentry";
+import { captureException, initSentry } from "./lib/sentry";
 
 initSentry();
 
+class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean }> {
+  state = { hasError: false };
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: unknown) {
+    captureException(error);
+  }
+
+  render() {
+    return this.state.hasError ? <ErrorFallback /> : this.props.children;
+  }
+}
+
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <Sentry.ErrorBoundary fallback={<ErrorFallback />}>
+    <ErrorBoundary>
       <AppShell />
-    </Sentry.ErrorBoundary>
+    </ErrorBoundary>
   </React.StrictMode>
 );
 

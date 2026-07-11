@@ -40,7 +40,7 @@ export default function ReviewScreen() {
         </button>
       </section>
       <section className="mt-5 rounded-[24px] border border-line bg-paper p-5 shadow-card-lg">
-        <p className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-display font-semibold uppercase tracking-wide text-primary">
+        <p className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-display font-semibold uppercase tracking-wide text-primaryDark">
           <Icon name="sparkle" size={13} /> New
         </p>
         <h2 className="mt-2 font-display text-2xl font-black">50-country test</h2>

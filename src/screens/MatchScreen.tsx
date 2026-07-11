@@ -45,8 +45,8 @@ export default function MatchScreen() {
   const question = questions[index];
 
   useEffect(() => {
-    if (matchQuery.error) setError(matchQuery.error.message);
-    else if (matchQuery.isSuccess && !match) setError("Match not found.");
+    if (matchQuery.error) setError("We couldn't load this challenge. Check your connection and try again.");
+    else if (matchQuery.isSuccess && !match) setError("This challenge link is invalid or has expired.");
     else setError(null);
   }, [match, matchQuery.error, matchQuery.isSuccess]);
 
@@ -115,6 +115,7 @@ export default function MatchScreen() {
         <section className="rounded-[24px] bg-paper p-6 text-center shadow-card">
           <h1 className="font-display text-2xl font-black">Challenge unavailable</h1>
           <p className="mt-2 font-bold text-muted">{error ?? "No match link was provided."}</p>
+          <button onClick={() => navigate("/")} className="btn-primary mt-4 w-full">Go home</button>
         </section>
       </main>
     );

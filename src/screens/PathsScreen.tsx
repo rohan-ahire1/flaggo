@@ -60,7 +60,7 @@ export default function PathsScreen() {
                 }}
                 className="flex items-center gap-4 rounded-[22px] border border-line bg-paper p-4 text-left shadow-card"
               >
-                <span className="grid h-14 w-14 place-items-center rounded-full bg-primary/10 font-display font-black text-primary">{pct}%</span>
+                <span className="grid h-14 w-14 place-items-center rounded-full bg-primary/10 font-display font-black text-primaryDark">{pct}%</span>
                 <span className="flex-1">
                   <span className="block font-display text-xl font-black">{item.name === "World" ? "World Basics" : item.name}</span>
                   <span className="font-bold text-muted">{done}/{item.lessons.length} lessons</span>

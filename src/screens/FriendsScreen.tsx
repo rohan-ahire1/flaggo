@@ -11,10 +11,11 @@ export default function FriendsScreen() {
   const { createAndShareChallenge, openSignIn } = useGame();
   const friendsQuery = useQuery<FriendsLeaderboardRow[], Error>({
     queryKey: ["friends-leaderboard"],
-    queryFn: getFriendsLeaderboard
+    queryFn: getFriendsLeaderboard,
+    enabled: Boolean(user)
   });
   const rows = friendsQuery.data ?? [];
-  const queryError = friendsQuery.error?.message ?? null;
+  const queryError = friendsQuery.error ? "Couldn't load your friends right now. Try again in a moment." : null;
 
   return (
     <main className="p-5">
@@ -44,7 +45,7 @@ export default function FriendsScreen() {
             <Icon name="user" size={36} className="mx-auto text-primary" />
             <h2 className="mt-3 font-display text-xl font-semibold text-ink">No friends yet</h2>
             <p className="mt-1 text-sm font-semibold text-muted">Send a challenge — anyone who plays it joins your list.</p>
-            <button onClick={() => void createAndShareChallenge()} className="btn-primary mt-4 w-full">Create a challenge</button>
+            <button onClick={user ? () => void createAndShareChallenge() : openSignIn} className="btn-primary mt-4 w-full">Create a challenge</button>
           </div>
         )}
       </section>

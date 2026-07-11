@@ -118,7 +118,7 @@ export default function LeaderboardScreen() {
       <section className="mt-5 grid gap-2">
         {rows.map((row) => <LeaderboardItem key={`${row.rank}-${row.display_name}-${row.score}`} row={row} />)}
         {mine ? (
-          <div className="mt-2 rounded-2xl border border-primary bg-primary/10 p-3 font-display font-semibold text-primary shadow-card">
+          <div className="mt-2 rounded-2xl border border-primary bg-primary/10 p-3 font-display font-semibold text-primaryDark shadow-card">
             #{mine.rank} · you · {mine.score}
           </div>
         ) : null}

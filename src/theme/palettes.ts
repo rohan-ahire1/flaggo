@@ -14,6 +14,8 @@ export type PaletteChannels = {
   primary: string;
   primaryDark: string;
   accent: string;
+  /** Darker accent that meets 4.5:1 contrast on `paper` — use for accent-colored text. */
+  accentDeep: string;
   success: string;
   error: string;
   map: string;
@@ -38,12 +40,13 @@ export const THEMES: Record<ThemeKey, ThemeMeta> = {
       surface2: "230 220 200",
       line: "219 207 185",
       ink: "32 48 58",
-      muted: "95 113 120",
+      muted: "86 103 110",
       primary: "20 80 107",
       primaryDark: "14 58 78",
       accent: "217 138 61",
-      success: "63 125 82",
-      error: "193 87 77",
+      accentDeep: "163 92 26",
+      success: "56 112 73",
+      error: "183 76 66",
       map: "212 226 220"
     }
   },
@@ -57,11 +60,12 @@ export const THEMES: Record<ThemeKey, ThemeMeta> = {
       surface2: "230 215 188",
       line: "220 201 166",
       ink: "58 46 33",
-      muted: "122 106 85",
+      muted: "110 95 74",
       primary: "168 81 44",
       primaryDark: "125 58 31",
       accent: "47 109 99",
-      success: "91 125 63",
+      accentDeep: "47 109 99",
+      success: "78 108 54",
       error: "179 73 47",
       map: "231 217 189"
     }
@@ -76,12 +80,13 @@ export const THEMES: Record<ThemeKey, ThemeMeta> = {
       surface2: "211 224 216",
       line: "195 214 203",
       ink: "29 43 39",
-      muted: "92 112 104",
+      muted: "84 104 96",
       primary: "31 122 109",
       primaryDark: "20 86 76",
       accent: "207 138 60",
-      success: "63 125 82",
-      error: "193 87 77",
+      accentDeep: "158 94 28",
+      success: "56 112 73",
+      error: "183 76 66",
       map: "214 230 220"
     }
   },
@@ -99,8 +104,9 @@ export const THEMES: Record<ThemeKey, ThemeMeta> = {
       primary: "58 110 165",
       primaryDark: "44 85 128",
       accent: "58 110 165",
-      success: "63 125 82",
-      error: "193 87 77",
+      accentDeep: "58 110 165",
+      success: "56 112 73",
+      error: "183 76 66",
       map: "231 235 241"
     }
   }
@@ -119,6 +125,7 @@ const VAR_NAMES: Record<keyof PaletteChannels, string> = {
   primary: "--primary",
   primaryDark: "--primary-dark",
   accent: "--accent",
+  accentDeep: "--accent-deep",
   success: "--success",
   error: "--error",
   map: "--map"
