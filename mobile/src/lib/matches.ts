@@ -54,9 +54,12 @@ export async function createMatch(config: MatchConfig): Promise<Match> {
   return { ...(data as Omit<Match, "config"> & { config: MatchConfig }), config: normalizeMatchConfig((data as { config?: MatchConfig }).config) };
 }
 
+// Malformed share links would otherwise hit Supabase and come back as uuid-syntax 400s.
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export async function getMatch(id: string): Promise<Match | null> {
   const client = supabase;
-  if (!client) return null;
+  if (!client || !UUID_RE.test(id)) return null;
   const { data, error } = await client.from("matches").select("id, created_by, seed, config, created_at").eq("id", id).maybeSingle();
   if (error) throw error;
   if (!data) return null;
@@ -65,7 +68,7 @@ export async function getMatch(id: string): Promise<Match | null> {
 
 export async function getMatchResults(id: string): Promise<MatchResult[]> {
   const client = supabase;
-  if (!client) return [];
+  if (!client || !UUID_RE.test(id)) return [];
   const { data, error } = await client
     .from("match_results")
     .select("match_id, user_id, display_name, score, total, finished_at")
