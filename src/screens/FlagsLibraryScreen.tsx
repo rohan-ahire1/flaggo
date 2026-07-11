@@ -35,13 +35,13 @@ export default function FlagsLibraryScreen() {
 
   return (
     <main className="p-5">
-      <button onClick={() => navigate(-1)} className="mb-4 grid h-10 w-10 place-items-center rounded-full bg-paper text-muted shadow-card" aria-label="Back">
+      <button onClick={() => navigate(-1)} className="icon-btn mb-4" aria-label="Back">
         <Icon name="chevron" size={20} className="rotate-180" />
       </button>
       <h1 className="screen-title">Flag library</h1>
-      <div className="mt-4 grid grid-cols-2 rounded-2xl bg-paper p-1 shadow-card">
-        <button className="rounded-xl bg-primary px-4 py-2 font-display text-sm font-semibold text-white shadow-sm">Flags</button>
-        <button onClick={() => navigate("/map/explore")} className="inline-flex items-center justify-center gap-1 rounded-xl px-4 py-2 font-display text-sm font-semibold text-muted hover:text-ink">
+      <div className="mt-4 grid grid-cols-2 gap-2">
+        <button className="chip chip-on w-full">Flags</button>
+        <button onClick={() => navigate("/map/explore")} className="chip w-full gap-1">
           Explore <Icon name="chevron" size={14} className="-rotate-45" />
         </button>
       </div>

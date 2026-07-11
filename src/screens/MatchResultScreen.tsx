@@ -96,7 +96,7 @@ export default function MatchResultScreen() {
 
   return (
     <main className="p-5">
-      <button onClick={() => navigate("/")} className="mb-4 grid h-10 w-10 place-items-center rounded-full bg-paper text-muted shadow-card" aria-label="Back"><Icon name="chevron" className="rotate-180" /></button>
+      <button onClick={() => navigate("/")} className="icon-btn mb-4" aria-label="Back"><Icon name="chevron" className="rotate-180" /></button>
       <section className="rounded-[28px] bg-paper p-6 text-center shadow-card-lg">
         <Icon name="trophy" size={44} className="mx-auto text-primary" />
         <h1 className="mt-3 screen-title">Match results</h1>
@@ -166,9 +166,9 @@ export default function MatchResultScreen() {
         </section>
       ) : null}
       <div className="mt-5 grid gap-3">
-        {guestScore != null ? <button onClick={openSignIn} className="btn-primary">Sign in to save your score</button> : null}
-        <button onClick={rematch} disabled={working} className="btn-primary">{working ? "Creating..." : "Rematch"}</button>
-        {matchId && <button onClick={() => void shareMatch(matchId)} className="btn-secondary">Share challenge</button>}
+        {guestScore != null ? <button onClick={openSignIn} className="btn-primary w-full">Sign in to save your score</button> : null}
+        <button onClick={rematch} disabled={working} className="btn-primary w-full">{working ? "Creating..." : "Rematch"}</button>
+        {matchId && <button onClick={() => void shareMatch(matchId)} className="btn-secondary w-full">Share challenge</button>}
       </div>
     </main>
   );

@@ -76,7 +76,7 @@ export default function HomeScreen() {
               <span key={index} className={`h-2 flex-1 rounded-full ${played && index < score ? "bg-white" : "bg-white/25"}`} />
             ))}
           </div>
-          <button onClick={() => navigate("/daily")} className="mt-5 w-full rounded-2xl bg-paper py-3.5 text-center font-display text-xl font-semibold text-primary shadow-card">
+          <button onClick={() => navigate("/daily")} className="btn-inverse mt-5 w-full">
             {played ? "Play again" : "Play today's Five"}
           </button>
         </div>
@@ -89,7 +89,7 @@ export default function HomeScreen() {
           <p className="text-sm font-semibold text-muted">{nextAction.sub}</p>
         </div>
         <div className="grid h-16 w-16 place-items-center rounded-2xl bg-surface text-center font-display text-xl font-black text-primary">{mastery}%</div>
-        <button onClick={nextAction.onClick} className="btn-primary col-span-2 py-3">Go</button>
+        <button onClick={nextAction.onClick} className="btn-primary col-span-2">Go</button>
       </section>
 
       <button onClick={() => void createAndShareChallenge()} className="mb-6 flex w-full items-center gap-3.5 rounded-[20px] border border-line bg-surface p-3.5 text-left">

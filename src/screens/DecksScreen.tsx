@@ -59,10 +59,10 @@ export default function DecksScreen() {
 
   return (
     <main className="p-5">
-      <button onClick={() => navigate(-1)} className="mb-4 grid h-10 w-10 place-items-center rounded-full bg-paper text-muted shadow-card" aria-label="Back"><Icon name="chevron" className="rotate-180" /></button>
+      <button onClick={() => navigate(-1)} className="icon-btn mb-4" aria-label="Back"><Icon name="chevron" className="rotate-180" /></button>
       <h1 className="screen-title">Decks</h1>
-      <div className="mt-4 grid grid-cols-2 rounded-2xl bg-paper p-1 shadow-card">
-        {(["flag", "capital"] as const).map((item) => <button key={item} onClick={() => setTopic(item)} className={`rounded-xl px-4 py-2 font-display text-sm font-semibold capitalize ${topic === item ? "bg-primary text-white" : "text-muted"}`}>{item}</button>)}
+      <div className="mt-4 grid grid-cols-2 gap-2">
+        {(["flag", "capital"] as const).map((item) => <button key={item} onClick={() => setTopic(item)} className={`chip w-full capitalize ${topic === item ? "chip-on" : ""}`}>{item}</button>)}
       </div>
 
       <section className="mt-5 grid gap-3">
@@ -78,8 +78,8 @@ export default function DecksScreen() {
                 </div>
               </div>
               <div className="mt-3 grid grid-cols-[1fr_auto] gap-2">
-                <button onClick={() => startDeckPractice(deck)} disabled={!size} className="btn-primary bg-primary text-white disabled:opacity-50">Practice</button>
-                <button onClick={() => void removeDeck(deck)} className="grid h-12 w-12 place-items-center rounded-2xl bg-surface text-muted" aria-label="Delete deck"><Icon name="x" /></button>
+                <button onClick={() => startDeckPractice(deck)} disabled={!size} className="btn-primary">Practice</button>
+                <button onClick={() => void removeDeck(deck)} className="icon-btn" aria-label="Delete deck"><Icon name="x" /></button>
               </div>
             </div>
           );
@@ -96,9 +96,9 @@ export default function DecksScreen() {
 
       <section ref={buildersRef} className="mt-6 rounded-[24px] bg-paper p-4 shadow-card">
         <h2 className="font-display text-xl font-black">Quick builders</h2>
-        <button onClick={createWeak} className="mt-3 w-full rounded-2xl bg-primary p-3 font-display font-black text-white">Weak countries</button>
+        <button onClick={createWeak} className="btn-primary mt-3 w-full">Weak countries</button>
         <div className="mt-3 grid grid-cols-2 gap-2 md:grid-cols-3">
-          {regions.map((region) => <button key={region} onClick={() => createRegion(region)} className="rounded-2xl border border-line p-3 font-display font-black">{region}</button>)}
+          {regions.map((region) => <button key={region} onClick={() => createRegion(region)} className="btn-secondary">{region}</button>)}
         </div>
       </section>
 
@@ -120,7 +120,7 @@ export default function DecksScreen() {
             );
           })}
         </div>
-        <button onClick={createManual} disabled={!selected.length} className="btn-primary mt-3 w-full bg-primary text-white disabled:opacity-50">Create deck</button>
+        <button onClick={createManual} disabled={!selected.length} className="btn-primary mt-3 w-full">Create deck</button>
       </section>
     </main>
   );

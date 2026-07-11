@@ -81,7 +81,7 @@ function ConfirmDialogView({
           <button
             type="button"
             onClick={() => onClose(true)}
-            className={options.destructive ? "btn-primary bg-error shadow-button-error" : "btn-primary"}
+            className={options.destructive ? "btn-danger" : "btn-primary"}
           >
             {options.confirmLabel ?? "Confirm"}
           </button>

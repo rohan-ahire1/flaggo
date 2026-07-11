@@ -15,7 +15,7 @@ export default function ExploreMapScreen() {
 
   return (
     <main className="p-5">
-      <button onClick={() => navigate(-1)} className="mb-4 grid h-10 w-10 place-items-center rounded-full bg-paper text-muted shadow-card" aria-label="Back">
+      <button onClick={() => navigate(-1)} className="icon-btn mb-4" aria-label="Back">
         <Icon name="chevron" size={20} className="rotate-180" />
       </button>
       <h1 className="screen-title">Explore</h1>
@@ -35,10 +35,10 @@ export default function ExploreMapScreen() {
                 <button
                   onClick={() => setSelectedCode(undefined)}
                   aria-label="Close country details"
-                  className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-paper text-muted"
-                >
-                  <Icon name="close" size={16} />
-                </button>
+                className="icon-btn"
+              >
+                <Icon name="close" size={16} />
+              </button>
               </div>
               <dl className="mt-2 grid gap-1 text-sm font-bold">
                 <div className="flex justify-between gap-3"><dt className="text-muted">Capital</dt><dd className="text-right">{selected.capital ?? "None"}</dd></div>

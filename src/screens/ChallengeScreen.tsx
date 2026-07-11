@@ -20,7 +20,7 @@ export default function ChallengeScreen() {
         <p className="mt-1 text-[15px] font-semibold text-white/80">
           Send today's exact 5-question round. When you both finish, compare scores.
         </p>
-        <button onClick={() => void createAndShareChallenge()} className="mt-5 w-full rounded-2xl bg-paper px-5 py-3.5 font-display text-lg font-black text-primary shadow-card">
+        <button onClick={() => void createAndShareChallenge()} className="btn-inverse mt-5 w-full">
           Create &amp; share
         </button>
       </section>

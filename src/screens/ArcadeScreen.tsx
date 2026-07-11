@@ -180,7 +180,7 @@ export default function ArcadeScreen() {
     return (
       <main className="flex min-h-full flex-col p-5">
         <div className="flex items-center gap-3">
-          <button onClick={() => navigate("/")} className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-paper text-muted shadow-card" aria-label="Back"><Icon name="chevron" className="rotate-180" /></button>
+          <button onClick={() => navigate("/")} className="icon-btn shrink-0" aria-label="Back"><Icon name="chevron" className="rotate-180" /></button>
           <div>
             <h1 className="screen-title">Arcade</h1>
             <p className="mt-1 text-sm font-semibold text-muted">Endless rounds, three ways.</p>
@@ -199,7 +199,7 @@ export default function ArcadeScreen() {
                   key={item}
                   onClick={() => setMode(item)}
                   aria-pressed={on}
-                  className={`flex items-center gap-3.5 rounded-2xl border-2 p-3.5 text-left transition-all ${on ? "border-primary bg-primary text-white shadow-button" : "border-line bg-paper text-ink shadow-card"}`}
+                  className={`flex items-center gap-3.5 rounded-2xl border-2 p-3.5 text-left transition-all ${on ? "border-primary bg-primary text-white shadow-card" : "border-line bg-paper text-ink shadow-card"}`}
                 >
                   <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-xl ${on ? "bg-paper/15 text-white" : "bg-surface text-primary"}`}>
                     <Icon name={meta.icon} size={22} />
@@ -228,7 +228,7 @@ export default function ArcadeScreen() {
                     key={item}
                     onClick={() => setTopic(item)}
                     aria-pressed={on}
-                    className={`flex items-center gap-2.5 rounded-2xl border-2 px-3.5 py-3 transition-all ${on ? "border-primary bg-primary text-white shadow-button" : "border-line bg-paper text-ink shadow-card"}`}
+                    className={`flex items-center gap-2.5 rounded-2xl border-2 px-3.5 py-3 transition-all ${on ? "border-primary bg-primary text-white shadow-card" : "border-line bg-paper text-ink shadow-card"}`}
                   >
                     <Icon name={meta.icon} size={19} className={on ? "text-white" : "text-primary"} />
                     <span className="font-display text-[15px] font-semibold">{meta.label}</span>
@@ -240,8 +240,8 @@ export default function ArcadeScreen() {
         </div>
 
         <div className="mt-7 grid gap-3">
-          <button onClick={start} disabled={!pool.length} className="btn-primary disabled:opacity-50">Start run</button>
-          {!user && <button onClick={openSignIn} className="font-display font-bold text-primary underline">Sign in to compete</button>}
+          <button onClick={start} disabled={!pool.length} className="btn-primary">Start run</button>
+          {!user && <button onClick={openSignIn} className="btn-ghost">Sign in to compete</button>}
         </div>
       </main>
     );
@@ -252,7 +252,7 @@ export default function ArcadeScreen() {
       <header className="sticky top-0 z-20 bg-paper/85 p-4 backdrop-blur-md">
         <p className="mb-2.5 text-center font-display text-[13px] font-bold uppercase tracking-wide text-muted">Arcade · {TOPIC_META[topic].label} · {MODE_META[mode].label}</p>
         <div className="flex items-center gap-3">
-          <button onClick={() => void closeRound()} className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-paper text-muted shadow-card" aria-label="End run"><Icon name="close" size={20} /></button>
+          <button onClick={() => void closeRound()} className="icon-btn shrink-0" aria-label="End run"><Icon name="close" size={20} /></button>
           <div className="flex-1 rounded-full bg-paper px-4 py-2 font-display font-bold shadow-card">Score {score}</div>
           {mode !== "sudden" && <span className={`rounded-full bg-error px-4 py-2 font-display font-black text-white ${remaining <= 10 ? "animate-pulse" : ""}`}>{remaining}s</span>}
         </div>

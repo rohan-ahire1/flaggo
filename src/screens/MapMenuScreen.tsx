@@ -29,7 +29,7 @@ export default function MapMenuScreen() {
 
   return (
     <main className="p-5">
-      <button onClick={() => navigate(-1)} className="mb-4 grid h-10 w-10 place-items-center rounded-full bg-paper text-muted shadow-card" aria-label="Back">
+      <button onClick={() => navigate(-1)} className="icon-btn mb-4" aria-label="Back">
         <Icon name="chevron" size={20} className="rotate-180" />
       </button>
       <h1 className="screen-title">World Map</h1>
@@ -43,7 +43,7 @@ export default function MapMenuScreen() {
           <button
             key={value}
             onClick={() => setMode(value)}
-            className={`rounded-2xl border-2 border-b-[5px] transition-all duration-150 active:translate-y-[3px] active:border-b-2 bg-paper p-4 text-left ${mode === value ? "border-primary text-ink" : "border-line text-muted"}`}
+            className={`btn-secondary items-start justify-start text-left ${mode === value ? "border-primary bg-primary text-white" : ""}`}
           >
             <span className="flex items-center gap-3">
               <span className={`grid h-11 w-11 place-items-center rounded-2xl ${mode === value ? "bg-primary/15 text-primary" : "bg-surface"}`}>
@@ -59,7 +59,7 @@ export default function MapMenuScreen() {
       </section>
 
       <section className="mt-5 rounded-[24px] border border-line bg-paper p-4 shadow-card">
-        <div className="mb-3 grid grid-cols-2 rounded-2xl bg-paper p-1">
+        <div className="mb-3 grid grid-cols-2 gap-2">
           {([
             ["tier", "Tier"],
             ["region", "Region"]
@@ -70,7 +70,7 @@ export default function MapMenuScreen() {
                 setPickerMode(value);
                 setSelectedId(value === "tier" ? groups[0]?.id ?? "" : "World");
               }}
-              className={`rounded-xl px-3 py-2 font-display text-sm font-semibold ${pickerMode === value ? "bg-paper text-primary shadow-sm" : "text-muted"}`}
+              className={`chip w-full ${pickerMode === value ? "chip-on" : ""}`}
             >
               {label}
             </button>
@@ -85,15 +85,12 @@ export default function MapMenuScreen() {
             ? groups.map((group) => <option key={group.id} value={group.id}>{group.title} ({group.countries.length})</option>)
             : regions.map((region) => <option key={region} value={region}>{region} ({region === "World" ? mapCountries.length : mapCountries.filter((country) => country.continent === region).length})</option>)}
         </select>
-        <button
-          onClick={() => startMapPractice(mode, selectedCountries)}
-          className="btn-primary mt-4 flex w-full items-center justify-center gap-2"
-        >
+        <button onClick={() => startMapPractice(mode, selectedCountries)} className="btn-primary mt-4 w-full">
           <Icon name="bolt" size={20} /> Start map practice
         </button>
       </section>
 
-      <button onClick={() => navigate("/map/explore")} className="btn-secondary mt-5 flex w-full items-center justify-center gap-2">
+      <button onClick={() => navigate("/map/explore")} className="btn-secondary mt-5 w-full">
         <Icon name="globe" size={20} /> Explore map
       </button>
     </main>

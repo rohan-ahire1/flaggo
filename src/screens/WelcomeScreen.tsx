@@ -29,12 +29,12 @@ export default function WelcomeScreen() {
 
         <button
           onClick={() => navigate("/daily")}
-          className="w-full rounded-2xl bg-primary py-4 font-display text-xl font-semibold text-white shadow-card-lg transition active:translate-y-0.5"
+          className="btn-primary w-full"
         >
           Play today&apos;s challenge
         </button>
         <p className="text-[15px] font-medium text-muted">no sign-up · about 90 seconds</p>
-        <button onClick={() => startLearning("flag")} className="text-[15px] font-bold text-primary underline">
+        <button onClick={() => startLearning("flag")} className="btn-ghost">
           Start with a lesson
         </button>
       </section>

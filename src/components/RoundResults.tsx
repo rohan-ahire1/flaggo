@@ -164,15 +164,14 @@ export default function RoundResults({
         <div className="mt-4 grid gap-2">
           {secondaryActions.map((action, index) =>
             action.variant === "ghost" ? (
-              <button key={`${action.label}-${index}`} onClick={action.onPress} className="btn-ghost justify-self-center">
+              <button key={`${action.label}-${index}`} onClick={action.onPress} className="btn-ghost w-full">
+                {action.icon ? <Icon name={action.icon} size={18} /> : null}
                 {action.label}
               </button>
             ) : (
-              <button key={`${action.label}-${index}`} onClick={action.onPress} className="btn-secondary">
-                <span className="inline-flex items-center justify-center gap-2">
-                  {action.icon ? <Icon name={action.icon} size={18} /> : null}
-                  {action.label}
-                </span>
+              <button key={`${action.label}-${index}`} onClick={action.onPress} className="btn-secondary w-full">
+                {action.icon ? <Icon name={action.icon} size={18} /> : null}
+                {action.label}
               </button>
             )
           )}
@@ -182,10 +181,8 @@ export default function RoundResults({
       {primaryAction ? (
         <div className="safe-bottom sticky bottom-0 mt-3 bg-paper pt-2">
           <button onClick={primaryAction.onPress} className="btn-primary w-full">
-            <span className="inline-flex items-center justify-center gap-2">
-              {primaryAction.icon ? <Icon name={primaryAction.icon} size={18} /> : null}
-              {primaryAction.label}
-            </span>
+            {primaryAction.icon ? <Icon name={primaryAction.icon} size={18} /> : null}
+            {primaryAction.label}
           </button>
         </div>
       ) : null}

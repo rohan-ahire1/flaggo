@@ -72,7 +72,7 @@ export default function FeedbackPanel({
       <button
         ref={buttonRef}
         onClick={onContinue}
-        className="btn-base w-full border-2 border-b-[5px] border-black/10 bg-paper text-ink active:translate-y-[3px] active:border-b-2"
+        className="btn-inverse w-full"
       >
         Continue
       </button>

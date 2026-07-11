@@ -25,7 +25,7 @@ export default function PathsScreen() {
 
   return (
     <main className="p-5">
-      <button onClick={region ? () => navigate("/learn") : () => navigate(-1)} className="mb-4 grid h-10 w-10 place-items-center rounded-full bg-paper text-muted shadow-card" aria-label="Back">
+      <button onClick={region ? () => navigate("/learn") : () => navigate(-1)} className="icon-btn mb-4" aria-label="Back">
         <Icon name="chevron" size={20} className="rotate-180" />
       </button>
       <h1 className="screen-title">{region ?? "Learning paths"}</h1>
@@ -37,7 +37,7 @@ export default function PathsScreen() {
               <button
                 key={topic}
                 onClick={() => switchTopic(topic)}
-                className={`rounded-full px-4 py-1.5 font-display text-sm font-black transition ${active ? "bg-primary text-white shadow-card" : "border border-line bg-paper text-muted"}`}
+                className={`chip ${active ? "chip-on" : ""}`}
               >
                 {TOPIC_LABELS[topic] ?? topic}
               </button>

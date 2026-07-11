@@ -51,9 +51,9 @@ export default function ProfileScreen() {
             </p>
           </div>
           {userEmail ? (
-            <button onClick={() => void signOutUser()} className="rounded-2xl bg-surface px-4 py-2 font-display font-semibold text-ink">Sign out</button>
+            <button onClick={() => void signOutUser()} className="btn-secondary">Sign out</button>
           ) : (
-            <button onClick={openSignIn} className="rounded-2xl bg-primary px-4 py-2 font-display font-semibold text-white">Sign in</button>
+            <button onClick={openSignIn} className="btn-primary">Sign in</button>
           )}
         </div>
         {synthetic && <AddRecoveryEmail />}
@@ -135,13 +135,13 @@ export default function ProfileScreen() {
           });
           if (ok) void resetAll();
         }}
-        className="btn-primary mt-8 w-full bg-error shadow-button-error"
+        className="btn-danger mt-8 w-full"
       >
         Reset progress
       </button>
 
       {userEmail && (
-        <button onClick={() => void deleteAccount()} className="mt-3 w-full rounded-2xl px-5 py-4 font-display font-semibold text-error">
+        <button onClick={() => void deleteAccount()} className="btn-ghost mt-3 w-full text-error">
           Delete my account & data
         </button>
       )}
@@ -188,7 +188,7 @@ function AddRecoveryEmail() {
           autoComplete="email"
           className="min-w-0 flex-1 rounded-2xl border-2 border-line bg-paper px-4 py-2.5 font-bold outline-none transition focus:border-primary"
         />
-        <button disabled={busy || !email.trim()} className="btn-primary px-4 disabled:opacity-50">
+        <button disabled={busy || !email.trim()} className="btn-primary">
           Add
         </button>
       </div>
