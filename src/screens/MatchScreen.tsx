@@ -111,7 +111,7 @@ export default function MatchScreen() {
   if (!matchId || error) {
     return (
       <main className="p-5">
-        <button onClick={() => navigate("/")} className="mb-4 grid h-10 w-10 place-items-center rounded-full bg-paper text-muted shadow-card" aria-label="Back"><Icon name="chevron" className="rotate-180" /></button>
+        <button onClick={() => navigate("/")} className="icon-btn mb-4" aria-label="Back"><Icon name="chevron" className="rotate-180" /></button>
         <section className="rounded-[24px] bg-paper p-6 text-center shadow-card">
           <h1 className="font-display text-2xl font-black">Challenge unavailable</h1>
           <p className="mt-2 font-bold text-muted">{error ?? "No match link was provided."}</p>
@@ -127,7 +127,7 @@ export default function MatchScreen() {
   if (!question) {
     return (
       <main className="grid min-h-screen place-items-center p-5">
-        <button onClick={() => navigate("/")} className="btn-primary bg-primary text-white">Go Home</button>
+        <button onClick={() => navigate("/")} className="btn-primary">Go Home</button>
       </main>
     );
   }
@@ -137,7 +137,7 @@ export default function MatchScreen() {
       <header className="sticky top-0 z-20 bg-paper/85 p-4 backdrop-blur-md">
         <p className="mb-2.5 text-center font-display text-[13px] font-semibold uppercase tracking-wide text-muted">Friend Challenge</p>
         <div className="flex items-center gap-3">
-          <button onClick={() => navigate("/")} aria-label="Close match" className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-paper text-muted shadow-card">
+          <button onClick={() => navigate("/")} aria-label="Close match" className="icon-btn shrink-0">
             <Icon name="close" size={20} />
           </button>
           <div className="flex-1"><ProgressBar value={(index / questions.length) * 100} /></div>

@@ -83,8 +83,8 @@ export default function NameClaimDialog({
             <h2 id="claim-title" className="font-display text-2xl font-semibold">Claim your player name</h2>
             <p className="mt-1 text-sm font-bold text-muted">Shown on leaderboards and challenges</p>
           </div>
-          <button onClick={onCancel} className="rounded-full p-2 font-display font-black text-muted hover:bg-surface" aria-label="Close">
-            x
+          <button onClick={onCancel} className="icon-btn" aria-label="Close">
+            <Icon name="close" size={18} />
           </button>
         </div>
 
@@ -131,10 +131,10 @@ export default function NameClaimDialog({
 
           {status ? <p className="rounded-2xl bg-red-50 p-3 text-sm font-bold text-error">{status}</p> : null}
 
-          <button disabled={disabled} className="btn-primary w-full bg-primary text-white shadow-button disabled:opacity-50">
+          <button disabled={disabled} className="btn-primary w-full">
             {busy ? "Saving..." : "Save name"}
           </button>
-          <button type="button" onClick={onCancel} className="w-full py-2 font-display font-black text-muted">
+          <button type="button" onClick={onCancel} className="btn-ghost w-full">
             Not now
           </button>
         </form>

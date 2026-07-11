@@ -78,17 +78,17 @@ export default function LeaderboardScreen() {
 
   return (
     <main className="p-5">
-      <button onClick={() => navigate(-1)} className="mb-4 grid h-10 w-10 place-items-center rounded-full bg-paper text-muted shadow-card" aria-label="Back"><Icon name="chevron" className="rotate-180" /></button>
+      <button onClick={() => navigate(-1)} className="icon-btn mb-4" aria-label="Back"><Icon name="chevron" className="rotate-180" /></button>
       <h1 className="screen-title">Leaderboards</h1>
 
-      <div className="mt-4 grid grid-cols-4 gap-1 rounded-2xl bg-surface p-1">
+      <div className="mt-4 grid grid-cols-4 gap-2">
         {([
           ["today", "Today"],
           ["arcade", "Arcade"],
           ["trivia", "Trivia"],
           ["xp", "XP"]
         ] as const).map(([value, label]) => (
-          <button key={value} onClick={() => setTab(value)} className={`rounded-xl px-2 py-2 font-display text-sm font-semibold ${tab === value ? "bg-paper text-ink shadow-sm" : "text-muted"}`}>
+          <button key={value} onClick={() => setTab(value)} className={`chip w-full ${tab === value ? "chip-on" : ""}`}>
             {label}
           </button>
         ))}
@@ -109,8 +109,8 @@ export default function LeaderboardScreen() {
 
       <p className="mt-4 font-display text-xl font-semibold text-ink">{heading}</p>
       <div className="mt-4 grid grid-cols-2 gap-3">
-        <button onClick={() => void createAndShareChallenge()} className="rounded-2xl bg-primary p-3 font-display font-semibold text-white shadow-card">Challenge a friend</button>
-        <button onClick={() => navigate("/friends")} className="rounded-2xl bg-paper p-3 font-display font-semibold text-primary shadow-card">Friends</button>
+        <button onClick={() => void createAndShareChallenge()} className="btn-primary">Challenge a friend</button>
+        <button onClick={() => navigate("/friends")} className="btn-secondary">Friends</button>
       </div>
       {!user && <button onClick={openSignIn} className="btn-primary mt-4 w-full">Sign in to compete</button>}
       {error && <div className="mt-4 rounded-2xl bg-error/10 p-4 font-bold text-error">{error}</div>}
@@ -142,7 +142,7 @@ function ChipRow<T extends string>({ items, value, onChange }: { items: { value:
         <button
           key={item.value}
           onClick={() => onChange(item.value)}
-          className={`shrink-0 rounded-full border px-3 py-2 text-sm font-bold ${value === item.value ? "border-primary bg-primary text-white" : "border-line bg-paper text-muted"}`}
+          className={`chip shrink-0 ${value === item.value ? "chip-on" : ""}`}
         >
           {item.label}
         </button>

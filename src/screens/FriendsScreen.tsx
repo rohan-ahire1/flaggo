@@ -18,15 +18,15 @@ export default function FriendsScreen() {
 
   return (
     <main className="p-5">
-      <button onClick={() => navigate(-1)} className="mb-4 grid h-10 w-10 place-items-center rounded-full bg-paper text-muted shadow-card" aria-label="Back"><Icon name="chevron" className="rotate-180" /></button>
+      <button onClick={() => navigate(-1)} className="icon-btn mb-4" aria-label="Back"><Icon name="chevron" className="rotate-180" /></button>
       <div className="flex items-start justify-between gap-3">
         <div>
           <h1 className="screen-title">Friends</h1>
           <p className="mt-1 font-bold text-muted">Friends are added automatically after a completed match.</p>
         </div>
-        <button onClick={user ? () => void createAndShareChallenge() : openSignIn} className="rounded-2xl bg-primary px-4 py-3 font-display font-black text-white shadow-card">Challenge</button>
+        <button onClick={user ? () => void createAndShareChallenge() : openSignIn} className="btn-primary">Challenge</button>
       </div>
-      {!user && <button onClick={openSignIn} className="mt-4 w-full rounded-2xl bg-primary p-3 font-display font-black text-white">Sign in to challenge friends</button>}
+      {!user && <button onClick={openSignIn} className="btn-primary mt-4 w-full">Sign in to challenge friends</button>}
       {queryError && <div className="mt-4 rounded-2xl bg-error/10 p-4 font-bold text-error">{queryError}</div>}
       <section className="mt-5 grid gap-2">
         {rows.map((row) => (

@@ -153,7 +153,7 @@ export default function FlagTestScreen() {
           <button
             onClick={() => void closeRound()}
             aria-label="Exit test"
-            className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-paper text-muted shadow-card transition active:translate-y-0.5 active:shadow-none"
+            className="icon-btn shrink-0"
           >
             <Icon name="close" size={20} />
           </button>

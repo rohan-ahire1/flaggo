@@ -117,7 +117,7 @@ export default function DailyChallengeScreen() {
       <header className="sticky top-0 z-20 bg-paper/85 p-4 backdrop-blur-md">
         <p className="mb-2.5 text-center font-display text-[13px] font-bold uppercase tracking-wide text-muted">Daily Challenge</p>
         <div className="flex items-center gap-3">
-          <button onClick={() => void closeRound()} aria-label="Close daily" className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-paper text-muted shadow-card">
+          <button onClick={() => void closeRound()} aria-label="Close daily" className="icon-btn shrink-0">
             <Icon name="close" size={20} />
           </button>
           <div className="flex-1"><ProgressBar value={(index / questions.length) * 100} /></div>

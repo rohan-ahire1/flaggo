@@ -219,7 +219,7 @@ export default function WorldMap({
           type="button"
           onClick={() => zoom(1.3)}
           aria-label="Zoom in"
-          className="pointer-events-auto grid h-10 w-10 place-items-center rounded-full border border-line bg-paper font-display text-xl font-black text-ink shadow-card"
+          className="icon-btn pointer-events-auto font-display text-xl font-black text-ink"
         >
           +
         </button>
@@ -227,7 +227,7 @@ export default function WorldMap({
           type="button"
           onClick={() => zoom(1 / 1.3)}
           aria-label="Zoom out"
-          className="pointer-events-auto grid h-10 w-10 place-items-center rounded-full border border-line bg-paper font-display text-xl font-black text-ink shadow-card"
+          className="icon-btn pointer-events-auto font-display text-xl font-black text-ink"
         >
           -
         </button>
@@ -235,7 +235,7 @@ export default function WorldMap({
           type="button"
           onClick={resetView}
           aria-label="Reset globe view"
-          className="pointer-events-auto grid h-10 w-10 place-items-center rounded-full border border-line bg-paper text-muted shadow-card"
+          className="icon-btn pointer-events-auto text-muted"
         >
           <Icon name="target" size={18} />
         </button>

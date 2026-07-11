@@ -22,7 +22,7 @@ export default function TestSetupScreen() {
 
   return (
     <main className="p-5">
-      <button onClick={() => navigate("/review")} className="mb-4 grid h-10 w-10 place-items-center rounded-full bg-paper text-muted shadow-card" aria-label="Back">
+      <button onClick={() => navigate("/review")} className="icon-btn mb-4" aria-label="Back">
         <Icon name="chevron" size={20} className="rotate-180" />
       </button>
       <h1 className="screen-title">Custom test</h1>
@@ -38,9 +38,7 @@ export default function TestSetupScreen() {
             <button
               key={value}
               onClick={() => setTopic(value)}
-              className={`rounded-2xl border-b-4 p-4 text-left font-display font-black transition active:translate-y-1 ${
-                topic === value ? "border-primaryDark bg-primary text-white" : "border-line bg-surface text-ink"
-              }`}
+              className={`btn-secondary items-start justify-start text-left ${topic === value ? "border-primary bg-primary text-white" : ""}`}
             >
               {label}
             </button>
@@ -63,18 +61,14 @@ export default function TestSetupScreen() {
         <div className="mt-5 grid grid-cols-2 gap-3">
           <button
             onClick={() => setMode("recall")}
-            className={`rounded-2xl border-b-4 p-4 text-left font-display font-black transition active:translate-y-1 ${
-              mode === "recall" ? "border-primaryDark bg-primary text-white" : "border-line bg-surface text-ink"
-            }`}
+            className={`btn-secondary items-start justify-start text-left ${mode === "recall" ? "border-primary bg-primary text-white" : ""}`}
           >
             Recall only
             <span className="mt-1 block text-xs font-bold opacity-80">No typing</span>
           </button>
           <button
             onClick={() => setMode("options")}
-            className={`rounded-2xl border-b-4 p-4 text-left font-display font-black transition active:translate-y-1 ${
-              mode === "options" ? "border-primaryDark bg-primary text-white" : "border-line bg-surface text-ink"
-            }`}
+            className={`btn-secondary items-start justify-start text-left ${mode === "options" ? "border-primary bg-primary text-white" : ""}`}
           >
             With options
             <span className="mt-1 block text-xs font-bold opacity-80">4 choices</span>

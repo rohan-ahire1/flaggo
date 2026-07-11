@@ -181,8 +181,8 @@ export default function SignInModal({ open, onClose }: { open: boolean; onClose:
             <h2 id="signin-title" className="font-display text-2xl font-semibold">{resetMode ? "Reset password" : mode === "signin" ? "Sign in" : "Create account"}</h2>
             <p className="mt-1 text-sm font-bold text-muted">{resetMode ? "We'll send a reset link to your email." : "Sync progress across devices."}</p>
           </div>
-          <button onClick={onClose} className="rounded-full p-2 font-display font-bold text-muted hover:bg-surface" aria-label="Close">
-            x
+          <button onClick={onClose} className="icon-btn" aria-label="Close">
+            <Icon name="close" size={18} />
           </button>
         </div>
 
@@ -190,14 +190,14 @@ export default function SignInModal({ open, onClose }: { open: boolean; onClose:
           <button
             type="button"
             onClick={() => switchMode("signin")}
-            className={`rounded-xl px-3 py-2 font-display text-sm font-semibold ${mode === "signin" ? "bg-paper text-ink shadow-sm" : "text-muted"}`}
+            className={`chip w-full ${mode === "signin" ? "chip-on" : ""}`}
           >
             Sign in
           </button>
           <button
             type="button"
             onClick={() => switchMode("signup")}
-            className={`rounded-xl px-3 py-2 font-display text-sm font-semibold ${mode === "signup" ? "bg-paper text-ink shadow-sm" : "text-muted"}`}
+            className={`chip w-full ${mode === "signup" ? "chip-on" : ""}`}
           >
             Create account
           </button>
@@ -219,8 +219,10 @@ export default function SignInModal({ open, onClose }: { open: boolean; onClose:
                 className="mt-2 w-full rounded-2xl border-2 border-line bg-paper px-4 py-3 font-bold outline-none transition focus:border-primary"
               />
             </div>
-            <button disabled={busy} className="btn-primary mt-3 w-full disabled:opacity-50">{busy ? "Sending..." : "Send reset link"}</button>
-            <button type="button" onClick={() => { setResetMode(false); setStatus(""); }} className="w-full py-2 font-display font-bold text-muted">Back to sign in</button>
+            <button disabled={busy} className="btn-primary mt-3 w-full">{busy ? "Sending..." : "Send reset link"}</button>
+            <button type="button" onClick={() => { setResetMode(false); setStatus(""); }} className="btn-ghost w-full">
+              Back to sign in
+            </button>
             {status && <p className="mt-4 rounded-2xl bg-surface p-3 text-sm font-bold text-muted">{status}</p>}
           </form>
         ) : (
@@ -231,14 +233,14 @@ export default function SignInModal({ open, onClose }: { open: boolean; onClose:
             <button
               type="button"
               onClick={() => setSignupMethod("email")}
-              className={`rounded-xl px-3 py-1.5 font-display text-xs font-semibold ${signupMethod === "email" ? "bg-primary text-white" : "text-muted"}`}
+              className={`chip w-full ${signupMethod === "email" ? "chip-on" : ""}`}
             >
               With email
             </button>
             <button
               type="button"
               onClick={() => setSignupMethod("username")}
-              className={`rounded-xl px-3 py-1.5 font-display text-xs font-semibold ${signupMethod === "username" ? "bg-primary text-white" : "text-muted"}`}
+              className={`chip w-full ${signupMethod === "username" ? "chip-on" : ""}`}
             >
               Username only
             </button>
@@ -331,7 +333,7 @@ export default function SignInModal({ open, onClose }: { open: boolean; onClose:
           </div>
 
           {mode === "signin" && (
-            <button type="button" onClick={() => { setResetMode(true); setStatus(""); }} className="btn-ghost text-sm">
+            <button type="button" onClick={() => { setResetMode(true); setStatus(""); }} className="btn-ghost">
               Forgot password?
             </button>
           )}
@@ -342,7 +344,7 @@ export default function SignInModal({ open, onClose }: { open: boolean; onClose:
             </p>
           )}
 
-          <button disabled={createDisabled} className="btn-primary mt-3 w-full disabled:opacity-50">
+          <button disabled={createDisabled} className="btn-primary mt-3 w-full">
             {mode === "signin" ? "Sign in" : "Create account"}
           </button>
         </form>

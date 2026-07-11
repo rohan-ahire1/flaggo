@@ -7,7 +7,7 @@ export function ProSuccessPage() {
       <section className="rounded-[24px] border border-line bg-paper shadow-card max-w-sm p-6 text-center">
         <h1 className="font-display text-3xl font-black">{BRAND.name} is free to use</h1>
         <p className="mt-2 font-bold text-muted">This page is currently inactive.</p>
-        <Link to="/" className="btn-primary mt-5 inline-block bg-primary text-white shadow-button">Back to {BRAND.name}</Link>
+        <Link to="/" className="btn-primary mt-5">Back to {BRAND.name}</Link>
       </section>
     </main>
   );
@@ -19,7 +19,7 @@ export function ProCancelPage() {
       <section className="rounded-[24px] border border-line bg-paper shadow-card max-w-sm p-6 text-center">
         <h1 className="font-display text-3xl font-black">{BRAND.name} is free to use</h1>
         <p className="mt-2 font-bold text-muted">This page is currently inactive.</p>
-        <Link to="/" className="btn-primary mt-5 inline-block bg-primary text-white shadow-button">Back to {BRAND.name}</Link>
+        <Link to="/" className="btn-primary mt-5">Back to {BRAND.name}</Link>
       </section>
     </main>
   );
