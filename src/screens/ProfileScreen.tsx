@@ -27,8 +27,8 @@ export default function ProfileScreen() {
   }, []);
   const stats: { label: string; value: number; icon: IconName; color: string }[] = [
     { label: "XP", value: progress.xp, icon: "bolt", color: "text-primary" },
-    { label: "Streak", value: progress.streak, icon: "flame", color: "text-accent" },
-    { label: "Coins", value: progress.coins, icon: "coin", color: "text-accent" },
+    { label: "Streak", value: progress.streak, icon: "flame", color: "text-accentDeep" },
+    { label: "Coins", value: progress.coins, icon: "coin", color: "text-accentDeep" },
     { label: "Flags seen", value: Object.keys(progress.review).length, icon: "globe", color: "text-success" }
   ];
   return (
@@ -111,8 +111,8 @@ export default function ProfileScreen() {
           {BADGES.map((badge) => {
             const earned = earnedBadges.get(badge.id);
             return (
-              <div key={badge.id} className={`rounded-2xl border border-line p-2.5 text-center ${earned ? "bg-paper" : "bg-surface opacity-60"}`}>
-                <div className={`mx-auto grid h-12 w-12 place-items-center rounded-2xl ${earned ? "bg-primary/10 text-primary" : "bg-paper text-muted"}`}>
+              <div key={badge.id} className={`rounded-2xl border border-line p-2.5 text-center ${earned ? "bg-paper" : "bg-surface"}`}>
+                <div className={`mx-auto grid h-12 w-12 place-items-center rounded-2xl ${earned ? "bg-primary/10 text-primary" : "bg-paper text-muted opacity-60"}`}>
                   <Icon name={badge.icon as IconName} size={23} />
                 </div>
                 <p className={`mt-2 min-h-10 text-sm font-display font-semibold leading-tight ${earned ? "text-ink" : "text-muted"}`}>{badge.name}</p>

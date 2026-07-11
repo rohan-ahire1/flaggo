@@ -56,16 +56,16 @@ export default function FlagsLibraryScreen() {
           />
         </div>
         <div className="grid grid-cols-2 gap-2">
-          <select value={continent} onChange={(event) => setContinent(event.target.value)} className="rounded-2xl border border-line bg-paper p-3 font-bold">
+          <select value={continent} aria-label="Continent" onChange={(event) => setContinent(event.target.value)} className="rounded-2xl border border-line bg-paper p-3 font-bold">
             {["All", "Africa", "Americas", "Asia", "Europe", "Oceania", "Antarctic"].map((value) => <option key={value}>{value}</option>)}
           </select>
-          <select value={difficulty} onChange={(event) => setDifficulty(event.target.value)} className="rounded-2xl border border-line bg-paper p-3 font-bold">
+          <select value={difficulty} aria-label="Difficulty" onChange={(event) => setDifficulty(event.target.value)} className="rounded-2xl border border-line bg-paper p-3 font-bold">
             {["All", "easy", "medium", "hard"].map((value) => <option key={value}>{value}</option>)}
           </select>
-          <select value={scope} onChange={(event) => setScope(event.target.value)} className="rounded-2xl border border-line bg-paper p-3 font-bold">
+          <select value={scope} aria-label="Country scope" onChange={(event) => setScope(event.target.value)} className="rounded-2xl border border-line bg-paper p-3 font-bold">
             {["All", "UN", "Independent", "Territories"].map((value) => <option key={value}>{value}</option>)}
           </select>
-          <select value={sort} onChange={(event) => setSort(event.target.value)} className="rounded-2xl border border-line bg-paper p-3 font-bold">
+          <select value={sort} aria-label="Sort order" onChange={(event) => setSort(event.target.value)} className="rounded-2xl border border-line bg-paper p-3 font-bold">
             <option value="az">A to Z</option>
             <option value="mastery">Mastery</option>
             <option value="weakest">Weakest</option>

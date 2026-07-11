@@ -26,6 +26,7 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ["**/*.{js,css,html,svg,png,ico}"],
+        globIgnores: ["**/sentry-*.js"],
         runtimeCaching: [
           {
             urlPattern: ({ url }) => url.hostname === "flagcdn.com" || url.pathname.includes("/flags/"),
@@ -42,6 +43,19 @@ export default defineConfig({
   resolve: {
     alias: {
       "@flaggo/core": path.resolve(__dirname, "packages/core/src")
+    }
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id: string) {
+          if (id.includes("packages/core/src/data/countries")) return "countries";
+          if (id.includes("node_modules/@sentry")) return "sentry";
+          if (id.includes("node_modules/@supabase/")) return "supabase";
+          if (/node_modules\/(react|react-dom|scheduler|react-router|react-router-dom)\//.test(id)) return "react";
+          return undefined;
+        }
+      }
     }
   },
   server: {

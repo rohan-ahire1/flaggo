@@ -193,7 +193,7 @@ export default function FlagTestScreen() {
                 disabled={revealed}
                 onClick={() => setSelectedValue(value)}
                 className={`rounded-2xl border-b-4 p-4 text-left font-display font-black transition active:translate-y-1 ${
-                  selectedValue === value ? "border-primary bg-primary/10 text-primary" : "border-line bg-surface text-ink"
+                  selectedValue === value ? "border-primary bg-primary/10 text-primaryDark" : "border-line bg-surface text-ink"
                 }`}
               >
                 {label}
@@ -204,7 +204,7 @@ export default function FlagTestScreen() {
         )}
 
         {revealed ? (
-          <div className={`mt-5 rounded-[24px] p-4 ${graded === true ? "bg-success/10 text-success" : graded === false ? "bg-error/10 text-error" : "bg-primary/10 text-primary"}`}>
+          <div className={`mt-5 rounded-[24px] p-4 ${graded === true ? "bg-success/10 text-success" : graded === false ? "bg-error/10 text-error" : "bg-primary/10 text-primaryDark"}`}>
             <p className="font-display text-sm font-black uppercase">{graded === null ? "Answer" : graded ? "Marked right" : "Marked wrong"}</p>
             <p className="mt-1 font-display font-semibold text-ink">{answer}</p>
             {topic === "flag" && country.officialName && <p className="text-sm font-bold text-muted">{country.officialName}</p>}

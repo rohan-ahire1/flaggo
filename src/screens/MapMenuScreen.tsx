@@ -78,6 +78,7 @@ export default function MapMenuScreen() {
         </div>
         <select
           value={selectedId}
+          aria-label="Country set"
           onChange={(event) => setSelectedId(event.target.value)}
           className="w-full rounded-2xl border border-line bg-paper p-3 font-bold"
         >

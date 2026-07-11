@@ -15,6 +15,7 @@ const semantic = {
   primary: v("--primary"),
   primaryDark: v("--primary-dark"),
   accent: v("--accent"),
+  accentDeep: v("--accent-deep"),
   success: v("--success"),
   error: v("--error"),
   map: v("--map")

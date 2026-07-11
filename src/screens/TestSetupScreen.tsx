@@ -48,6 +48,7 @@ export default function TestSetupScreen() {
         <label className="section-label mt-5 block">Country set</label>
         <select
           value={groupId}
+          aria-label="Country set"
           onChange={(event) => setGroupId(event.target.value)}
           className="mt-2 w-full rounded-2xl border-2 border-line bg-paper p-4 font-display font-black outline-none focus:border-primary"
         >

@@ -98,7 +98,15 @@ export default function DecksScreen() {
         <h2 className="font-display text-xl font-black">Quick builders</h2>
         <button onClick={createWeak} className="btn-primary mt-3 w-full">Weak countries</button>
         <div className="mt-3 grid grid-cols-2 gap-2 md:grid-cols-3">
-          {regions.map((region) => <button key={region} onClick={() => createRegion(region)} className="btn-secondary">{region}</button>)}
+          {regions.map((region, index) => (
+            <button
+              key={region}
+              onClick={() => createRegion(region)}
+              className={`btn-secondary ${index === regions.length - 1 && regions.length % 2 === 1 ? "col-span-2 md:col-span-1" : ""}`}
+            >
+              {region}
+            </button>
+          ))}
         </div>
       </section>
 
@@ -113,7 +121,7 @@ export default function DecksScreen() {
               <button
                 key={country.code}
                 onClick={() => setSelected((value) => (active ? value.filter((code) => code !== country.code) : [...value, country.code]))}
-                className={`rounded-2xl border p-3 text-left font-display font-black ${active ? "border-primary bg-primary/10 text-primary" : "border-line"}`}
+                className={`rounded-2xl border p-3 text-left font-display font-black ${active ? "border-primary bg-primary/10 text-primaryDark" : "border-line"}`}
               >
                 {country.name}
               </button>

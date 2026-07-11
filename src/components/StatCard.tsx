@@ -14,7 +14,7 @@ export default function StatCard({
   const color = {
     blue: "text-primary",
     green: "text-primary",
-    orange: "text-accent",
+    orange: "text-accentDeep",
     red: "text-error"
   }[tone];
   return (
