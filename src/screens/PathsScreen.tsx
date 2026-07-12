@@ -7,7 +7,7 @@ import { lessonsForTopic } from "@flaggo/core/utils/lessonGenerator";
 import { trackEvent } from "../lib/analytics";
 import { useGame } from "../state/GameProvider";
 
-const TOPIC_LABELS: Record<string, string> = { flag: "Flags", capital: "Capitals" };
+const TOPIC_LABELS: Record<string, string> = { flag: "Flags", capital: "Capitals", currency: "Currencies", location: "Map", language: "Languages" };
 
 export default function PathsScreen() {
   const navigate = useNavigate();
@@ -30,7 +30,7 @@ export default function PathsScreen() {
       </button>
       <h1 className="screen-title">{region ?? "Learning paths"}</h1>
       {!region && (
-        <div className="mt-3 flex gap-2">
+        <div className="mt-3 flex flex-wrap gap-2">
           {PATH_TOPICS.map((topic) => {
             const active = progress.selectedTopic === topic;
             return (
