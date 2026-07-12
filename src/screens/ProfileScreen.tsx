@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthProvider";
 import Icon, { type IconName } from "../components/Icon";
 import ThemeSwitcher from "../components/ThemeSwitcher";
@@ -13,6 +14,7 @@ import { useGame } from "../state/GameProvider";
 import { BADGES } from "@flaggo/core/game/badges";
 
 export default function ProfileScreen() {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const confirm = useConfirm();
   const { installPrompt, isStandalone, promptInstall } = useInstallPrompt();
@@ -101,6 +103,8 @@ export default function ProfileScreen() {
           </div>
         ))}
       </div>
+
+      <button onClick={() => navigate("/stats")} className="btn-secondary mt-3 w-full">Full stats & region progress</button>
 
       <section className="mt-5 rounded-[22px] border border-line bg-paper p-4 shadow-card">
         <div className="mb-3 flex items-center justify-between gap-3">
