@@ -24,29 +24,27 @@ export default function HomeScreen() {
   const learnTopic: Topic = progress.selectedTopic === "capital" ? "capital" : "flag";
   const topicLessons = lessons.filter((lesson) => lesson.topic === learnTopic);
   const nextLesson = topicLessons.find((lesson) => !completed.has(lesson.id)) ?? lessons.filter((lesson) => lesson.topic === "flag").find((lesson) => !completed.has(lesson.id));
-  const doneCount = topicLessons.filter((lesson) => completed.has(lesson.id)).length;
-  const mastery = topicLessons.length ? Math.round((doneCount / topicLessons.length) * 100) : 0;
   const due = getDueCountries(progress, countries, learnTopic).slice(0, 8);
   const weak = getWeakCountries(progress, countries, learnTopic).slice(0, 8);
 
-  const quick: { label: string; icon: IconName; onClick: () => void }[] = [
-    { label: "Learn", icon: "learn", onClick: () => navigate("/learn") },
-    { label: "Find on map", icon: "globe", onClick: () => navigate("/map") },
-    { label: "Arcade", icon: "bolt", onClick: () => navigate("/arcade") },
-    { label: "Trivia", icon: "sparkle", onClick: () => navigate("/trivia") }
+  const explore: { label: string; desc: string; icon: IconName; onClick: () => void }[] = [
+    { label: "Arcade", desc: "Beat the clock", icon: "bolt", onClick: () => navigate("/arcade") },
+    { label: "Trivia", desc: "Quick-fire facts", icon: "sparkle", onClick: () => navigate("/trivia") },
+    { label: "World map", desc: "Find countries", icon: "globe", onClick: () => navigate("/map") },
+    { label: "Custom test", desc: "Test yourself", icon: "target", onClick: () => navigate("/test-setup") },
+    { label: "Flag library", desc: "Browse every flag", icon: "library", onClick: () => navigate("/library") },
+    { label: "Decks", desc: "Build practice sets", icon: "star", onClick: () => navigate("/decks") }
   ];
 
-  const more: { label: string; icon: IconName; onClick: () => void }[] = [
-    { label: "Flag library", icon: "library", onClick: () => navigate("/library") },
-    { label: "Decks", icon: "star", onClick: () => navigate("/decks") },
-    { label: "Stats", icon: "stats", onClick: () => navigate("/stats") }
-  ];
+  const isNewUser = !progress.xp && !progress.completedLessonIds.length && !Object.keys(progress.review).length;
 
-  const nextAction = due.length
-    ? { title: "Start review", sub: `${due.length} due now`, onClick: () => startReview(due, learnTopic) }
-    : weak.length
-      ? { title: "Practice weak spots", sub: `${weak.length} countries to reinforce`, onClick: () => startReview(weak, learnTopic) }
-      : { title: nextLesson ? "Continue learning" : "Browse lessons", sub: nextLesson?.title ?? "Choose a path", onClick: () => nextLesson ? openLesson(nextLesson) : navigate("/learn") };
+  const nextAction = isNewUser
+    ? { label: "Start here", title: "Learn your first flags", sub: "A 2-minute lesson to get going", cta: "Start lesson", onClick: () => nextLesson ? openLesson(nextLesson) : navigate("/learn") }
+    : due.length
+      ? { label: "Keep going", title: "Review what's due", sub: `${due.length} countries ready to review`, cta: "Review", onClick: () => startReview(due, learnTopic) }
+      : weak.length
+        ? { label: "Keep going", title: "Practice weak spots", sub: `${weak.length} countries to reinforce`, cta: "Practice", onClick: () => startReview(weak, learnTopic) }
+        : { label: "Keep going", title: nextLesson ? "Continue learning" : "Browse lessons", sub: nextLesson?.title ?? "Choose a path", cta: "Go", onClick: () => nextLesson ? openLesson(nextLesson) : navigate("/learn") };
 
   return (
     <div className="px-5 pb-5 pt-5">
@@ -65,7 +63,7 @@ export default function HomeScreen() {
         <span className="wl-dots absolute inset-0 opacity-90" />
         <div className="relative">
           <div className="flex items-center justify-between gap-3">
-            <p className="text-xs font-bold uppercase tracking-[0.12em] text-white/80">Today&apos;s five</p>
+            <p className="text-xs font-bold uppercase tracking-[0.12em] text-white/80">New round every day</p>
             <span className="rounded-full bg-white/15 px-3 py-1 text-xs font-bold">resets in {hoursToReset}h</span>
           </div>
           <h2 className="mt-3 font-display text-[32px] font-semibold leading-none">Daily challenge</h2>
@@ -80,34 +78,27 @@ export default function HomeScreen() {
         </div>
       </section>
 
-      <section className="mb-4 grid grid-cols-[1fr_auto] items-center gap-3 rounded-[22px] border border-line bg-paper p-4 shadow-card">
-        <div>
-          <p className="section-label">Progress pulse</p>
-          <h2 className="mt-1 font-display text-xl font-semibold text-ink">{nextAction.title}</h2>
-          <p className="text-sm font-semibold text-muted">{nextAction.sub}</p>
-        </div>
-        <div className="grid h-16 w-16 place-items-center rounded-2xl bg-surface text-center font-display text-xl font-black text-primary">{mastery}%</div>
-        <button onClick={nextAction.onClick} className="btn-primary col-span-2">Go</button>
+      <section className="mb-4 rounded-[22px] border border-line bg-paper p-4 shadow-card">
+        <p className="section-label">{nextAction.label}</p>
+        <h2 className="mt-1 font-display text-xl font-semibold text-ink">{nextAction.title}</h2>
+        <p className="text-sm font-semibold text-muted">{nextAction.sub}</p>
+        <button onClick={nextAction.onClick} className="btn-primary mt-3 w-full">{nextAction.cta}</button>
       </section>
 
-      <h2 className="mb-2.5 font-display text-xl font-semibold text-ink">Quick play</h2>
-      <div className="mb-6 grid grid-cols-2 gap-3">
-        {quick.map((q) => <Tile key={q.label} {...q} tone="primary" />)}
-      </div>
-
-      <h2 className="mb-2.5 font-display text-xl font-semibold text-ink">More</h2>
+      <h2 className="mb-2.5 font-display text-xl font-semibold text-ink">Explore</h2>
       <div className="grid grid-cols-2 gap-3">
-        {more.map((m) => <Tile key={m.label} {...m} tone="muted" />)}
+        {explore.map((item) => <Tile key={item.label} {...item} />)}
       </div>
     </div>
   );
 }
 
-function Tile({ label, icon, onClick, tone }: { label: string; icon: IconName; onClick: () => void; tone: "primary" | "muted" }) {
+function Tile({ label, desc, icon, onClick }: { label: string; desc: string; icon: IconName; onClick: () => void }) {
   return (
-    <button onClick={onClick} className="flex items-center gap-2.5 rounded-[18px] border border-line bg-paper p-3.5 text-left shadow-card">
-      <Icon name={icon} size={22} className={tone === "primary" ? "text-primary" : "text-muted"} />
-      <span className="font-semibold text-ink">{label}</span>
+    <button onClick={onClick} className="rounded-[18px] border border-line bg-paper p-3.5 text-left shadow-card">
+      <Icon name={icon} size={22} className="text-primary" />
+      <span className="mt-2 block font-semibold text-ink">{label}</span>
+      <span className="block text-[13px] font-medium text-muted">{desc}</span>
     </button>
   );
 }
