@@ -13,8 +13,6 @@ import { buildArcadeQuestions, buildLessonQuestions } from "@/quiz/buildQuestion
 import { describeQuestion, questionLabel, type QuizOption } from "@/quiz/describeQuestion";
 import { useProgress } from "@/state/ProgressProvider";
 import { useAuth } from "@/auth/AuthProvider";
-import { useNameClaim } from "@/components/NameClaimProvider";
-import { promptChallenge } from "@/social/challenge";
 import { themeColor } from "@/theme/palettes";
 import { useThemeStore } from "@/theme/store";
 import type { AppProgress } from "@flaggo/core/types/progress";
@@ -26,9 +24,6 @@ import { generateLessons } from "@flaggo/core/utils/lessonGenerator";
 import { deckCountries } from "@flaggo/core/utils/decks";
 import { countries } from "@flaggo/core/data/countries";
 import { buildDailyQuiz, dateKey, applyDailyResult } from "@flaggo/core/utils/dailyChallenge";
-import { buildMatchQuestions, normalizeMatchConfig, submitMatchResult, type MatchConfig } from "@/lib/matches";
-import { arcadeBoard, dailyBoard, submitScore } from "@/lib/leaderboard";
-import { writePendingMatch } from "@/lib/pendingMatch";
 import { earnedBadgeResults } from "@/lib/badges";
 import { syncStreakReminder } from "@/lib/streakReminder";
 import { persistArcadeBest } from "@flaggo/core/utils/arcade";
@@ -58,9 +53,6 @@ export default function QuizScreen() {
     mode?: string;
     topic?: string;
     amode?: string;
-    matchId?: string;
-    seed?: string;
-    config?: string;
     lessonId?: string;
     deckId?: string;
     codes?: string;
@@ -70,14 +62,12 @@ export default function QuizScreen() {
   const topic = (lesson?.topic as Topic) ?? (params.topic as Topic) ?? "flag";
   const isArcade = params.mode === "arcade";
   const isDaily = params.mode === "daily";
-  const isMatch = params.mode === "match";
   const arcadeMode = (params.amode as ArcadeMode) ?? "timed";
   const isTimedArcade = isArcade && (arcadeMode === "timed" || arcadeMode === "hard");
   const arcadeLimit = arcadeMode === "hard" ? 45 : 60;
 
   const { progress, setProgress } = useProgress();
   const { user } = useAuth();
-  const { ensureName } = useNameClaim();
   const theme = useThemeStore((s) => s.theme);
   const draft = useRef<AppProgress>(progress);
   const finishing = useRef(false);
@@ -89,13 +79,6 @@ export default function QuizScreen() {
       const codeSet = new Set(requestedCodes);
       const pool = countries.filter((country) => codeSet.has(country.code)).slice(0, 12);
       return generateReviewQuestions(pool, topic).map((question) => ({ question, topic }));
-    }
-    if (isMatch && params.seed && params.config) {
-      const config = normalizeMatchConfig(JSON.parse(params.config) as MatchConfig);
-      return buildMatchQuestions(params.seed, config, countries).map((m) => ({
-        question: m.question as Question,
-        topic: m.topic as Topic
-      }));
     }
     if (isDaily) {
       return buildDailyQuiz(dateKey(), countries).map((d) => ({ question: d.question as Question, topic: d.topic as Topic }));
@@ -113,7 +96,7 @@ export default function QuizScreen() {
     const qs = isArcade ? buildArcadeQuestions(topic, arcadeMode) : buildLessonQuestions(topic);
     return qs.map((question) => ({ question, topic }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isMatch, isDaily, isArcade, topic, arcadeMode, params.seed, params.config, params.deckId, params.codes, lesson]);
+  }, [isDaily, isArcade, topic, arcadeMode, params.deckId, params.codes, lesson]);
 
   const [index, setIndex] = useState(0);
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
@@ -219,32 +202,6 @@ export default function QuizScreen() {
     if (finishing.current) return;
     finishing.current = true;
     let done = draft.current;
-    if (isMatch) {
-      const newIds = evaluateBadges(done, countries, lessons, { kind: "match", score: scoreRef.current, total });
-      if (newIds.length) done = awardBadges(done, newIds);
-      draft.current = done;
-      setProgress(done);
-      if (params.matchId) {
-        if (user) {
-          try {
-            const name = await ensureName();
-            if (!name) {
-              finishing.current = false;
-              return;
-            }
-            await submitMatchResult(params.matchId, scoreRef.current, total, name);
-          } catch (error) {
-            setNotice(error instanceof Error ? error.message : "Could not save your challenge score.");
-            finishing.current = false;
-            return;
-          }
-        } else {
-          await writePendingMatch({ matchId: params.matchId, score: scoreRef.current, total, at: Date.now() });
-        }
-        router.replace({ pathname: "/match/[id]", params: { id: params.matchId, my: String(scoreRef.current) } });
-      }
-      return;
-    }
     const scoreToSubmit = scoreRef.current;
     if (isDaily) {
       done = applyDailyResult(done, dateKey(), { score: scoreToSubmit, total });
@@ -264,51 +221,15 @@ export default function QuizScreen() {
     setProgress(done);
     setFinished(true);
     if (isDaily) void syncStreakReminder(done).catch(() => undefined);
-    if (user && isDaily) {
-      void ensureName()
-        .then((name) => {
-          if (name) return submitScore(dailyBoard(dateKey()), scoreToSubmit, name);
-        })
-        .catch(() => undefined);
-    } else if (user && isArcade) {
-      const best = Math.max(draft.current.arcade[arcadeKey(arcadeMode, topic)] ?? 0, scoreToSubmit);
-      void ensureName()
-        .then((name) => {
-          if (name) return submitScore(arcadeBoard(arcadeMode, topic), best, name);
-        })
-        .catch(() => undefined);
-    }
   }
 
   if (finished) {
     const finalScore = Math.max(score, scoreRef.current);
     const streak = isDaily ? draft.current.daily.streak : isArcade ? undefined : draft.current.streak;
     const missed = results.filter((item) => !item.correct).length;
-    const signedOutCompeteAction = !user && (isDaily || isArcade)
-      ? [
-          {
-            label: "Sign in to compete",
-            variant: "secondary" as const,
-            onPress: () => router.replace("/profile")
-          }
-        ]
-      : [];
     const actions = isDaily
       ? [
-          {
-            label: "Challenge a friend",
-            variant: "primary" as const,
-            icon: "users" as const,
-            onPress: () => void promptChallenge(finalScore)
-          },
-          {
-            label: "See leaderboard",
-            variant: "secondary" as const,
-            icon: "trophy" as const,
-            onPress: () => router.replace("/leaderboard")
-          },
-          ...signedOutCompeteAction,
-          { label: "Done", variant: "secondary" as const, onPress: () => dismiss() }
+          { label: "Done", variant: "primary" as const, icon: "today" as const, onPress: () => dismiss() }
         ]
       : [
           ...(missed
@@ -331,7 +252,6 @@ export default function QuizScreen() {
                 params: { mode: params.mode ?? "lesson", topic, amode: arcadeMode }
               })
           },
-          ...signedOutCompeteAction,
           { label: "Done", variant: "secondary" as const, onPress: () => dismiss() }
         ];
     return (

@@ -21,10 +21,10 @@ export default function WelcomeScreen() {
         </View>
         <Text className="text-[40px] font-black text-ink lg:text-[56px]">Flaggo</Text>
         <Text className="text-center text-[13px] font-extrabold uppercase tracking-[2px] text-accent">
-          Geography, but make it a daily duel
+          Master the world, one round at a time
         </Text>
         <Text className="text-center text-[16px] font-semibold text-muted lg:max-w-[520px] lg:text-[18px]">
-          A fresh geography challenge every day. Same for everyone. Beat your friends.
+          A fresh geography challenge every day. Build your streak, master the world.
         </Text>
       </View>
       <View className="w-full max-w-[420px] self-center gap-3 px-5 pb-4 lg:pb-10">

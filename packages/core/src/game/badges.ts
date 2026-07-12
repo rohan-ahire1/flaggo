@@ -31,7 +31,7 @@ export const BADGES: BadgeMeta[] = [
 export type RoundContext = {
   score: number;
   total: number;
-  kind: "lesson" | "review" | "daily" | "arcade" | "trivia" | "test" | "map" | "match";
+  kind: "lesson" | "review" | "daily" | "arcade" | "trivia" | "test" | "map";
   arcadeMode?: ArcadeMode;
 };
 

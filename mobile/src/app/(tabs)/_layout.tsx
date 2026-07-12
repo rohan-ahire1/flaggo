@@ -8,7 +8,6 @@ import { useThemeStore } from "@/theme/store";
 const TAB_ITEMS: { name: string; title: string; icon: IconName }[] = [
   { name: "index", title: "Today", icon: "today" },
   { name: "review", title: "Play", icon: "play" },
-  { name: "challenge", title: "Challenge", icon: "flag" },
   { name: "learn", title: "Learn", icon: "book" },
   { name: "profile", title: "You", icon: "user" }
 ];

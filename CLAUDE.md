@@ -8,9 +8,9 @@ Flaggo (internal repo name `flaggo`, brand "Flaggo", tagline "Master the world,
 one round at a time") is a flags/geography learning game. Players learn and test
 themselves on countries across topics — flags, capitals, map locations, currencies,
 languages, and bordering neighbors — through lessons, a daily challenge, an arcade
-mode, trivia, map play, spaced-repetition review, custom decks, public leaderboards,
-and shareable head-to-head multiplayer "matches". Progress is saved locally and synced
-to Supabase when signed in. It's a mobile-first installable PWA. The free MVP keeps
+mode, trivia, map play, spaced-repetition review, and custom decks. Single-player only
+(multiplayer matches, friends, and leaderboards were removed). Progress is saved locally
+and synced to Supabase when signed in. It's a mobile-first installable PWA. The free MVP keeps
 Stripe checkout and AdSense code in the repo but disabled behind feature flags.
 
 ## Tech stack
@@ -43,8 +43,7 @@ Stripe checkout and AdSense code in the repo but disabled behind feature flags.
 - `pages/` — route-level pages (AuthCallback, Legal, NotFound, Pro).
 - `hooks/` — `useSyncedProgress` (local↔Supabase progress sync, debounced upserts, anon→user
   merge), `useEntitlement` (ads-removed entitlement).
-- `lib/` — `supabase.ts` (client, null if unconfigured), `leaderboard.ts`, `matches.ts`,
-  `analytics.ts`, `sentry.ts`.
+- `lib/` — `supabase.ts` (client, null if unconfigured), `analytics.ts`, `sentry.ts`.
 - `packages/core/src/utils/` — shared game logic: `quiz`, `lessonGenerator`, `spacedRepetition` (Leitner boxes),
   `dailyChallenge`, `arcade`, `trivia`, `geo`, `seededRandom` (deterministic seeded RNG so
   matches/daily are reproducible), `decks`, `storage` (localStorage), `progressMerge`.
@@ -67,8 +66,8 @@ Stripe checkout and AdSense code in the repo but disabled behind feature flags.
 
 `supabase/migrations/*.sql` (apply in filename order). Also `supabase/setup.sql` =
 combined idempotent paste-into-SQL-editor version. Tables (all RLS-enabled):
-`profiles`, `progress` (jsonb blob), `entitlements`, `purchases`, `leaderboard_scores`,
-`matches`, `match_results`, `friend_links`. RPCs: `top_scores`, `friends_leaderboard`.
+`profiles`, `progress` (jsonb blob), `entitlements`, `purchases`. (Social tables were
+dropped by migration `202607120001_drop_social.sql`.)
 A signup trigger (`handle_new_user`) seeds profile/progress/entitlements rows. Display
 names never store email (PII fix in migration `…0004`). See `docs/ARCHITECTURE.md`.
 
@@ -122,6 +121,6 @@ requested. For manual testing, use `netlify deploy` for preview deploys and avoi
   `VITE_MONETIZATION_ENABLED` is false.
 - Public display names must never be emails — use `sanitizeDisplayName` / `isPublicSafeHandle`.
 - Matches and the daily challenge are **seeded** (deterministic) so all players get the same
-  questions; preserve that when touching `packages/core/src/utils/seededRandom`, `matches`, `dailyChallenge`.
+  questions; preserve that when touching `packages/core/src/utils/seededRandom`, `dailyChallenge`.
 - Plans live in `plans/` (`*.plan.md`). See `plans/launch-free-mvp.plan.md` for launch intent.
 </content>

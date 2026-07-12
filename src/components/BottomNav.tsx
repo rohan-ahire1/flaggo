@@ -2,11 +2,10 @@ import { NavLink } from "react-router-dom";
 import Icon, { type IconName } from "./Icon";
 
 // Worldly IA: structured learning is the spine (Learn), with Today's habit loop
-// and the social/compete loop supporting retention. Each tab maps to a screen.
+// supporting retention. Each tab maps to a screen.
 const tabs: { to: string; label: string; icon: IconName; end?: boolean }[] = [
   { to: "/", label: "Today", icon: "today", end: true },
   { to: "/review", label: "Practice", icon: "play" },
-  { to: "/challenge", label: "Challenge", icon: "flag" },
   { to: "/learn", label: "Learn", icon: "book" },
   { to: "/profile", label: "You", icon: "user" }
 ];

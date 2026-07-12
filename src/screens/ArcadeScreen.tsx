@@ -7,7 +7,6 @@ import QuestionCard from "../components/QuestionCard";
 import RoundResults, { type RoundResultItem } from "../components/RoundResults";
 import { useConfirm } from "../components/ConfirmDialog";
 import { useAuth } from "../auth/AuthProvider";
-import { useNameClaim } from "../components/NameClaimProvider";
 import type { ArcadeMode } from "@flaggo/core/types/arcade";
 import { ARCADE_MODES, arcadeKey } from "@flaggo/core/types/arcade";
 import type { Country } from "@flaggo/core/types/country";
@@ -21,7 +20,6 @@ import { answerLabel, answerLabelForWrapper } from "@flaggo/core/game/answerLabe
 import { awardBadges, evaluateBadges } from "@flaggo/core/game/badges";
 import { trackEvent } from "../lib/analytics";
 import { earnedBadgeResults } from "../lib/badges";
-import { arcadeBoard, submitScore } from "../lib/leaderboard";
 import { useGame } from "../state/GameProvider";
 
 const WorldMap = lazy(() => import("../components/WorldMap"));
@@ -49,8 +47,7 @@ export default function ArcadeScreen() {
   const navigate = useNavigate();
   const confirm = useConfirm();
   const { user } = useAuth();
-  const { ensureName } = useNameClaim();
-  const { countries, lessons, progress, setProgress, openSignIn, createAndShareChallenge } = useGame();
+  const { countries, lessons, progress, setProgress } = useGame();
   const [mode, setMode] = useState<ArcadeMode>("timed");
   const [topic, setTopic] = useState<Topic>(progress.selectedTopic);
   const [running, setRunning] = useState(false);
@@ -135,8 +132,6 @@ export default function ArcadeScreen() {
     setDone(true);
     setRunning(false);
     trackEvent("arcade_complete", { mode, topic, score: finalScore });
-    const name = await ensureName();
-    if (name) await submitScore(arcadeBoard(mode, topic), Math.max(next.arcade[arcadeKey(mode, topic)] ?? 0, finalScore), name);
   }
 
   function continueNext() {
@@ -168,8 +163,6 @@ export default function ArcadeScreen() {
         earnedBadges={earnedBadgeResults(earnedBadgeIds)}
         actions={[
           { label: "Play again", variant: "primary", icon: "play", onPress: start },
-          { label: "Challenge a friend", variant: "secondary", icon: "flag", onPress: () => void createAndShareChallenge() },
-          { label: "View leaderboard", variant: "secondary", icon: "trophy", onPress: () => navigate("/leaderboard") },
           { label: "Done", variant: "secondary", icon: "today", onPress: () => navigate("/") }
         ]}
       />
@@ -241,7 +234,6 @@ export default function ArcadeScreen() {
 
         <div className="mt-7 grid gap-3">
           <button onClick={start} disabled={!pool.length} className="btn-primary">Start run</button>
-          {!user && <button onClick={openSignIn} className="btn-ghost">Sign in to compete</button>}
         </div>
       </main>
     );

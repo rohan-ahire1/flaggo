@@ -19,12 +19,12 @@ export default function WelcomeScreen() {
         <div>
           <h1 className="font-display text-[44px] font-semibold leading-none text-ink">{BRAND.name}</h1>
           <p className="mt-2 text-sm font-bold uppercase tracking-[0.06em] text-accentDeep">
-            Geography, but make it a daily duel
+            Master the world, one round at a time
           </p>
         </div>
 
         <p className="text-balance text-[19px] font-medium leading-snug text-ink">
-          A fresh 5-question challenge every day. Same for everyone. Beat your friends.
+          A fresh 5-question challenge every day. Build your streak, master the world.
         </p>
 
         <button

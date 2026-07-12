@@ -11,10 +11,8 @@ import { hashStringToSeed, mulberry32 } from "@flaggo/core/utils/seededRandom";
 import { buildTrivia, type TriviaMode, type TriviaRound } from "@flaggo/core/utils/trivia";
 import { triviaBoard } from "@flaggo/core/game/boards";
 import { awardBadges, evaluateBadges } from "@flaggo/core/game/badges";
-import { useNameClaim } from "../components/NameClaimProvider";
 import { trackEvent } from "../lib/analytics";
 import { earnedBadgeResults } from "../lib/badges";
-import { submitScore } from "../lib/leaderboard";
 import { useGame } from "../state/GameProvider";
 
 const MODES: { mode: TriviaMode; label: string; desc: string; icon: IconName }[] = [
@@ -46,7 +44,6 @@ export default function TriviaScreen() {
   const navigate = useNavigate();
   const confirm = useConfirm();
   const { user } = useAuth();
-  const { ensureName } = useNameClaim();
   const { countries, lessons, progress, setProgress } = useGame();
   const [mode, setMode] = useState<TriviaMode>("higher-lower");
   const [runMode, setRunMode] = useState<RunMode>("timed");
@@ -131,14 +128,6 @@ export default function TriviaScreen() {
     setDone(true);
     setRunning(false);
     trackEvent("trivia_complete", { mode, runMode, score: finalScore });
-    if (user) {
-      const bestScore = Math.max(progress.arcade[key] ?? 0, finalScore);
-      void ensureName()
-        .then((name) => {
-          if (name) return submitScore(triviaBoard(mode), bestScore, name);
-        })
-        .catch(() => undefined);
-    }
   }
 
   function continueNext() {

@@ -8,7 +8,6 @@ import { useThemeStore } from "@/theme/store";
 const NAV_ITEMS: { title: string; href: string; icon: IconName }[] = [
   { title: "Today", href: "/", icon: "today" },
   { title: "Play", href: "/review", icon: "play" },
-  { title: "Challenge", href: "/challenge", icon: "flag" },
   { title: "Learn", href: "/learn", icon: "book" },
   { title: "You", href: "/profile", icon: "user" }
 ];
@@ -24,9 +23,6 @@ function activeFor(pathname: string, href: string) {
       pathname.startsWith("/trivia") ||
       pathname.startsWith("/arcade")
     );
-  }
-  if (href === "/challenge") {
-    return pathname === "/challenge" || pathname.startsWith("/friends") || pathname.startsWith("/match");
   }
   return pathname === href;
 }

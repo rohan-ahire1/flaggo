@@ -41,15 +41,12 @@ function useFigtreeWebFont() {
 
 const ROUTE_TITLES: Record<string, string> = {
   "/": "Today",
-  "/challenge": "Challenge",
   "/learn": "Learn",
   "/review": "Play",
   "/profile": "You",
   "/quiz": "Quiz",
   "/arcade": "Arcade",
   "/decks": "Decks",
-  "/friends": "Friends",
-  "/leaderboard": "Leaderboard",
   "/library": "Flag Library",
   "/map": "World Map",
   "/map/explore": "Explore Map",
@@ -68,7 +65,7 @@ export default function WebDocumentHead() {
   useFigtreeWebFont();
   if (Platform.OS !== "web") return null;
 
-  const routeTitle = ROUTE_TITLES[pathname] ?? (pathname.startsWith("/match/") ? "Challenge Match" : "Flaggo");
+  const routeTitle = ROUTE_TITLES[pathname] ?? "Flaggo";
   const title = routeTitle === "Flaggo" ? BRAND.name : `${routeTitle} | ${BRAND.name}`;
   const description = "Master the world, one round at a time.";
 

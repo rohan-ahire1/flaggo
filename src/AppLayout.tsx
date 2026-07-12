@@ -1,5 +1,5 @@
 import { Suspense, useEffect, useRef } from "react";
-import { Outlet, useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import AdConsentBanner from "./ads/AdConsentBanner";
 import SignInModal from "./auth/SignInModal";
 import AppFooter from "./components/AppFooter";
@@ -14,22 +14,15 @@ const HIDE_CHROME_PREFIXES = [
   "/map/play",
   "/daily",
   "/arcade",
-  "/trivia",
-  "/match"
+  "/trivia"
 ];
 
 export default function AppLayout() {
   const location = useLocation();
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
   const welcomeChecked = useRef(false);
   const { progress, loading, toast, signInOpen, setSignInOpen } = useGame();
   const hideChrome = HIDE_CHROME_PREFIXES.some((path) => location.pathname === path || location.pathname.startsWith(`${path}/`));
-
-  useEffect(() => {
-    const id = searchParams.get("m");
-    if (id) navigate(`/match/${id}`, { replace: true });
-  }, [navigate, searchParams]);
 
   useEffect(() => {
     if (welcomeChecked.current || loading || location.pathname !== "/") return;
