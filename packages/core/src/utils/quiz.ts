@@ -255,6 +255,10 @@ export function generateLessonQuestions(lesson: Lesson, countries: Country[]): Q
     .map((code) => countries.find((country) => country.code === code))
     .filter(Boolean) as Country[];
   if (lesson.topic === "capital") return generateCapitalQuestions(lesson.id, lessonCountries, countries);
+  if (lesson.topic === "currency") return generateCurrencyQuestions(lesson.id, lessonCountries, countries);
+  if (lesson.topic === "language") return generateLanguageQuestions(lesson.id, lessonCountries, countries);
+  // Location lessons play on the map (MapQuestions built by the map screen), not as MCQs.
+  if (lesson.topic === "location") return [];
   return generateFlagQuestions(lesson.id, lessonCountries, countries);
 }
 

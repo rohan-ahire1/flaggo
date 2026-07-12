@@ -15,14 +15,18 @@ import type { Topic } from "@flaggo/core/types/topic";
 const REGION_ORDER = ["World", "Asia", "Europe", "Africa", "Americas", "Oceania", "Territories"];
 const LEARN_TOPICS: { key: Topic; label: string }[] = [
   { key: "flag", label: "Flags" },
-  { key: "capital", label: "Capitals" }
+  { key: "capital", label: "Capitals" },
+  { key: "currency", label: "Currencies" },
+  { key: "location", label: "Map" },
+  { key: "language", label: "Languages" }
 ];
+const COUNT_LABELS: Partial<Record<Topic, string>> = { capital: "capitals", currency: "currencies", location: "countries", language: "languages" };
 
 export default function LearnScreen() {
   const { progress } = useProgress();
   const theme = useThemeStore((s) => s.theme);
   const [topic, setTopic] = useState<Topic>(
-    progress.selectedTopic === "capital" ? "capital" : "flag"
+    LEARN_TOPICS.some((t) => t.key === progress.selectedTopic) ? progress.selectedTopic : "flag"
   );
   const [region, setRegion] = useState<string | null>(null);
 
@@ -40,6 +44,10 @@ export default function LearnScreen() {
   const visible = region ? topicLessons.filter((l) => l.region === region) : [];
 
   function openLesson(lesson: Lesson) {
+    if (lesson.topic === "location") {
+      router.push({ pathname: "/map/play", params: { mode: "locate", codes: lesson.countryCodes.join(","), lessonId: lesson.id } });
+      return;
+    }
     router.push({ pathname: "/quiz", params: { mode: "lesson", lessonId: lesson.id } });
   }
 
@@ -60,7 +68,7 @@ export default function LearnScreen() {
 
         {!region ? (
           <View className="gap-5">
-            <View className="flex-row gap-2">
+            <View className="flex-row flex-wrap gap-2">
               {LEARN_TOPICS.map((t) => {
                 const on = t.key === topic;
                 return (
@@ -118,7 +126,7 @@ export default function LearnScreen() {
                       {lesson.title}
                     </Text>
                     <Text className="text-[13px] font-semibold text-muted">
-                      {lesson.countryCodes.length} {topic === "capital" ? "capitals" : "flags"}
+                      {lesson.countryCodes.length} {COUNT_LABELS[topic] ?? "flags"}
                     </Text>
                   </View>
                 </Card>

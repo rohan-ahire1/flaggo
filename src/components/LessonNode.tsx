@@ -47,7 +47,8 @@ export default function LessonNode({
     return <span className="font-display text-lg font-black">{index + 1}</span>;
   };
 
-  const countLabel = lesson.topic === "capital" ? "capitals" : "flags";
+  const countLabels: Record<string, string> = { capital: "capitals", currency: "currencies", location: "countries", language: "languages" };
+  const countLabel = countLabels[lesson.topic] ?? "flags";
 
   return (
     <div className="flex items-stretch gap-3.5">

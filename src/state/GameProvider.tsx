@@ -107,6 +107,10 @@ export function GameProvider({ children }: { children: ReactNode }) {
   }, [authLoading, ensureName, user]);
 
   function openLesson(lesson: Lesson) {
+    if (lesson.topic === "location") {
+      navigate("/map/play", { state: { mode: "locate", countryCodes: lesson.countryCodes, lessonId: lesson.id } });
+      return;
+    }
     navigate("/lesson", { state: { lessonId: lesson.id } });
   }
 

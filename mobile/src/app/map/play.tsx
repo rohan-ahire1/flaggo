@@ -11,13 +11,15 @@ import { countries } from "@flaggo/core/data/countries";
 import { useProgress } from "@/state/ProgressProvider";
 import { generateMapQuestions, type MapMode } from "@flaggo/core/utils/quiz";
 import { updateReviewState } from "@flaggo/core/utils/spacedRepetition";
+import { updateStreak } from "@flaggo/core/utils/date";
 import { generateLessons } from "@flaggo/core/utils/lessonGenerator";
 import { awardBadges, evaluateBadges } from "@flaggo/core/game/badges";
 import { earnedBadgeResults } from "@/lib/badges";
 
 export default function MapPlayScreen() {
-  const params = useLocalSearchParams<{ mode?: string; codes?: string }>();
+  const params = useLocalSearchParams<{ mode?: string; codes?: string; lessonId?: string }>();
   const mode = (params.mode as MapMode) ?? "locate";
+  const lessonId = typeof params.lessonId === "string" && params.lessonId ? params.lessonId : undefined;
   const { progress, setProgress } = useProgress();
   const progressRef = useRef(progress);
   const scoreRef = useRef(0);
@@ -28,8 +30,10 @@ export default function MapPlayScreen() {
   const pool = useMemo(() => {
     const codes = new Set((params.codes ?? "").split(",").filter(Boolean));
     const list = codes.size ? countries.filter((c) => codes.has(c.code)) : countries;
+    // Lesson rounds keep their exact country set even when small.
+    if (lessonId) return list.length ? list : countries;
     return list.length >= 4 ? list : countries;
-  }, [params.codes]);
+  }, [lessonId, params.codes]);
   const byCode = useMemo(() => new Map(countries.map((c) => [c.code, c])), []);
   const questions = useMemo(() => generateMapQuestions(pool, mode), [pool, mode]);
 
@@ -82,7 +86,17 @@ export default function MapPlayScreen() {
     setFeedback(null);
     if (index + 1 >= questions.length) {
       let done = progressRef.current;
-      const newIds = evaluateBadges(done, countries, lessons, { kind: "map", score: scoreRef.current, total: questions.length });
+      if (lessonId) {
+        const total = questions.length || 1;
+        const perfect = scoreRef.current === total;
+        done = updateStreak({
+          ...done,
+          xp: done.xp + 25 + (perfect ? 20 : 0),
+          coins: done.coins + 5 + (perfect ? 10 : 0),
+          completedLessonIds: Array.from(new Set([...done.completedLessonIds, lessonId]))
+        });
+      }
+      const newIds = evaluateBadges(done, countries, lessons, { kind: lessonId ? "lesson" : "map", score: scoreRef.current, total: questions.length });
       if (newIds.length) done = awardBadges(done, newIds);
       progressRef.current = done;
       setEarnedBadgeIds(newIds);

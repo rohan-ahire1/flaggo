@@ -12,17 +12,18 @@ import { generateMapQuestions, type MapMode, type MapQuestion } from "@flaggo/co
 import { updateReviewState } from "@flaggo/core/utils/spacedRepetition";
 import { awardBadges, evaluateBadges } from "@flaggo/core/game/badges";
 import { useGame } from "../state/GameProvider";
+import { trackEvent } from "../lib/analytics";
 import { earnedBadgeResults } from "../lib/badges";
 
 const WorldMap = lazy(() => import("../components/WorldMap"));
 
-type MapRouteState = { mode: MapMode; countryCodes: string[] } | null;
+type MapRouteState = { mode: MapMode; countryCodes: string[]; lessonId?: string } | null;
 
 export default function MapPlayScreen() {
   const navigate = useNavigate();
   const confirm = useConfirm();
   const { state } = useLocation();
-  const { countries: allCountries, lessons, progress, setProgress, startMapPractice } = useGame();
+  const { countries: allCountries, lessons, progress, setProgress, startMapPractice, nextLearningLesson, openLesson } = useGame();
   const routeState = state as MapRouteState;
   // Keyed memo: a fresh array each render would regenerate questions mid-round.
   const codesKey = routeState?.countryCodes.join(",") ?? "";
@@ -37,7 +38,8 @@ export default function MapPlayScreen() {
     [allCountries, codesKey]
   );
   const mode = routeState?.mode ?? "locate";
-  const onExit = () => navigate("/map");
+  const lessonId = routeState?.lessonId;
+  const onExit = () => navigate(lessonId ? "/learn" : "/map");
   const questions = useMemo(() => generateMapQuestions(countries, mode), [countries, mode]);
   const countryByCode = useMemo(() => new Map(countries.map((country) => [country.code, country])), [countries]);
   const [currentProgress, setCurrentProgress] = useState(progress);
@@ -77,13 +79,17 @@ export default function MapPlayScreen() {
 
   function finishRound() {
     const total = questions.length || 1;
-    const bonusXp = 10;
-    let next = updateStreak({ ...currentProgress, xp: currentProgress.xp + bonusXp });
-    const newIds = evaluateBadges(next, allCountries, lessons, { kind: "map", score: correct, total });
+    const perfect = correct === total;
+    const bonusXp = lessonId ? 25 + (perfect ? 20 : 0) : 10;
+    const coinsEarned = lessonId ? 5 + (perfect ? 10 : 0) : 0;
+    let next = updateStreak({ ...currentProgress, xp: currentProgress.xp + bonusXp, coins: currentProgress.coins + coinsEarned });
+    if (lessonId) next = { ...next, completedLessonIds: Array.from(new Set([...next.completedLessonIds, lessonId])) };
+    const newIds = evaluateBadges(next, allCountries, lessons, { kind: lessonId ? "lesson" : "map", score: correct, total });
     if (newIds.length) next = awardBadges(next, newIds);
     setEarnedBadgeIds(newIds);
     setCurrentProgress(next);
     setProgress(next);
+    if (lessonId) trackEvent("lesson-complete", { accuracy: Math.round((correct / total) * 100), topic: "location" });
     setFinished(true);
   }
 
@@ -109,17 +115,28 @@ export default function MapPlayScreen() {
   }
 
   if (finished) {
+    const perfect = correct === (questions.length || 1);
+    const bonusXp = lessonId ? 25 + (perfect ? 20 : 0) : 10;
+    const nextLesson = lessonId ? nextLearningLesson("location") : undefined;
     return (
       <RoundResults
         score={correct}
         total={questions.length || 1}
         items={items}
-        caption={`+${xp + 10} XP`}
+        streak={lessonId ? currentProgress.streak : undefined}
+        caption={`+${xp + bonusXp} XP`}
         earnedBadges={earnedBadgeResults(earnedBadgeIds)}
-        actions={[
-          { label: "Play again", variant: "primary", icon: "play", onPress: () => startMapPractice(mode, countries) },
-          { label: "Back to map menu", variant: "secondary", icon: "globe", onPress: onExit }
-        ]}
+        actions={
+          lessonId
+            ? [
+                ...(nextLesson ? [{ label: "Continue learning", variant: "primary" as const, icon: "learn" as const, onPress: () => openLesson(nextLesson) }] : []),
+                { label: "Back to Learn", variant: nextLesson ? ("secondary" as const) : ("primary" as const), icon: "learn" as const, onPress: onExit }
+              ]
+            : [
+                { label: "Play again", variant: "primary", icon: "play", onPress: () => startMapPractice(mode, countries) },
+                { label: "Back to map menu", variant: "secondary", icon: "globe", onPress: onExit }
+              ]
+        }
       />
     );
   }
