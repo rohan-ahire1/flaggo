@@ -10,7 +10,7 @@ const MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct
 
 export default function HomeScreen() {
   const navigate = useNavigate();
-  const { countries, progress, lessons, openLesson, startReview, createAndShareChallenge } = useGame();
+  const { countries, progress, lessons, openLesson, startReview } = useGame();
   const today = new Date();
   const todayKey = today.toISOString().slice(0, 10);
   const dailyResult = progress.daily.history[todayKey];
@@ -37,11 +37,9 @@ export default function HomeScreen() {
   ];
 
   const more: { label: string; icon: IconName; onClick: () => void }[] = [
-    { label: "Leaderboard", icon: "trophy", onClick: () => navigate("/leaderboard") },
     { label: "Flag library", icon: "library", onClick: () => navigate("/library") },
     { label: "Decks", icon: "star", onClick: () => navigate("/decks") },
-    { label: "Stats", icon: "stats", onClick: () => navigate("/stats") },
-    { label: "Friends", icon: "user", onClick: () => navigate("/friends") }
+    { label: "Stats", icon: "stats", onClick: () => navigate("/stats") }
   ];
 
   const nextAction = due.length
@@ -91,15 +89,6 @@ export default function HomeScreen() {
         <div className="grid h-16 w-16 place-items-center rounded-2xl bg-surface text-center font-display text-xl font-black text-primary">{mastery}%</div>
         <button onClick={nextAction.onClick} className="btn-primary col-span-2">Go</button>
       </section>
-
-      <button onClick={() => void createAndShareChallenge()} className="mb-6 flex w-full items-center gap-3.5 rounded-[20px] border border-line bg-surface p-3.5 text-left">
-        <span className="grid h-[46px] w-[46px] flex-none place-items-center rounded-[14px] bg-accent text-white"><Icon name="flag" size={24} /></span>
-        <span className="flex-1">
-          <span className="block font-display text-[18px] font-semibold text-ink">Challenge a friend</span>
-          <span className="block text-[13px] text-muted">Send a shared round and compare</span>
-        </span>
-        <Icon name="chevron" size={20} className="text-muted" />
-      </button>
 
       <h2 className="mb-2.5 font-display text-xl font-semibold text-ink">Quick play</h2>
       <div className="mb-6 grid grid-cols-2 gap-3">

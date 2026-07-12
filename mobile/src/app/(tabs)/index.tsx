@@ -7,7 +7,6 @@ import { Card, Pill, PillButton, SectionLabel, softShadow } from "@/components/u
 import { useEffect } from "react";
 import { useProgress } from "@/state/ProgressProvider";
 import { useOnboardStore } from "@/state/onboarding";
-import { promptChallenge } from "@/social/challenge";
 import { countries } from "@flaggo/core/data/countries";
 import { DAILY_QUESTION_COUNT, dateKey } from "@flaggo/core/utils/dailyChallenge";
 import { getDueCountries, getMasteredCountries, getWeakCountries } from "@flaggo/core/utils/spacedRepetition";
@@ -145,18 +144,6 @@ export default function HomeScreen() {
                 : router.push({ pathname: "/quiz", params: { mode: "lesson", topic: focusTopic } })
             }
           />
-        </Card>
-
-        {/* Challenge a friend */}
-        <Card onPress={() => void promptChallenge()} className="flex-row items-center gap-3">
-          <View className="h-11 w-11 items-center justify-center rounded-2xl bg-accent">
-            <Icon name="users" size={22} color="#ffffff" />
-          </View>
-          <View className="flex-1">
-            <Text className="text-[17px] font-black text-ink">Challenge a friend</Text>
-            <Text className="text-[13px] font-semibold text-muted">Send today's exact round & compare</Text>
-          </View>
-          <Icon name="chevron-right" size={22} color={themeColor(theme, "muted")} />
         </Card>
 
         {/* Quick play */}

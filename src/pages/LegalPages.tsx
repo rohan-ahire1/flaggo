@@ -21,7 +21,6 @@ export function PrivacyPage() {
       <p>{BRAND.name} stores learning progress so you can practice geography trivia and, when signed in, sync progress across devices.</p>
       <p>Account data is handled by Supabase Auth. If you create an account or sign in with email and password, {BRAND.name} receives basic account identifiers such as your email address and Supabase user ID.</p>
       <p>Progress is stored locally in your browser and, for signed-in users, in Supabase as a JSON progress record.</p>
-      <p>If you opt into leaderboards, your chosen display name and submitted score are publicly visible. Your email address and account ID are never shown in leaderboard results.</p>
       <p>Ads are currently disabled. If ads return later, {BRAND.name} will only load Google AdSense after consent, including cookies or similar technologies for ad measurement and personalization. Plausible analytics records privacy-friendly product events without personal identifiers. Sentry may receive error diagnostics when configured.</p>
       <p>You can request data deletion or privacy help at {contact}. You can also delete your account and learning data from the Profile screen when signed in.</p>
     </LegalLayout>

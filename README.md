@@ -8,7 +8,6 @@ Flaggo — master world geography, one round at a time.
 
 - Flag, capital, trivia, map, arcade, daily challenge, and review practice modes.
 - Spaced repetition progress saved locally and synced with Supabase when signed in.
-- Public leaderboards, friend links, and shareable multiplayer challenges.
 - Theme palettes with a light default and persistent user preference.
 - PWA install support with offline app shell and cached flag assets.
 - Free-MVP launch mode: Stripe checkout and AdSense code remain in the repo but are hidden by default behind feature flags.

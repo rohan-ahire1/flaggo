@@ -5,7 +5,6 @@ import { lazy } from "react";
 import AppLayout from "./AppLayout";
 import { ThemeProvider } from "./theme/ThemeProvider";
 import { AuthProvider } from "./auth/AuthProvider";
-import { NameClaimProvider } from "./components/NameClaimProvider";
 import { ConfirmProvider } from "./components/ConfirmDialog";
 import { InstallPromptProvider } from "./components/InstallPromptProvider";
 import { GameProvider } from "./state/GameProvider";
@@ -31,12 +30,7 @@ const DailyChallengeScreen = lazy(() => import("./screens/DailyChallengeScreen")
 const PathsScreen = lazy(() => import("./screens/PathsScreen"));
 const ArcadeScreen = lazy(() => import("./screens/ArcadeScreen"));
 const DecksScreen = lazy(() => import("./screens/DecksScreen"));
-const LeaderboardScreen = lazy(() => import("./screens/LeaderboardScreen"));
 const TriviaScreen = lazy(() => import("./screens/TriviaScreen"));
-const MatchScreen = lazy(() => import("./screens/MatchScreen"));
-const MatchResultScreen = lazy(() => import("./screens/MatchResultScreen"));
-const FriendsScreen = lazy(() => import("./screens/FriendsScreen"));
-const ChallengeScreen = lazy(() => import("./screens/ChallengeScreen"));
 
 function PageTracker() {
   const location = useLocation();
@@ -57,7 +51,6 @@ export default function AppShell() {
       <AuthProvider>
         <ConfirmProvider>
         <InstallPromptProvider>
-        <NameClaimProvider>
         <GameProvider>
           <PageTracker />
           <Routes>
@@ -78,13 +71,8 @@ export default function AppShell() {
               <Route path="/map/explore" element={<ExploreMapScreen />} />
               <Route path="/decks" element={<DecksScreen />} />
               <Route path="/library" element={<FlagsLibraryScreen />} />
-              <Route path="/leaderboard" element={<LeaderboardScreen />} />
-              <Route path="/friends" element={<FriendsScreen />} />
-              <Route path="/challenge" element={<ChallengeScreen />} />
               <Route path="/stats" element={<StatsScreen />} />
               <Route path="/profile" element={<ProfileScreen />} />
-              <Route path="/match/:id" element={<MatchScreen />} />
-              <Route path="/match/:id/result" element={<MatchResultScreen />} />
             </Route>
             <Route path="/privacy" element={<PrivacyPage />} />
             <Route path="/terms" element={<TermsPage />} />
@@ -92,7 +80,6 @@ export default function AppShell() {
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </GameProvider>
-        </NameClaimProvider>
         </InstallPromptProvider>
         </ConfirmProvider>
       </AuthProvider>

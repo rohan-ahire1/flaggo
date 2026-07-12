@@ -9,8 +9,6 @@ import { Badge, Card, PillButton, Pill, SectionLabel } from "@/components/ui";
 import { countries } from "@flaggo/core/data/countries";
 import { useProgress } from "@/state/ProgressProvider";
 import { useAuth } from "@/auth/AuthProvider";
-import { useNameClaim } from "@/components/NameClaimProvider";
-import { submitScore } from "@/lib/leaderboard";
 import { arcadeScore } from "@flaggo/core/utils/arcade";
 import { triviaBoard } from "@flaggo/core/game/boards";
 import { awardBadges, evaluateBadges } from "@flaggo/core/game/badges";
@@ -41,7 +39,6 @@ function answerLabel(round: TriviaRound) {
 export default function TriviaScreen() {
   const { progress, setProgress } = useProgress();
   const { user } = useAuth();
-  const { ensureName } = useNameClaim();
   const theme = useThemeStore((s) => s.theme);
   const lessons = useMemo(() => generateLessons(countries), []);
   const [mode, setMode] = useState<TriviaMode>("higher-lower");
@@ -103,14 +100,6 @@ export default function TriviaScreen() {
     setProgress(next);
     setDone(true);
     setRunning(false);
-    if (user) {
-      const bestScore = Math.max(progress.arcade[key] ?? 0, finalScore);
-      void ensureName()
-        .then((name) => {
-          if (name) return submitScore(triviaBoard(mode), bestScore, name);
-        })
-        .catch(() => undefined);
-    }
   }
   function continueNext() {
     if (!feedback) return;

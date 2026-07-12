@@ -120,7 +120,7 @@ export default function ProfileScreen() {
       }
     };
 
-    const message = "This removes your synced progress, scores and matches permanently.";
+    const message = "This removes your synced progress permanently.";
     if (Platform.OS === "web") {
       if (typeof window !== "undefined" && window.confirm(`Delete account?\n\n${message}`)) void run();
       return;
@@ -256,8 +256,6 @@ export default function ProfileScreen() {
         {/* Social */}
         <View className="gap-3 lg:w-[48%]">
           <SectionLabel>Compete</SectionLabel>
-          <LinkRow icon="users" label="Friends" sub="Head-to-head standings" onPress={() => router.push("/friends")} />
-          <LinkRow icon="trophy" label="Leaderboard" sub="Daily & all-time XP" onPress={() => router.push("/leaderboard")} />
         </View>
 
         {/* Appearance */}

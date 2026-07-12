@@ -7,22 +7,19 @@ import QuestionCard from "../components/QuestionCard";
 import RoundResults, { type RoundResultItem } from "../components/RoundResults";
 import { useConfirm } from "../components/ConfirmDialog";
 import { useAuth } from "../auth/AuthProvider";
-import { useNameClaim } from "../components/NameClaimProvider";
 import { applyDailyResult, buildDailyQuiz, dateKey, type DailyQuestion } from "@flaggo/core/utils/dailyChallenge";
 import { updateReviewState } from "@flaggo/core/utils/spacedRepetition";
 import { answerLabelForWrapper } from "@flaggo/core/game/answerLabel";
 import { awardBadges, evaluateBadges } from "@flaggo/core/game/badges";
 import { trackEvent } from "../lib/analytics";
 import { earnedBadgeResults } from "../lib/badges";
-import { dailyBoard, submitScore } from "../lib/leaderboard";
 import { useGame } from "../state/GameProvider";
 
 export default function DailyChallengeScreen() {
   const navigate = useNavigate();
   const confirm = useConfirm();
   const { user } = useAuth();
-  const { ensureName } = useNameClaim();
-  const { countries, lessons, progress, setProgress, openSignIn, createAndShareChallenge } = useGame();
+  const { countries, lessons, progress, setProgress } = useGame();
   const today = dateKey();
   const questions = useMemo(() => buildDailyQuiz(today, countries), [countries, today]);
   const [index, setIndex] = useState(0);
@@ -68,8 +65,6 @@ export default function DailyChallengeScreen() {
     setProgress(next);
     setComplete(true);
     trackEvent("daily_complete", { date: today, score: result.score, streak: next.daily.streak });
-    const name = await ensureName();
-    if (name) await submitScore(dailyBoard(today), result.score, name);
   }
 
   function continueNext() {
@@ -101,10 +96,7 @@ export default function DailyChallengeScreen() {
         caption={`+${correct * 10} XP · streak ${currentProgress.daily.streak}`}
         earnedBadges={earnedBadgeResults(earnedBadgeIds)}
         actions={[
-          { label: "Challenge a friend", variant: "primary", icon: "flag", onPress: () => void createAndShareChallenge() },
-          { label: "See leaderboard", variant: "secondary", icon: "trophy", onPress: () => navigate("/leaderboard") },
-          { label: "Done", variant: "secondary", icon: "today", onPress: () => navigate("/") },
-          ...(!user ? [{ label: "Sign in to compete", variant: "ghost" as const, onPress: openSignIn }] : [])
+          { label: "Done", variant: "primary", icon: "today", onPress: () => navigate("/") }
         ]}
       />
     );
