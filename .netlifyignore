@@ -4,8 +4,15 @@ mobile/node_modules
 mobile/dist
 mobile/.expo
 mobile/.expo-shared
+mobile/android/.gradle
+mobile/android/.cxx
+mobile/android/app/build
+mobile/android/build
 ui-audit-screenshots
 coverage
 .git
 .DS_Store
 *.log
+.env
+.env.*
+deploy-*.zip
