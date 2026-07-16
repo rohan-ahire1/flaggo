@@ -4,3 +4,9 @@ dist
 .DS_Store
 countries.raw.json
 *.local
+
+# Local deployment bundles and environment files
+deploy-*.zip
+.env
+.env.*
+!.env.example
