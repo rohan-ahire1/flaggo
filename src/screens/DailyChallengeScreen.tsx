@@ -25,7 +25,7 @@ export default function DailyChallengeScreen() {
   const [index, setIndex] = useState(0);
   const [currentProgress, setCurrentProgress] = useState(progress);
   const [correct, setCorrect] = useState(0);
-  const [feedback, setFeedback] = useState<{ ok: boolean; question: DailyQuestion; wrongCode?: string } | null>(null);
+  const [feedback, setFeedback] = useState<{ ok: boolean; question: DailyQuestion; selectedLabel?: string } | null>(null);
   const [complete, setComplete] = useState(false);
   const [items, setItems] = useState<RoundResultItem[]>([]);
   const [earnedBadgeIds, setEarnedBadgeIds] = useState<string[]>([]);
@@ -52,7 +52,7 @@ export default function DailyChallengeScreen() {
       flagUrl: question.country.flagUrl,
       context: [question.country.subregion, question.country.capital ? `Capital: ${question.country.capital}` : ""].filter(Boolean).join(" · ")
     }]);
-    setFeedback({ ok, question, wrongCode: selectedLabel });
+    setFeedback({ ok, question, selectedLabel });
   }
 
   async function finish() {
@@ -117,9 +117,19 @@ export default function DailyChallengeScreen() {
         </div>
       </header>
       <section key={question.id} className="animate-fade-in p-5">
-        <QuestionCard question={question.question} disabled={Boolean(feedback)} onAnswer={answer} />
+        <QuestionCard question={question.question} disabled={Boolean(feedback)} selectedLabel={feedback?.selectedLabel} onAnswer={answer} />
       </section>
-      {feedback && <FeedbackPanel correct={feedback.ok} country={feedback.question.country} xp={10} answerLabel={answerLabelForWrapper(feedback.question)} onContinue={continueNext} />}
+      {feedback && (
+        <FeedbackPanel
+          correct={feedback.ok}
+          country={feedback.question.country}
+          xp={feedback.ok ? 10 : 0}
+          answerLabel={answerLabelForWrapper(feedback.question)}
+          selectedLabel={feedback.selectedLabel}
+          revealCorrectFlag={feedback.question.question.type === "pick-flag"}
+          onContinue={continueNext}
+        />
+      )}
     </main>
   );
 }

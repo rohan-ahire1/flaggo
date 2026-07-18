@@ -9,7 +9,7 @@ const ProgressContext = createContext<ProgressContextValue | null>(null);
 
 export function ProgressProvider({ children }: { children: ReactNode }) {
   const value = useSyncedProgress();
-  return <ProgressContext.Provider value={value}>{children}</ProgressContext.Provider>;
+  return <ProgressContext.Provider value={value}>{value.loading ? null : children}</ProgressContext.Provider>;
 }
 
 export function useProgress(): ProgressContextValue {

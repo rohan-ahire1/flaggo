@@ -1,12 +1,12 @@
 import { NavLink } from "react-router-dom";
 import Icon, { type IconName } from "./Icon";
 
-// Worldly IA: structured learning is the spine (Learn), with Today's habit loop
-// supporting retention. Each tab maps to a screen.
+// Flag mastery is the spine. The library supports recognition and review;
+// profile contains the wider progress and settings surface.
 const tabs: { to: string; label: string; icon: IconName; end?: boolean }[] = [
-  { to: "/", label: "Today", icon: "today", end: true },
-  { to: "/review", label: "Practice", icon: "play" },
-  { to: "/learn", label: "Learn", icon: "book" },
+  { to: "/", label: "Learn", icon: "flag", end: true },
+  { to: "/review", label: "Review", icon: "review" },
+  { to: "/library", label: "Flags", icon: "library" },
   { to: "/profile", label: "You", icon: "user" }
 ];
 

@@ -92,7 +92,7 @@ export default function StatsScreen() {
           <Card className="gap-3">
             {regions.map((region) => {
               const group = topicCountries.filter((c) => c.continent === region);
-              const done = group.filter((c) => (progress.review[reviewKey(c.code, topic)]?.box ?? 0) >= 5).length;
+              const done = getMasteredCountries(progress, group, topic).length;
               const pct = group.length ? Math.round((done / group.length) * 100) : 0;
               return (
                 <View key={region} className="gap-1">

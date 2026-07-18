@@ -1,101 +1,126 @@
 import { useNavigate } from "react-router-dom";
 import Icon, { type IconName } from "../components/Icon";
 import { DAILY_QUESTION_COUNT } from "@flaggo/core/utils/dailyChallenge";
-import type { Topic } from "@flaggo/core/types/topic";
-import { getDueCountries, getWeakCountries } from "@flaggo/core/utils/spacedRepetition";
+import { progressiveResults, type ProgressiveStage } from "@flaggo/core/utils/progressivePractice";
 import { useGame } from "../state/GameProvider";
 
-const DOW = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-const MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const STAGE_LABEL: Record<ProgressiveStage, string> = { easy: "easy", medium: "medium", hard: "hard" };
 
 export default function HomeScreen() {
   const navigate = useNavigate();
-  const { countries, progress, lessons, openLesson, startReview } = useGame();
-  const today = new Date();
-  const todayKey = today.toISOString().slice(0, 10);
+  const { countries, progress } = useGame();
+  const todayKey = new Date().toISOString().slice(0, 10);
   const dailyResult = progress.daily.history[todayKey];
-  const played = Boolean(dailyResult);
-  const total = dailyResult?.total ?? DAILY_QUESTION_COUNT;
-  const score = dailyResult?.score ?? 0;
-  const streak = progress.daily.streak;
-  const hoursToReset = 24 - today.getUTCHours();
 
-  const completed = new Set(progress.completedLessonIds);
-  const learnTopic: Topic = progress.selectedTopic === "capital" ? "capital" : "flag";
-  const topicLessons = lessons.filter((lesson) => lesson.topic === learnTopic);
-  const nextLesson = topicLessons.find((lesson) => !completed.has(lesson.id)) ?? lessons.filter((lesson) => lesson.topic === "flag").find((lesson) => !completed.has(lesson.id));
-  const due = getDueCountries(progress, countries, learnTopic).slice(0, 8);
-  const weak = getWeakCountries(progress, countries, learnTopic).slice(0, 8);
+  const learning = progressiveResults(progress, countries);
+  const introducedPercent = countries.length ? Math.round((learning.seen / countries.length) * 100) : 0;
+  const isNewUser = learning.seen === 0;
 
-  const explore: { label: string; desc: string; icon: IconName; onClick: () => void }[] = [
-    { label: "Arcade", desc: "Beat the clock", icon: "bolt", onClick: () => navigate("/arcade") },
-    { label: "Trivia", desc: "Quick-fire facts", icon: "sparkle", onClick: () => navigate("/trivia") },
+  const nextAction = isNewUser
+    ? {
+        label: "Start here",
+        title: "Learn your first flags",
+        sub: "Start with easier flags and repeat mistakes until they stick.",
+        cta: "Start progressive learning"
+      }
+    : {
+        label: "Progressive learning",
+        title: `Continue with ${STAGE_LABEL[learning.stage]} flags`,
+        sub: learning.needsRepetition
+          ? `${learning.needsRepetition} ${learning.needsRepetition === 1 ? "flag needs" : "flags need"} repetition alongside new material.`
+          : "Keep introducing new flags at your current stage.",
+        cta: "Continue learning"
+      };
+
+  const moreModes: { label: string; desc: string; icon: IconName; onClick: () => void }[] = [
+    { label: "Challenge modes", desc: "120s timed or three strikes", icon: "bolt", onClick: () => navigate("/arcade?mode=timed") },
     { label: "World map", desc: "Find countries", icon: "globe", onClick: () => navigate("/map") },
-    { label: "Custom test", desc: "Test yourself", icon: "target", onClick: () => navigate("/test-setup") },
-    { label: "Flag library", desc: "Browse every flag", icon: "library", onClick: () => navigate("/library") },
+    { label: "Trivia", desc: "Quick-fire facts", icon: "sparkle", onClick: () => navigate("/trivia") },
+    { label: "Custom test", desc: "Choose your challenge", icon: "target", onClick: () => navigate("/test-setup") },
     { label: "Decks", desc: "Build practice sets", icon: "star", onClick: () => navigate("/decks") }
   ];
 
-  const isNewUser = !progress.xp && !progress.completedLessonIds.length && !Object.keys(progress.review).length;
-
-  const nextAction = isNewUser
-    ? { label: "Start here", title: "Learn your first flags", sub: "A 2-minute lesson to get going", cta: "Start lesson", onClick: () => nextLesson ? openLesson(nextLesson) : navigate("/learn") }
-    : due.length
-      ? { label: "Keep going", title: "Review what's due", sub: `${due.length} countries ready to review`, cta: "Review", onClick: () => startReview(due, learnTopic) }
-      : weak.length
-        ? { label: "Keep going", title: "Practice weak spots", sub: `${weak.length} countries to reinforce`, cta: "Practice", onClick: () => startReview(weak, learnTopic) }
-        : { label: "Keep going", title: nextLesson ? "Continue learning" : "Browse lessons", sub: nextLesson?.title ?? "Choose a path", cta: "Go", onClick: () => nextLesson ? openLesson(nextLesson) : navigate("/learn") };
-
   return (
     <div className="px-5 pb-5 pt-5">
-      <header className="mb-5 flex items-start justify-between">
+      <header className="mb-5 flex items-start justify-between gap-4">
         <div>
-          <h1 className="screen-title">Today</h1>
-          <p className="mt-1 text-sm font-medium text-muted">{DOW[today.getDay()]}, {MON[today.getMonth()]} {today.getDate()}</p>
+          <p className="section-label">Your world flag journey</p>
+          <h1 className="screen-title mt-1">Learn every flag</h1>
+          <p className="mt-1 text-sm font-medium text-muted">One small lesson. Smart reviews. Lasting recall.</p>
         </div>
-        <div className="flex items-center gap-1.5 rounded-[22px] border border-line bg-surface px-3.5 py-1.5 text-[17px] font-bold text-accent">
+        <div className="flex shrink-0 items-center gap-1.5 rounded-[22px] border border-line bg-surface px-3.5 py-1.5 text-[17px] font-bold text-accent">
           <Icon name="flame" size={17} />
-          {streak}
+          {progress.streak}
         </div>
       </header>
 
       <section className="relative mb-4 overflow-hidden rounded-[26px] bg-primary p-5 text-white shadow-card-lg">
         <span className="wl-dots absolute inset-0 opacity-90" />
         <div className="relative">
-          <div className="flex items-center justify-between gap-3">
-            <p className="text-xs font-bold uppercase tracking-[0.12em] text-white/80">New round every day</p>
-            <span className="rounded-full bg-white/15 px-3 py-1 text-xs font-bold">resets in {hoursToReset}h</span>
-          </div>
-          <h2 className="mt-3 font-display text-[32px] font-semibold leading-none">Daily challenge</h2>
-          <div className="mt-4 flex gap-1.5">
-            {Array.from({ length: total }).map((_, index) => (
-              <span key={index} className={`h-2 flex-1 rounded-full ${played && index < score ? "bg-white" : "bg-white/25"}`} />
-            ))}
-          </div>
-          <button onClick={() => navigate("/daily")} className="btn-inverse mt-5 w-full">
-            {played ? "Play again" : "Play today's Five"}
+          <p className="text-xs font-bold uppercase tracking-[0.12em] text-white/75">{nextAction.label}</p>
+          <h2 className="mt-2 font-display text-[30px] font-semibold leading-tight">{nextAction.title}</h2>
+          <p className="mt-1 text-sm font-semibold text-white/80">{nextAction.sub}</p>
+          <button onClick={() => navigate("/arcade?mode=progressive&start=1")} className="btn-inverse mt-5 w-full">
+            <Icon name="learn" size={19} /> {nextAction.cta}
           </button>
+
+          <div className="mt-5 border-t border-white/20 pt-4">
+            <div className="flex items-end justify-between gap-4">
+              <div>
+                <span className="font-display text-3xl font-semibold">{learning.seen}</span>
+                <span className="text-sm font-bold text-white/75"> / {countries.length} introduced</span>
+              </div>
+              <span className="text-sm font-bold text-white/80">{learning.mastered} mastered</span>
+            </div>
+            <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-white/20">
+              <div className="h-full rounded-full bg-white transition-all duration-500" style={{ width: `${introducedPercent}%` }} />
+            </div>
+          </div>
         </div>
       </section>
 
-      <section className="mb-4 rounded-[22px] border border-line bg-paper p-4 shadow-card">
-        <p className="section-label">{nextAction.label}</p>
-        <h2 className="mt-1 font-display text-xl font-semibold text-ink">{nextAction.title}</h2>
-        <p className="text-sm font-semibold text-muted">{nextAction.sub}</p>
-        <button onClick={nextAction.onClick} className="btn-primary mt-3 w-full">{nextAction.cta}</button>
-      </section>
+      <div className="mb-5 grid grid-cols-2 gap-3">
+        <button onClick={() => navigate("/learn")} className="rounded-[18px] border border-line bg-paper p-3.5 text-left shadow-card">
+          <Icon name="book" size={22} className="text-primary" />
+          <span className="mt-2 block font-semibold text-ink">Flag lessons</span>
+          <span className="block text-[13px] font-medium text-muted">Choose a region</span>
+        </button>
+        <button onClick={() => navigate("/arcade?mode=progressive&tab=results")} className="rounded-[18px] border border-line bg-paper p-3.5 text-left shadow-card">
+          <Icon name="stats" size={22} className="text-primary" />
+          <span className="mt-2 block font-semibold text-ink">Learning results</span>
+          <span className="block text-[13px] font-medium text-muted">Progress by difficulty</span>
+        </button>
+      </div>
 
-      <h2 className="mb-2.5 font-display text-xl font-semibold text-ink">Explore</h2>
+      <button
+        onClick={() => navigate("/daily")}
+        className="mb-6 flex w-full items-center gap-3 rounded-[20px] border border-line bg-surface p-4 text-left shadow-card"
+      >
+        <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-accent/15 text-accentDeep">
+          <Icon name="today" size={22} />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block font-display text-lg font-semibold text-ink">Daily challenge</span>
+          <span className="block text-[13px] font-medium text-muted">
+            {dailyResult ? `${dailyResult.score}/${dailyResult.total} today · play again` : `${DAILY_QUESTION_COUNT} mixed questions · about 90 seconds`}
+          </span>
+        </span>
+        <Icon name="chevron" size={18} className="shrink-0 text-muted" />
+      </button>
+
+      <h2 className="mb-2.5 font-display text-xl font-semibold text-ink">More ways to play</h2>
       <div className="grid grid-cols-2 gap-3">
-        {explore.map((item) => <Tile key={item.label} {...item} />)}
+        {moreModes.map((item, index) => (
+          <Tile key={item.label} {...item} wide={index === moreModes.length - 1} />
+        ))}
       </div>
     </div>
   );
 }
 
-function Tile({ label, desc, icon, onClick }: { label: string; desc: string; icon: IconName; onClick: () => void }) {
+function Tile({ label, desc, icon, onClick, wide = false }: { label: string; desc: string; icon: IconName; onClick: () => void; wide?: boolean }) {
   return (
-    <button onClick={onClick} className="rounded-[18px] border border-line bg-paper p-3.5 text-left shadow-card">
+    <button onClick={onClick} className={`rounded-[18px] border border-line bg-paper p-3.5 text-left shadow-card ${wide ? "col-span-2" : ""}`}>
       <Icon name={icon} size={22} className="text-primary" />
       <span className="mt-2 block font-semibold text-ink">{label}</span>
       <span className="block text-[13px] font-medium text-muted">{desc}</span>

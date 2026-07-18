@@ -6,13 +6,14 @@ type Props = {
   src: string;
   className?: string;
   imgClassName?: string;
+  framed?: boolean;
   // "contain" (default) letterboxes the whole flag inside a fixed box with padding.
   // "cover" fills a fixed box, cropping to fit. "natural" lets the card take the
   // flag's own aspect ratio — the whole flag shows, uncropped, with rounded corners.
   fit?: "contain" | "cover" | "natural";
 };
 
-export default function FlagImage({ code, name, src, className = "", imgClassName = "", fit = "contain" }: Props) {
+export default function FlagImage({ code, name, src, className = "", imgClassName = "", framed = true, fit = "contain" }: Props) {
   const [failed, setFailed] = useState(false);
 
   if (fit === "natural") {
@@ -21,7 +22,7 @@ export default function FlagImage({ code, name, src, className = "", imgClassNam
     // very wide bar) stay a sane size instead of blowing up the layout. Rounding the
     // <img> itself rounds the actual flag corners to match the UI.
     return (
-      <div className={`flex items-center justify-center rounded-2xl border border-line bg-paper p-2 ${className}`}>
+      <div className={`flex items-center justify-center ${framed ? "rounded-2xl border border-line bg-paper p-2" : ""} ${className}`}>
         {failed ? (
           <div className="grid aspect-[3/2] w-full place-items-center rounded-[14px] bg-surface font-display text-lg font-black text-muted">
             {code}
@@ -42,7 +43,7 @@ export default function FlagImage({ code, name, src, className = "", imgClassNam
 
   const cover = fit === "cover";
   return (
-    <div className={`grid overflow-hidden rounded-2xl border border-line bg-paper ${cover ? "" : "p-2"} ${className}`}>
+    <div className={`grid overflow-hidden ${framed ? `rounded-2xl border border-line bg-paper ${cover ? "" : "p-2"}` : ""} ${className}`}>
       {failed ? (
         <div className="grid h-full w-full place-items-center rounded-xl bg-surface font-display text-lg font-black text-muted">
           {code}

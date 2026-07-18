@@ -114,6 +114,17 @@ export default function MapPlayScreen() {
     onExit();
   }
 
+  function startNextLesson(nextLesson: (typeof lessons)[number]) {
+    setIndex(0);
+    setCorrect(0);
+    setXp(0);
+    setFeedback(null);
+    setItems([]);
+    setFinished(false);
+    setEarnedBadgeIds([]);
+    openLesson(nextLesson);
+  }
+
   if (finished) {
     const perfect = correct === (questions.length || 1);
     const bonusXp = lessonId ? 25 + (perfect ? 20 : 0) : 10;
@@ -129,7 +140,7 @@ export default function MapPlayScreen() {
         actions={
           lessonId
             ? [
-                ...(nextLesson ? [{ label: "Continue learning", variant: "primary" as const, icon: "learn" as const, onPress: () => openLesson(nextLesson) }] : []),
+                ...(nextLesson ? [{ label: "Continue learning", variant: "primary" as const, icon: "learn" as const, onPress: () => startNextLesson(nextLesson) }] : []),
                 { label: "Back to Learn", variant: nextLesson ? ("secondary" as const) : ("primary" as const), icon: "learn" as const, onPress: onExit }
               ]
             : [

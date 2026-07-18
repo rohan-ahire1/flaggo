@@ -18,6 +18,7 @@ import { hasSupabaseConfig } from "@/lib/supabase";
 import { isSyntheticEmail, isValidUsername } from "@/lib/username";
 import { isStreakReminderEnabled, setStreakReminderEnabled, syncStreakReminder } from "@/lib/streakReminder";
 import { useProgress } from "@/state/ProgressProvider";
+import { isMasteredReview } from "@flaggo/core/utils/spacedRepetition";
 import { themeColor } from "@/theme/palettes";
 import { useThemeStore } from "@/theme/store";
 import { BADGES } from "@flaggo/core/game/badges";
@@ -31,7 +32,7 @@ export default function ProfileScreen() {
   const [notice, setNotice] = useState<string | null>(null);
   const [reminderEnabled, setReminderEnabled] = useState(false);
 
-  const mastered = Object.values(progress.review).filter((r) => r.box >= 5).length;
+  const mastered = Object.values(progress.review).filter(isMasteredReview).length;
   const earnedBadges = new Map(progress.badges.map((badge) => [badge.id, badge]));
   const earnedCount = BADGES.filter((badge) => earnedBadges.has(badge.id)).length;
   const accuracy =

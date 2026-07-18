@@ -78,7 +78,7 @@ export default function QuizScreen() {
     if (requestedCodes.length) {
       const codeSet = new Set(requestedCodes);
       const pool = countries.filter((country) => codeSet.has(country.code)).slice(0, 12);
-      return generateReviewQuestions(pool, topic).map((question) => ({ question, topic }));
+      return generateReviewQuestions(pool, topic, Math.random, countries).map((question) => ({ question, topic }));
     }
     if (isDaily) {
       return buildDailyQuiz(dateKey(), countries).map((d) => ({ question: d.question as Question, topic: d.topic as Topic }));
@@ -89,8 +89,8 @@ export default function QuizScreen() {
     if (params.deckId) {
       const deck = progress.decks.find((d) => d.id === params.deckId && d.topic === topic);
       const pool = deck ? deckCountries(deck, countries) : [];
-      if (pool.length >= 4) {
-        return generateReviewQuestions(pool, topic).map((question) => ({ question, topic }));
+      if (pool.length) {
+        return generateReviewQuestions(pool, topic, Math.random, countries).map((question) => ({ question, topic }));
       }
     }
     const qs = isArcade ? buildArcadeQuestions(topic, arcadeMode) : buildLessonQuestions(topic);

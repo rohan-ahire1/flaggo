@@ -8,9 +8,9 @@ import { useGame } from "../state/GameProvider";
 export default function ReviewScreen() {
   const navigate = useNavigate();
   const { countries, progress, startReview, startMapReview } = useGame();
-  const topic = progress.selectedTopic;
-  const topicCountries = topic === "capital" ? countries.filter((country) => country.capital?.trim()) : countries;
-  const label = topic === "capital" ? "capitals" : "flags";
+  const topic = "flag" as const;
+  const topicCountries = countries;
+  const label = "flags";
   const due = getDueCountries(progress, topicCountries, topic).slice(0, 12);
   const weak = getWeakCountries(progress, topicCountries, topic).slice(0, 6);
   const practice = due.length ? due : weak.length ? weak : topicCountries.slice(0, 8);
@@ -28,11 +28,12 @@ export default function ReviewScreen() {
             <p className="mt-1 font-bold text-muted">{due.length ? `${label} due for review` : "No reviews due today."}</p>
           </div>
         </div>
-        <button onClick={() => startReview(practice)} className="btn-primary mt-5 w-full">
-          <Icon name="bolt" size={20} /> Start Review
+        <button onClick={() => startReview(practice, topic)} className="btn-primary mt-5 w-full">
+          <Icon name="bolt" size={20} /> {due.length ? "Review due flags" : "Practice flags"}
         </button>
       </section>
-      <section className="mt-5 rounded-[24px] border border-line bg-paper p-5 shadow-card-lg">
+      <h2 className="mt-7 font-display text-xl font-semibold text-ink">More practice</h2>
+      <section className="mt-3 rounded-[24px] border border-line bg-paper p-5 shadow-card-lg">
         <h2 className="font-display text-2xl font-black">Map practice</h2>
         <p className="mt-1 font-bold text-muted">Review country locations with the same spaced-repetition schedule.</p>
         <button onClick={() => void startMapReview()} className="btn-secondary mt-5 w-full">
@@ -54,7 +55,7 @@ export default function ReviewScreen() {
       </h2>
       {weak.length ? (
         <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-          {weak.map((country) => <FlagCard key={country.code} country={country} review={progress.review[reviewKey(country.code, topic)]} onClick={() => startReview([country])} />)}
+          {weak.map((country) => <FlagCard key={country.code} country={country} review={progress.review[reviewKey(country.code, topic)]} onClick={() => startReview([country], topic)} />)}
         </div>
       ) : <p className="mt-3 font-bold text-muted">Practice will include new {label} until weak {label} appear.</p>}
     </main>

@@ -12,6 +12,7 @@ export * from "./utils/geo";
 export * from "./utils/lessonGenerator";
 export * from "./utils/popularity";
 export * from "./utils/progressMerge";
+export * from "./utils/progressivePractice";
 export * from "./utils/quiz";
 export * from "./utils/seededRandom";
 export * from "./utils/spacedRepetition";

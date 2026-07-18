@@ -14,7 +14,7 @@ export default function FlagsLibraryScreen() {
   const [difficulty, setDifficulty] = useState("All");
   const [scope, setScope] = useState("All");
   const [sort, setSort] = useState("az");
-  const topic = progress.selectedTopic;
+  const topic = "flag" as const;
 
   const filtered = useMemo(() => {
     const result = countries.filter((country) => {
@@ -76,7 +76,7 @@ export default function FlagsLibraryScreen() {
         <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
           {filtered.map((country) => (
             <div key={country.code} className="relative h-full min-w-0">
-              <FlagCard country={country} review={progress.review[reviewKey(country.code, topic)]} onClick={() => startReview([country], progress.selectedTopic)} />
+              <FlagCard country={country} review={progress.review[reviewKey(country.code, topic)]} onClick={() => startReview([country], topic)} />
               <button
                 onClick={(event) => {
                   event.stopPropagation();

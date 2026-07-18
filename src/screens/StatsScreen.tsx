@@ -71,7 +71,7 @@ export default function StatsScreen() {
         <div className="mt-2 space-y-3">
           {regions.map((region) => {
             const group = topicCountries.filter((country) => country.continent === region);
-            const done = group.filter((country) => progress.review[reviewKey(country.code, topic)]?.box >= 5).length;
+            const done = getMasteredCountries(progress, group, topic).length;
             const pct = group.length ? Math.round((done / group.length) * 100) : 0;
             return (
               <div key={region}>
