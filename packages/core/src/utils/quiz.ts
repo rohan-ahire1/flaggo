@@ -262,16 +262,21 @@ export function generateLessonQuestions(lesson: Lesson, countries: Country[]): Q
   return generateFlagQuestions(lesson.id, lessonCountries, countries);
 }
 
-export function generateReviewQuestions(countries: Country[], topic: Topic, rng: () => number = Math.random): Question[] {
+export function generateReviewQuestions(
+  countries: Country[],
+  topic: Topic,
+  rng: () => number = Math.random,
+  optionCountries: Country[] = countries
+): Question[] {
   const pool = topic === "capital" ? capitalCountries(countries) : countries;
-  if (topic === "capital") return generateCapitalQuestions("review", pool, pool, rng);
-  if (topic === "currency") return generateCurrencyQuestions("review", currencyCountries(countries), currencyCountries(countries), rng);
-  if (topic === "language") return generateLanguageQuestions("review", languageCountries(countries), languageCountries(countries), rng);
-  if (topic === "neighbor") return generateNeighborQuestions("review", neighborCountries(countries), countries, rng);
+  if (topic === "capital") return generateCapitalQuestions("review", pool, capitalCountries(optionCountries), rng);
+  if (topic === "currency") return generateCurrencyQuestions("review", currencyCountries(countries), currencyCountries(optionCountries), rng);
+  if (topic === "language") return generateLanguageQuestions("review", languageCountries(countries), languageCountries(optionCountries), rng);
+  if (topic === "neighbor") return generateNeighborQuestions("review", neighborCountries(countries), optionCountries, rng);
   return shuffleArray(pool, rng).slice(0, 8).map((country, index) => {
-    if (index % 3 === 1) return { id: `review-${country.code}-${index}`, type: "pick-flag", correctCountry: country, options: makeOptions(country, pool, rng) };
-    if (index % 3 === 2) return { id: `review-${country.code}-${index}`, type: "memory-review", correctCountry: country, options: makeOptions(country, pool, rng) };
-    return { id: `review-${country.code}-${index}`, type: "guess-country", correctCountry: country, options: makeOptions(country, pool, rng) };
+    if (index % 3 === 1) return { id: `review-${country.code}-${index}`, type: "pick-flag", correctCountry: country, options: makeOptions(country, optionCountries, rng) };
+    if (index % 3 === 2) return { id: `review-${country.code}-${index}`, type: "memory-review", correctCountry: country, options: makeOptions(country, optionCountries, rng) };
+    return { id: `review-${country.code}-${index}`, type: "guess-country", correctCountry: country, options: makeOptions(country, optionCountries, rng) };
   });
 }
 

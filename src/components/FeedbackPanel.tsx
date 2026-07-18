@@ -10,6 +10,7 @@ export default function FeedbackPanel({
   xp,
   answerLabel,
   selectedLabel,
+  revealCorrectFlag = false,
   onContinue
 }: {
   correct: boolean;
@@ -17,6 +18,7 @@ export default function FeedbackPanel({
   xp: number;
   answerLabel?: string;
   selectedLabel?: string;
+  revealCorrectFlag?: boolean;
   onContinue: () => void;
 }) {
   const buttonRef = useRef<HTMLButtonElement | null>(null);
@@ -45,9 +47,11 @@ export default function FeedbackPanel({
       <div className="mb-4 flex items-center gap-4">
         <div className="relative shrink-0">
           <FlagImage code={country.code} name={country.name} src={country.flagUrl} fit="natural" className="w-28 rounded-[18px]" />
-          <span className="absolute -bottom-2 -right-2 grid h-9 w-9 place-items-center rounded-full bg-paper shadow-md">
-            <Icon name={correct ? "check" : "x"} size={20} className={correct ? "text-success" : "text-error"} />
-          </span>
+          {(correct || revealCorrectFlag) && (
+            <span className="absolute -bottom-2 -right-2 grid h-9 w-9 place-items-center rounded-full bg-paper shadow-md">
+              <Icon name="check" size={20} className="text-success" />
+            </span>
+          )}
         </div>
         <div>
           <h2 className="font-display text-2xl font-black">{correct ? "Nice!" : "Not quite"}</h2>
@@ -62,9 +66,15 @@ export default function FeedbackPanel({
                   You picked <span className="font-black">{selectedLabel}</span>
                 </p>
               )}
-              <p>
-                Correct answer <span className="font-black">{answerLabel ?? country.name}</span>
-              </p>
+              {revealCorrectFlag ? (
+                <p className="mt-1">
+                  Correct flag <span className="font-black">{country.name}</span>
+                </p>
+              ) : (
+                <p>
+                  Correct answer <span className="font-black">{answerLabel ?? country.name}</span>
+                </p>
+              )}
             </div>
           )}
         </div>

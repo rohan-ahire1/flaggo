@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { Country } from "../../types/country";
 import type { Lesson } from "../../types/lesson";
-import { generateCurrencyQuestions, generateLanguageQuestions, generateLessonQuestions, generateMapQuestions, generateNeighborQuestions, getCapitalDistractors, getCurrencyClue } from "../quiz";
+import { generateCurrencyQuestions, generateLanguageQuestions, generateLessonQuestions, generateMapQuestions, generateNeighborQuestions, generateReviewQuestions, getCapitalDistractors, getCurrencyClue } from "../quiz";
 import { hashStringToSeed, mulberry32 } from "../seededRandom";
 
 function country(code: string, name: string, continent: Country["continent"], capital?: string, ccn3?: string, extra: Partial<Country> = {}): Country {
@@ -172,5 +172,26 @@ describe("map quiz generation", () => {
       expect(new Set(question.options.map((option) => option.code)).size).toBe(4);
       expect(question.options.map((option) => option.code)).toContain(question.targetCode);
     });
+  });
+});
+
+describe("review quiz generation", () => {
+  const countries = [
+    country("ID", "Indonesia", "Asia"),
+    country("MC", "Monaco", "Europe"),
+    country("PL", "Poland", "Europe"),
+    country("JP", "Japan", "Asia")
+  ];
+
+  it("uses the full catalog for answer options in a one-country review", () => {
+    const questions = generateReviewQuestions([countries[0]], "flag", mulberry32(hashStringToSeed("single-review")), countries);
+
+    expect(questions).toHaveLength(1);
+    const question = questions[0];
+    expect(question.type).toBe("guess-country");
+    if (question.type !== "guess-country") throw new Error("Expected a country-choice review question");
+    expect(question.options).toHaveLength(4);
+    expect(new Set(question.options.map((option) => option.code)).size).toBe(4);
+    expect(question.options.map((option) => option.code)).toContain("ID");
   });
 });

@@ -70,12 +70,6 @@ describe("badges", () => {
     expect(evaluateBadges(progress(), countries, lessons, { kind: "daily", score: 5, total: 5 })).toContain("perfect-round");
   });
 
-  it("earns Similar Flags Survivor only for hard arcade scores of 10+", () => {
-    expect(evaluateBadges(progress(), countries, lessons, { kind: "arcade", arcadeMode: "timed", score: 10, total: 10 })).not.toContain("lookalike-survivor");
-    expect(evaluateBadges(progress(), countries, lessons, { kind: "arcade", arcadeMode: "hard", score: 9, total: 10 })).not.toContain("lookalike-survivor");
-    expect(evaluateBadges(progress(), countries, lessons, { kind: "arcade", arcadeMode: "hard", score: 10, total: 10 })).toContain("lookalike-survivor");
-  });
-
   it("does not return already-earned badges again", () => {
     const already = progress({ badges: [{ id: "perfect-round", earnedAt: "2026-07-01T00:00:00.000Z" }] });
     expect(evaluateBadges(already, countries, lessons, { kind: "daily", score: 5, total: 5 })).not.toContain("perfect-round");

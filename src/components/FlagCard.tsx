@@ -1,11 +1,12 @@
 import type { Country } from "@flaggo/core/types/country";
 import type { ReviewState } from "@flaggo/core/types/progress";
+import { isMasteredReview } from "@flaggo/core/utils/spacedRepetition";
 import FlagImage from "./FlagImage";
 import Icon from "./Icon";
 
 export default function FlagCard({ country, review, onClick }: { country: Country; review?: ReviewState; onClick?: () => void }) {
-  const mastery = review ? Math.min(100, review.box * 20) : 0;
-  const mastered = mastery >= 100;
+  const mastered = isMasteredReview(review);
+  const mastery = mastered ? 100 : review ? Math.min(80, review.box * 20) : 0;
   return (
     <button
       onClick={onClick}

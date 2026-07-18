@@ -56,13 +56,13 @@ export default function LessonScreen() {
   const invalidRoute = !routeState || (mode === "lesson" && !lesson);
   const activeTopic = mode === "review" ? reviewTopic : lesson?.topic ?? "flag";
   const questions = useMemo<Question[]>(() => {
-    if (mode === "review") return generateReviewQuestions(reviewCountries.length ? reviewCountries : countries, activeTopic);
+    if (mode === "review") return generateReviewQuestions(reviewCountries.length ? reviewCountries : countries, activeTopic, Math.random, countries);
     return lesson ? generateLessonQuestions(lesson, countries) : [];
   }, [activeTopic, countries, lesson, mode, reviewCountries]);
   const [index, setIndex] = useState(0);
   const [correct, setCorrect] = useState(0);
   const [xp, setXp] = useState(0);
-  const [feedback, setFeedback] = useState<{ ok: boolean; question: Question } | null>(null);
+  const [feedback, setFeedback] = useState<{ ok: boolean; question: Question; selectedLabel?: string } | null>(null);
   const [items, setItems] = useState<RoundResultItem[]>([]);
   const [result, setResult] = useState<{ xpEarned: number; correct: number; total: number; streak: number; earnedBadgeIds: string[] } | null>(null);
   const question = questions[index];
@@ -93,7 +93,7 @@ export default function LessonScreen() {
     setXp((value) => value + earned);
     setCorrect((value) => value + (wasCorrect ? 1 : 0));
     setItems((value) => [...value, resultItem(question, wasCorrect, selectedLabel)]);
-    setFeedback({ ok: wasCorrect, question });
+    setFeedback({ ok: wasCorrect, question, selectedLabel });
   }
 
   function complete() {
@@ -134,6 +134,16 @@ export default function LessonScreen() {
     navigate(mode === "review" ? "/review" : "/");
   }
 
+  function startNextLesson(nextLesson: (typeof lessons)[number]) {
+    setIndex(0);
+    setCorrect(0);
+    setXp(0);
+    setFeedback(null);
+    setItems([]);
+    setResult(null);
+    openLesson(nextLesson);
+  }
+
   if (result) {
     const next = nextLearningLesson(activeTopic);
     return (
@@ -145,7 +155,7 @@ export default function LessonScreen() {
         caption={`+${result.xpEarned} XP`}
         earnedBadges={earnedBadgeResults(result.earnedBadgeIds)}
         actions={[
-          ...(next ? [{ label: "Continue learning", variant: "primary" as const, icon: "learn" as const, onPress: () => openLesson(next) }] : []),
+          ...(next ? [{ label: "Continue learning", variant: "primary" as const, icon: "learn" as const, onPress: () => startNextLesson(next) }] : []),
           { label: "Back to Today", variant: next ? "secondary" as const : "primary" as const, icon: "today" as const, onPress: () => navigate("/") }
         ]}
       />
@@ -179,7 +189,7 @@ export default function LessonScreen() {
         </div>
       </header>
       <section key={index} className="animate-fade-in p-5">
-        <QuestionCard question={question} disabled={Boolean(feedback)} onAnswer={answer} />
+        <QuestionCard question={question} disabled={Boolean(feedback)} selectedLabel={feedback?.selectedLabel} onAnswer={answer} />
       </section>
       {feedback && (
         <FeedbackPanel
@@ -187,6 +197,8 @@ export default function LessonScreen() {
           country={feedback.question.correctCountry}
           xp={10}
           answerLabel={answerLabel(feedback.question)}
+          selectedLabel={feedback.selectedLabel}
+          revealCorrectFlag={feedback.question.type === "pick-flag"}
           onContinue={continueNext}
         />
       )}

@@ -12,6 +12,7 @@ import { isSfxEnabled, setSfxEnabled } from "../lib/sfx";
 import { isSyntheticEmail } from "../lib/username";
 import { useGame } from "../state/GameProvider";
 import { BADGES } from "@flaggo/core/game/badges";
+import { parseReviewKey } from "@flaggo/core/types/topic";
 
 export default function ProfileScreen() {
   const navigate = useNavigate();
@@ -31,7 +32,7 @@ export default function ProfileScreen() {
     { label: "XP", value: progress.xp, icon: "bolt", color: "text-primary" },
     { label: "Streak", value: progress.streak, icon: "flame", color: "text-accentDeep" },
     { label: "Coins", value: progress.coins, icon: "coin", color: "text-accentDeep" },
-    { label: "Flags seen", value: Object.keys(progress.review).length, icon: "globe", color: "text-success" }
+    { label: "Flags seen", value: Object.keys(progress.review).filter((key) => parseReviewKey(key).topic === "flag").length, icon: "globe", color: "text-success" }
   ];
   return (
     <main className="p-5">

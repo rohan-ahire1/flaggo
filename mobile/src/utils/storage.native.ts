@@ -83,46 +83,49 @@ export async function loadProgress(): Promise<AppProgress> {
 async function writeRow(progress: AppProgress, meta: ProgressMeta, needsMerge: boolean): Promise<void> {
   await initDb();
   const db = getDb();
-  await db
-    .update(progressTable)
-    .set({
-      xp: progress.xp,
-      coins: progress.coins,
-      streak: progress.streak,
-      lastLessonDate: progress.lastLessonDate,
-      selectedTopic: progress.selectedTopic,
-      totalCorrect: progress.totalCorrect,
-      totalWrong: progress.totalWrong,
-      dailyLastDate: progress.daily.lastDate,
-      dailyStreak: progress.daily.streak,
-      dailyBest: progress.daily.best,
-      completedLessonIds: JSON.stringify(progress.completedLessonIds),
-      dailyHistory: JSON.stringify(progress.daily.history),
-      arcade: JSON.stringify(progress.arcade),
-      decks: JSON.stringify(progress.decks),
-      badges: JSON.stringify(progress.badges),
-      updatedAt: meta.updatedAt,
-      userId: meta.userId,
-      needsMerge: needsMerge ? 1 : 0
-    })
-    .where(eq(progressTable.id, 1));
-
-  // Re-sync the relational review table: clear and re-insert current cards.
-  await db.delete(reviewItems);
   const entries = Object.values(progress.review);
-  if (entries.length) {
-    await db.insert(reviewItems).values(
-      entries.map((r) => ({
-        countryCode: r.countryCode,
-        topic: r.topic ?? "flag",
-        box: r.box,
-        correctCount: r.correctCount,
-        wrongCount: r.wrongCount,
-        lastSeenAt: r.lastSeenAt,
-        nextReviewAt: r.nextReviewAt
-      }))
-    );
-  }
+  db.transaction((tx) => {
+    tx
+      .update(progressTable)
+      .set({
+        xp: progress.xp,
+        coins: progress.coins,
+        streak: progress.streak,
+        lastLessonDate: progress.lastLessonDate,
+        selectedTopic: progress.selectedTopic,
+        totalCorrect: progress.totalCorrect,
+        totalWrong: progress.totalWrong,
+        dailyLastDate: progress.daily.lastDate,
+        dailyStreak: progress.daily.streak,
+        dailyBest: progress.daily.best,
+        completedLessonIds: JSON.stringify(progress.completedLessonIds),
+        dailyHistory: JSON.stringify(progress.daily.history),
+        arcade: JSON.stringify(progress.arcade),
+        decks: JSON.stringify(progress.decks),
+        badges: JSON.stringify(progress.badges),
+        updatedAt: meta.updatedAt,
+        userId: meta.userId,
+        needsMerge: needsMerge ? 1 : 0
+      })
+      .where(eq(progressTable.id, 1))
+      .run();
+
+    // Keep the progress row and its review cards in one atomic snapshot.
+    tx.delete(reviewItems).run();
+    if (entries.length) {
+      tx.insert(reviewItems).values(
+        entries.map((r) => ({
+          countryCode: r.countryCode,
+          topic: r.topic ?? "flag",
+          box: r.box,
+          correctCount: r.correctCount,
+          wrongCount: r.wrongCount,
+          lastSeenAt: r.lastSeenAt,
+          nextReviewAt: r.nextReviewAt
+        }))
+      ).run();
+    }
+  });
 }
 
 export async function saveProgress(progress: AppProgress): Promise<void> {
@@ -136,27 +139,29 @@ export async function saveSyncedProgress(progress: AppProgress, meta: ProgressMe
 export async function resetProgress(): Promise<void> {
   await initDb();
   const db = getDb();
-  await db.delete(reviewItems);
-  await db.update(progressTable).set({
-    xp: 0,
-    coins: 0,
-    streak: 0,
-    lastLessonDate: null,
-    selectedTopic: "flag",
-    totalCorrect: 0,
-    totalWrong: 0,
-    dailyLastDate: null,
-    dailyStreak: 0,
-    dailyBest: 0,
-    completedLessonIds: "[]",
-    dailyHistory: "{}",
-    arcade: "{}",
-    decks: "[]",
-    badges: "[]",
-    updatedAt: null,
-    userId: null,
-    needsMerge: 0
-  }).where(eq(progressTable.id, 1));
+  db.transaction((tx) => {
+    tx.delete(reviewItems).run();
+    tx.update(progressTable).set({
+      xp: 0,
+      coins: 0,
+      streak: 0,
+      lastLessonDate: null,
+      selectedTopic: "flag",
+      totalCorrect: 0,
+      totalWrong: 0,
+      dailyLastDate: null,
+      dailyStreak: 0,
+      dailyBest: 0,
+      completedLessonIds: "[]",
+      dailyHistory: "{}",
+      arcade: "{}",
+      decks: "[]",
+      badges: "[]",
+      updatedAt: null,
+      userId: null,
+      needsMerge: 0
+    }).where(eq(progressTable.id, 1)).run();
+  });
 }
 
 export async function loadProgressMeta(): Promise<ProgressMeta> {

@@ -17,10 +17,12 @@ function Eyebrow({ icon, children }: { icon: IconName; children: string }) {
 export default function QuestionCard({
   question,
   disabled,
+  selectedLabel,
   onAnswer
 }: {
   question: Question;
   disabled: boolean;
+  selectedLabel?: string;
   onAnswer: (wasCorrect: boolean, selectedLabel?: string) => void;
 }) {
   useEffect(() => {
@@ -71,16 +73,26 @@ export default function QuestionCard({
           <h1 className="font-display text-2xl font-black">Pick the flag of {question.correctCountry.name}.</h1>
         </div>
         <div className="grid grid-cols-2 gap-3">
-          {question.options.map((country) => (
-            <button
-              key={country.code}
-              disabled={disabled}
-              onClick={() => onAnswer(country.code === question.correctCountry.code, country.name)}
-              className="rounded-2xl border-2 border-b-[5px] border-line bg-paper p-3 transition-all duration-150 hover:border-primary/40 active:translate-y-[3px] active:border-b-2"
-            >
-              <FlagImage code={country.code} name={country.name} src={country.flagUrl} className="aspect-[4/3] w-full rounded-xl p-2" />
-            </button>
-          ))}
+          {question.options.map((country) => {
+            const correctOption = disabled && country.code === question.correctCountry.code;
+            const selectedWrongOption = disabled && country.name === selectedLabel && !correctOption;
+            return (
+              <button
+                key={country.code}
+                disabled={disabled}
+                onClick={() => onAnswer(country.code === question.correctCountry.code, country.name)}
+                className={`rounded-2xl border-2 border-b-[5px] bg-paper p-3 transition-all duration-150 active:translate-y-[3px] active:border-b-2 ${
+                  correctOption
+                    ? "border-success bg-success/10 ring-2 ring-success/20"
+                    : selectedWrongOption
+                      ? "border-error bg-error/10"
+                      : "border-line hover:border-primary/40"
+                }`}
+              >
+                <FlagImage code={country.code} name={country.name} src={country.flagUrl} framed={false} className="aspect-[4/3] w-full rounded-xl" />
+              </button>
+            );
+          })}
         </div>
       </div>
     );
@@ -323,7 +335,7 @@ export function TriviaCard({
               onClick={() => onAnswer(country.code === round.correctCountry.code, country.name)}
               className="rounded-[24px] border-2 border-b-[5px] border-line bg-paper p-4 text-left transition active:translate-y-[3px] active:border-b-2"
             >
-              <FlagImage code={country.code} name={country.name} src={country.flagUrl} className="aspect-[4/3] w-full rounded-xl p-2" />
+              <FlagImage code={country.code} name={country.name} src={country.flagUrl} framed={false} className="aspect-[4/3] w-full rounded-xl" />
               <p className="mt-3 font-display text-xl font-black">{country.name}</p>
               {disabled && <p className="text-sm font-bold text-muted">{formatMetric(country[round.metric] ?? 0, round.metric)}</p>}
             </button>
@@ -348,7 +360,7 @@ export function TriviaCard({
               onClick={() => onAnswer(country.code === round.correctCountry.code, country.name)}
               className="rounded-2xl border-2 border-b-[5px] border-line bg-paper p-3 text-left transition active:translate-y-[3px] active:border-b-2"
             >
-              <FlagImage code={country.code} name={country.name} src={country.flagUrl} className="aspect-[4/3] w-full rounded-xl p-2" />
+              <FlagImage code={country.code} name={country.name} src={country.flagUrl} framed={false} className="aspect-[4/3] w-full rounded-xl" />
               <p className="mt-2 font-display font-black">{country.name}</p>
             </button>
           ))}

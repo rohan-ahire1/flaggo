@@ -22,12 +22,19 @@ function isValidDateString(value: string) {
 function chooseReview(a: ReviewState | undefined, b: ReviewState | undefined): ReviewState | undefined {
   if (!a) return b;
   if (!b) return a;
-  const winner =
-    a.box > b.box ? a : b.box > a.box ? b : new Date(a.lastSeenAt ?? 0).getTime() >= new Date(b.lastSeenAt ?? 0).getTime() ? a : b;
+  const aSeen = new Date(a.lastSeenAt ?? 0).getTime();
+  const bSeen = new Date(b.lastSeenAt ?? 0).getTime();
+  const aDue = new Date(a.nextReviewAt).getTime();
+  const bDue = new Date(b.nextReviewAt).getTime();
+  const winner = aSeen !== bSeen
+    ? aSeen > bSeen ? a : b
+    : a.box !== b.box
+      ? a.box < b.box ? a : b
+      : aDue <= bDue ? a : b;
   return {
     ...winner,
-    correctCount: (a.correctCount ?? 0) + (b.correctCount ?? 0),
-    wrongCount: (a.wrongCount ?? 0) + (b.wrongCount ?? 0)
+    correctCount: Math.max(a.correctCount ?? 0, b.correctCount ?? 0),
+    wrongCount: Math.max(a.wrongCount ?? 0, b.wrongCount ?? 0)
   };
 }
 
@@ -40,11 +47,11 @@ export function normalizeProgress(progress: Partial<AppProgress> | null | undefi
     const state = value as Partial<ReviewState>;
     const nextKey = reviewKey(parsed.code, parsed.topic);
     const normalizedState = {
-      box: Math.max(1, nonNegativeInteger(state.box || 1)),
+      box: Math.min(5, nonNegativeInteger(state.box)),
       correctCount: nonNegativeInteger(state.correctCount),
       wrongCount: nonNegativeInteger(state.wrongCount),
-      lastSeenAt: typeof state.lastSeenAt === "string" ? state.lastSeenAt : null,
-      nextReviewAt: typeof state.nextReviewAt === "string" ? state.nextReviewAt : new Date(0).toISOString(),
+      lastSeenAt: typeof state.lastSeenAt === "string" && isValidDateString(state.lastSeenAt) ? state.lastSeenAt : null,
+      nextReviewAt: typeof state.nextReviewAt === "string" && isValidDateString(state.nextReviewAt) ? state.nextReviewAt : new Date(0).toISOString(),
       countryCode: parsed.code,
       topic: parsed.topic
     };

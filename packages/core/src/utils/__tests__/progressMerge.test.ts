@@ -53,7 +53,7 @@ describe("mergeProgress", () => {
     expect(merged.completedLessonIds.sort()).toEqual(["a", "b", "c"]);
   });
 
-  it("merges review by higher box and sums counts", () => {
+  it("merges review by the latest attempt and keeps idempotent counters", () => {
     const merged = mergeProgress(
       progress({
         review: {
@@ -68,10 +68,10 @@ describe("mergeProgress", () => {
     );
 
     expect(merged.review["IN:flag"]).toMatchObject({
-      box: 4,
-      correctCount: 6,
-      wrongCount: 4,
-      nextReviewAt: "2026-06-22T00:00:00.000Z"
+      box: 2,
+      correctCount: 4,
+      wrongCount: 3,
+      nextReviewAt: "2026-06-20T00:00:00.000Z"
     });
   });
 
@@ -92,8 +92,84 @@ describe("mergeProgress", () => {
     expect(merged.review["BR:flag"]).toMatchObject({
       lastSeenAt: "2026-06-18T00:00:00.000Z",
       nextReviewAt: "2026-06-20T00:00:00.000Z",
-      correctCount: 2,
+      correctCount: 1,
       wrongCount: 2
+    });
+  });
+
+  it("keeps merges idempotent when local and server are the same snapshot", () => {
+    const snapshot = progress({
+      review: {
+        "FR:flag": {
+          countryCode: "FR",
+          topic: "flag",
+          box: 3,
+          correctCount: 5,
+          wrongCount: 2,
+          lastSeenAt: "2026-07-18T00:00:00.000Z",
+          nextReviewAt: "2026-07-25T00:00:00.000Z"
+        }
+      }
+    });
+
+    expect(mergeProgress(snapshot, snapshot).review["FR:flag"]).toEqual(snapshot.review["FR:flag"]);
+  });
+
+  it("preserves a newer lapse over an older mastered snapshot", () => {
+    const newerLapse = progress({
+      review: {
+        "FR:flag": {
+          countryCode: "FR",
+          topic: "flag",
+          box: 0,
+          correctCount: 5,
+          wrongCount: 1,
+          lastSeenAt: "2026-07-18T00:00:00.000Z",
+          nextReviewAt: "2026-07-18T00:00:00.000Z"
+        }
+      }
+    });
+    const olderMastery = progress({
+      review: {
+        "FR:flag": {
+          countryCode: "FR",
+          topic: "flag",
+          box: 5,
+          correctCount: 5,
+          wrongCount: 0,
+          lastSeenAt: "2026-07-01T00:00:00.000Z",
+          nextReviewAt: "2026-07-31T00:00:00.000Z"
+        }
+      }
+    });
+
+    expect(mergeProgress(newerLapse, olderMastery).review["FR:flag"]).toMatchObject({
+      box: 0,
+      wrongCount: 1,
+      lastSeenAt: "2026-07-18T00:00:00.000Z",
+      nextReviewAt: "2026-07-18T00:00:00.000Z"
+    });
+  });
+
+  it("preserves box zero and repairs invalid review timestamps", () => {
+    const normalized = normalizeProgress({
+      review: {
+        "FR:flag": {
+          countryCode: "FR",
+          topic: "flag",
+          box: 0,
+          correctCount: 0,
+          wrongCount: 1,
+          lastSeenAt: "invalid",
+          nextReviewAt: "invalid"
+        }
+      }
+    });
+
+    expect(normalized.review["FR:flag"]).toMatchObject({
+      box: 0,
+      lastSeenAt: null,
+      nextReviewAt: new Date(0).toISOString()
     });
   });
 
@@ -108,7 +184,7 @@ describe("mergeProgress", () => {
     });
 
     expect(Object.keys(normalized.review).sort()).toEqual(["FR:capital", "FR:flag"]);
-    expect(normalized.review["FR:flag"]).toMatchObject({ countryCode: "FR", topic: "flag", box: 3, correctCount: 5, wrongCount: 1 });
+    expect(normalized.review["FR:flag"]).toMatchObject({ countryCode: "FR", topic: "flag", box: 3, correctCount: 3, wrongCount: 1 });
     expect(normalized.review["FR:capital"]).toMatchObject({ countryCode: "FR", topic: "capital", box: 1 });
     expect(normalized.selectedTopic).toBe("capital");
   });
@@ -129,8 +205,8 @@ describe("mergeProgress", () => {
       })
     );
 
-    expect(merged.review["FR:flag"]).toMatchObject({ topic: "flag", box: 5, correctCount: 7, wrongCount: 1 });
-    expect(merged.review["FR:capital"]).toMatchObject({ topic: "capital", box: 4, correctCount: 5, wrongCount: 2 });
+    expect(merged.review["FR:flag"]).toMatchObject({ topic: "flag", box: 5, correctCount: 5, wrongCount: 1 });
+    expect(merged.review["FR:capital"]).toMatchObject({ topic: "capital", box: 4, correctCount: 4, wrongCount: 2 });
   });
 
   it("keeps divergent topic progress from two devices", () => {

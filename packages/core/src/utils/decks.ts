@@ -1,14 +1,15 @@
 import type { Country } from "../types/country";
 import type { AppProgress, Deck } from "../types/progress";
 import { reviewKey, type Topic } from "../types/topic";
+import { compareWeakReviews, isWeakReview } from "./spacedRepetition";
 
 export const STARRED_DECK_ID = "starred";
 export const STARRED_DECK_NAME = "Starred";
 
 export function buildWeakDeck(progress: AppProgress, topic: Topic, limit = 30): string[] {
   return Object.values(progress.review)
-    .filter((state) => (state.topic ?? "flag") === topic && (state.box <= 1 || state.wrongCount > state.correctCount))
-    .sort((a, b) => b.wrongCount - a.wrongCount)
+    .filter((state) => (state.topic ?? "flag") === topic && isWeakReview(state))
+    .sort(compareWeakReviews)
     .slice(0, limit)
     .map((state) => state.countryCode);
 }
