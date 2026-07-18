@@ -1,13 +1,18 @@
 import Icon from "../components/Icon";
 import { BRAND } from "../config/brand";
+import { completeOnboarding } from "../lib/onboarding";
 
-// Cold open — a no-login first session. One primary action: start learning flags.
+// Cold open — a no-login first session. The primary action enters the app home.
 import { useNavigate } from "react-router-dom";
-import { useGame } from "../state/GameProvider";
 
 export default function WelcomeScreen() {
   const navigate = useNavigate();
-  const { startLearning } = useGame();
+
+  function enterApp() {
+    completeOnboarding();
+    navigate("/", { replace: true });
+  }
+
   return (
     <main className="grid min-h-screen place-items-center bg-paper p-8">
       <section className="flex w-full max-w-sm animate-pop-in flex-col items-center gap-6 text-center">
@@ -28,7 +33,7 @@ export default function WelcomeScreen() {
         </p>
 
         <button
-          onClick={() => startLearning("flag")}
+          onClick={enterApp}
           className="btn-primary w-full"
         >
           <Icon name="flag" size={20} /> Start learning flags
