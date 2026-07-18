@@ -13,10 +13,11 @@ import { generateReviewQuestions, type Question } from "@flaggo/core/utils/quiz"
 import { progressivePracticeBatch, progressiveResults, type ProgressiveStage } from "@flaggo/core/utils/progressivePractice";
 import { updateReviewState } from "@flaggo/core/utils/spacedRepetition";
 import { seededShuffle, hashStringToSeed, mulberry32 } from "@flaggo/core/utils/seededRandom";
-import { answerLabel } from "@flaggo/core/game/answerLabel";
+import { answerDetail, answerLabel } from "@flaggo/core/game/answerLabel";
 import { awardBadges, evaluateBadges } from "@flaggo/core/game/badges";
 import { trackEvent } from "../lib/analytics";
 import { earnedBadgeResults } from "../lib/badges";
+import { useAppBack } from "../navigation/useAppBack";
 import { useGame } from "../state/GameProvider";
 
 type PracticeMode = "timed" | "strikes" | "progressive";
@@ -65,12 +66,13 @@ function questionSet(countries: Country[], count: number, rng: () => number, opt
 
 export default function ArcadeScreen() {
   const navigate = useNavigate();
+  const goBack = useAppBack("/");
   const [searchParams] = useSearchParams();
   const { countries, lessons, progress, setProgress } = useGame();
   const requestedMode = searchParams.get("mode");
   const shouldAutoStart = searchParams.get("start") === "1";
   const autoStartHandled = useRef(false);
-  const initialMode: PracticeMode = requestedMode === "timed" || requestedMode === "strikes" ? requestedMode : "progressive";
+  const initialMode: PracticeMode = requestedMode === "progressive" || requestedMode === "strikes" ? requestedMode : "timed";
   const [mode, setMode] = useState<PracticeMode>(initialMode);
   const [setupTab, setSetupTab] = useState<SetupTab>(searchParams.get("tab") === "results" && initialMode === "progressive" ? "results" : "practice");
   const [running, setRunning] = useState(false);
@@ -236,17 +238,19 @@ export default function ArcadeScreen() {
     return (
       <main className="flex min-h-full flex-col p-5">
         <div className="flex items-center gap-3">
-          <button onClick={() => navigate("/")} className="icon-btn shrink-0" aria-label="Back">
+          <button onClick={goBack} className="icon-btn shrink-0" aria-label="Back">
             <Icon name="chevron" className="rotate-180" />
           </button>
           <div>
-            <h1 className="screen-title">Practice flags</h1>
-            <p className="mt-1 text-sm font-semibold text-muted">Choose the kind of session you need today.</p>
+            <h1 className="screen-title">{mode === "progressive" ? "Progressive learning" : "Practice flags"}</h1>
+            <p className="mt-1 text-sm font-semibold text-muted">
+              {mode === "progressive" ? "Learn gradually with repetition that targets mistakes." : "Choose the kind of session you need today."}
+            </p>
           </div>
         </div>
 
-        <section className="mt-6 grid gap-3">
-          {(["timed", "strikes", "progressive"] as PracticeMode[]).map((item) => {
+        {mode !== "progressive" && <section className="mt-6 grid gap-3">
+          {(["timed", "strikes"] as PracticeMode[]).map((item) => {
             const active = mode === item;
             const meta = MODE_META[item];
             return (
@@ -272,7 +276,7 @@ export default function ArcadeScreen() {
               </button>
             );
           })}
-        </section>
+        </section>}
 
         {mode === "progressive" && (
           <div className="mt-5 grid grid-cols-2 rounded-2xl bg-surface p-1" role="tablist" aria-label="Progressive learning views">
@@ -359,6 +363,7 @@ export default function ArcadeScreen() {
           country={feedback.question.correctCountry}
           xp={feedback.ok ? 10 : 0}
           answerLabel={answerLabel(feedback.question)}
+          answerDetail={answerDetail(feedback.question)}
           selectedLabel={feedback.selectedLabel}
           revealCorrectFlag={feedback.question.type === "pick-flag"}
           onContinue={continueNext}

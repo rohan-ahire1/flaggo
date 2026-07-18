@@ -1,17 +1,17 @@
 import { useMemo, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import Icon from "../components/Icon";
 import { useConfirm } from "../components/ConfirmDialog";
 import type { Deck } from "@flaggo/core/types/progress";
 import type { Topic } from "@flaggo/core/types/topic";
 import { createDeck, buildWeakDeck, countryCodesByRegion, deckCountries, STARRED_DECK_ID } from "@flaggo/core/utils/decks";
 import { trackEvent } from "../lib/analytics";
+import { useAppBack } from "../navigation/useAppBack";
 import { useGame } from "../state/GameProvider";
 
 const regions = ["Africa", "Americas", "Asia", "Europe", "Oceania"];
 
 export default function DecksScreen() {
-  const navigate = useNavigate();
+  const goBack = useAppBack("/review");
   const confirm = useConfirm();
   const { countries, progress, setProgress, startDeckPractice } = useGame();
   const [topic, setTopic] = useState<Topic>(progress.selectedTopic);
@@ -59,7 +59,7 @@ export default function DecksScreen() {
 
   return (
     <main className="p-5">
-      <button onClick={() => navigate(-1)} className="icon-btn mb-4" aria-label="Back"><Icon name="chevron" className="rotate-180" /></button>
+      <button onClick={goBack} className="icon-btn mb-4" aria-label="Back"><Icon name="chevron" className="rotate-180" /></button>
       <h1 className="screen-title">Decks</h1>
       <div className="mt-4 grid grid-cols-2 gap-2">
         {(["flag", "capital"] as const).map((item) => <button key={item} onClick={() => setTopic(item)} className={`chip w-full capitalize ${topic === item ? "chip-on" : ""}`}>{item}</button>)}

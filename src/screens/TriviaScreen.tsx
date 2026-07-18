@@ -13,6 +13,7 @@ import { triviaBoard } from "@flaggo/core/game/boards";
 import { awardBadges, evaluateBadges } from "@flaggo/core/game/badges";
 import { trackEvent } from "../lib/analytics";
 import { earnedBadgeResults } from "../lib/badges";
+import { useAppBack } from "../navigation/useAppBack";
 import { useGame } from "../state/GameProvider";
 
 const MODES: { mode: TriviaMode; label: string; desc: string; icon: IconName }[] = [
@@ -42,6 +43,7 @@ function roundCountry(round: TriviaRound) {
 
 export default function TriviaScreen() {
   const navigate = useNavigate();
+  const goBack = useAppBack("/");
   const confirm = useConfirm();
   const { user } = useAuth();
   const { countries, lessons, progress, setProgress } = useGame();
@@ -52,7 +54,7 @@ export default function TriviaScreen() {
   const [seed, setSeed] = useState("idle");
   const [index, setIndex] = useState(0);
   const [answers, setAnswers] = useState<boolean[]>([]);
-  const [feedback, setFeedback] = useState<{ ok: boolean; round: TriviaRound } | null>(null);
+  const [feedback, setFeedback] = useState<{ ok: boolean; round: TriviaRound; selectedLabel?: string } | null>(null);
   const [remaining, setRemaining] = useState(60);
   const [startedAt, setStartedAt] = useState(0);
   const [items, setItems] = useState<RoundResultItem[]>([]);
@@ -105,7 +107,7 @@ export default function TriviaScreen() {
       flagUrl: country.flagUrl,
       context: [country.subregion, country.capital ? `Capital: ${country.capital}` : ""].filter(Boolean).join(" · ")
     }]);
-    setFeedback({ ok, round });
+    setFeedback({ ok, round, selectedLabel });
     if (runMode === "sudden" && !ok) window.setTimeout(() => finish([...answers, ok]), 250);
   }
 
@@ -169,7 +171,7 @@ export default function TriviaScreen() {
     return (
       <main className="flex min-h-full flex-col p-5">
         <div className="flex items-center gap-3">
-          <button onClick={() => navigate("/")} className="icon-btn shrink-0" aria-label="Back">
+          <button onClick={goBack} className="icon-btn shrink-0" aria-label="Back">
             <Icon name="chevron" className="rotate-180" />
           </button>
           <div>
@@ -246,9 +248,19 @@ export default function TriviaScreen() {
         </div>
       </header>
       <section key={round.id} className="animate-fade-in p-5">
-        <TriviaCard round={round} disabled={Boolean(feedback)} onAnswer={answer} />
+        <TriviaCard round={round} disabled={Boolean(feedback)} selectedLabel={feedback?.selectedLabel} onAnswer={answer} />
       </section>
-      {feedback && <FeedbackPanel correct={feedback.ok} country={roundCountry(feedback.round)} xp={0} answerLabel={answerLabel(feedback.round)} onContinue={continueNext} />}
+      {feedback && (
+        <FeedbackPanel
+          correct={feedback.ok}
+          country={roundCountry(feedback.round)}
+          xp={0}
+          answerLabel={answerLabel(feedback.round)}
+          selectedLabel={feedback.selectedLabel}
+          showFlag={feedback.round.mode !== "true-false"}
+          onContinue={continueNext}
+        />
+      )}
     </main>
   );
 }

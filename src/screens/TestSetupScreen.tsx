@@ -1,14 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import Icon from "../components/Icon";
 import type { Topic } from "@flaggo/core/types/topic";
 import { getPopularityGroups } from "@flaggo/core/utils/popularity";
+import type { TestMode } from "../navigation/routes";
+import { useAppBack } from "../navigation/useAppBack";
 import { useGame } from "../state/GameProvider";
 
-export type TestMode = "recall" | "options";
+export type { TestMode } from "../navigation/routes";
 
 export default function TestSetupScreen() {
-  const navigate = useNavigate();
+  const goBack = useAppBack("/review");
   const { countries, progress, startFlagTest } = useGame();
   const [topic, setTopic] = useState<Topic>(progress.selectedTopic);
   const topicCountries = useMemo(() => topic === "capital" ? countries.filter((country) => country.capital?.trim()) : countries, [countries, topic]);
@@ -22,7 +23,7 @@ export default function TestSetupScreen() {
 
   return (
     <main className="p-5">
-      <button onClick={() => navigate("/review")} className="icon-btn mb-4" aria-label="Back">
+      <button onClick={goBack} className="icon-btn mb-4" aria-label="Back">
         <Icon name="chevron" size={20} className="rotate-180" />
       </button>
       <h1 className="screen-title">Custom test</h1>

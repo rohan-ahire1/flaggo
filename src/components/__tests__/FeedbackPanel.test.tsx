@@ -23,9 +23,28 @@ describe("FeedbackPanel", () => {
       />
     );
 
-    expect(screen.getByText(/You picked/)).toHaveTextContent("You picked Lesotho");
-    expect(screen.getByText(/Correct flag/)).toHaveTextContent("Correct flag Anguilla");
+    expect(screen.getByText(/Correct flag:/)).toHaveTextContent("Correct flag: Anguilla");
+    expect(screen.queryByText(/Your answer:/)).not.toBeInTheDocument();
     expect(screen.getByAltText("Anguilla")).toBeInTheDocument();
-    expect(screen.queryByText(/Correct answer/)).not.toBeInTheDocument();
+  });
+
+  it("separates a wrong answer from the correction", () => {
+    const japan = countries.find((country) => country.code === "JP")!;
+
+    render(
+      <FeedbackPanel
+        correct={false}
+        country={japan}
+        xp={0}
+        answerLabel="Tokyo"
+        answerDetail="The capital of Japan is Tokyo."
+        selectedLabel="Kyoto"
+        onContinue={vi.fn()}
+      />
+    );
+
+    expect(screen.getByText(/The correct answer is/)).toHaveTextContent("The correct answer is Tokyo.");
+    expect(screen.queryByText(/Your answer:/)).not.toBeInTheDocument();
+    expect(screen.getByText("The capital of Japan is Tokyo.")).toBeInTheDocument();
   });
 });

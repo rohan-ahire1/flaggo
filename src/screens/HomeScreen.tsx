@@ -1,36 +1,25 @@
 import { useNavigate } from "react-router-dom";
 import Icon, { type IconName } from "../components/Icon";
 import { DAILY_QUESTION_COUNT } from "@flaggo/core/utils/dailyChallenge";
-import { progressiveResults, type ProgressiveStage } from "@flaggo/core/utils/progressivePractice";
+import { progressiveResults } from "@flaggo/core/utils/progressivePractice";
 import { useGame } from "../state/GameProvider";
-
-const STAGE_LABEL: Record<ProgressiveStage, string> = { easy: "easy", medium: "medium", hard: "hard" };
 
 export default function HomeScreen() {
   const navigate = useNavigate();
-  const { countries, progress } = useGame();
+  const { countries, lessons, progress, openLesson } = useGame();
   const todayKey = new Date().toISOString().slice(0, 10);
   const dailyResult = progress.daily.history[todayKey];
 
   const learning = progressiveResults(progress, countries);
-  const introducedPercent = countries.length ? Math.round((learning.seen / countries.length) * 100) : 0;
-  const isNewUser = learning.seen === 0;
+  const completedLessonIds = new Set(progress.completedLessonIds);
+  const flagLessons = lessons.filter((lesson) => lesson.topic === "flag");
+  const completedFlagLessons = flagLessons.filter((lesson) => completedLessonIds.has(lesson.id));
+  const nextFlagLesson = flagLessons.find((lesson) => !completedLessonIds.has(lesson.id));
+  const introducedByLessons = new Set(completedFlagLessons.flatMap((lesson) => lesson.countryCodes)).size;
+  const introducedPercent = countries.length ? Math.round((introducedByLessons / countries.length) * 100) : 0;
+  const isNewLearner = completedFlagLessons.length === 0;
 
-  const nextAction = isNewUser
-    ? {
-        label: "Start here",
-        title: "Learn your first flags",
-        sub: "Start with easier flags and repeat mistakes until they stick.",
-        cta: "Start progressive learning"
-      }
-    : {
-        label: "Progressive learning",
-        title: `Continue with ${STAGE_LABEL[learning.stage]} flags`,
-        sub: learning.needsRepetition
-          ? `${learning.needsRepetition} ${learning.needsRepetition === 1 ? "flag needs" : "flags need"} repetition alongside new material.`
-          : "Keep introducing new flags at your current stage.",
-        cta: "Continue learning"
-      };
+  const startNextFlagLesson = () => nextFlagLesson ? openLesson(nextFlagLesson) : navigate("/learn");
 
   const moreModes: { label: string; desc: string; icon: IconName; onClick: () => void }[] = [
     { label: "Challenge modes", desc: "120s timed or three strikes", icon: "bolt", onClick: () => navigate("/arcade?mode=timed") },
@@ -57,20 +46,24 @@ export default function HomeScreen() {
       <section className="relative mb-4 overflow-hidden rounded-[26px] bg-primary p-5 text-white shadow-card-lg">
         <span className="wl-dots absolute inset-0 opacity-90" />
         <div className="relative">
-          <p className="text-xs font-bold uppercase tracking-[0.12em] text-white/75">{nextAction.label}</p>
-          <h2 className="mt-2 font-display text-[30px] font-semibold leading-tight">{nextAction.title}</h2>
-          <p className="mt-1 text-sm font-semibold text-white/80">{nextAction.sub}</p>
-          <button onClick={() => navigate("/arcade?mode=progressive&start=1")} className="btn-inverse mt-5 w-full">
-            <Icon name="learn" size={19} /> {nextAction.cta}
+          <p className="text-xs font-bold uppercase tracking-[0.12em] text-white/75">{isNewLearner ? "Start here" : "Your next lesson"}</p>
+          <h2 className="mt-2 font-display text-[30px] font-semibold leading-tight">
+            {isNewLearner ? "Learn your first flags" : "Continue flag lessons"}
+          </h2>
+          <p className="mt-1 text-sm font-semibold text-white/80">
+            {nextFlagLesson ? `${nextFlagLesson.title} · ${nextFlagLesson.countryCodes.length} flags` : "You completed every flag lesson."}
+          </p>
+          <button onClick={startNextFlagLesson} className="btn-inverse mt-5 w-full">
+            <Icon name="book" size={19} /> {nextFlagLesson ? (isNewLearner ? "Start first lesson" : "Continue lesson") : "Browse lessons"}
           </button>
 
           <div className="mt-5 border-t border-white/20 pt-4">
             <div className="flex items-end justify-between gap-4">
               <div>
-                <span className="font-display text-3xl font-semibold">{learning.seen}</span>
+                <span className="font-display text-3xl font-semibold">{introducedByLessons}</span>
                 <span className="text-sm font-bold text-white/75"> / {countries.length} introduced</span>
               </div>
-              <span className="text-sm font-bold text-white/80">{learning.mastered} mastered</span>
+              <span className="text-sm font-bold text-white/80">{completedFlagLessons.length}/{flagLessons.length} lessons</span>
             </div>
             <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-white/20">
               <div className="h-full rounded-full bg-white transition-all duration-500" style={{ width: `${introducedPercent}%` }} />
@@ -79,18 +72,21 @@ export default function HomeScreen() {
         </div>
       </section>
 
-      <div className="mb-5 grid grid-cols-2 gap-3">
-        <button onClick={() => navigate("/learn")} className="rounded-[18px] border border-line bg-paper p-3.5 text-left shadow-card">
-          <Icon name="book" size={22} className="text-primary" />
-          <span className="mt-2 block font-semibold text-ink">Flag lessons</span>
-          <span className="block text-[13px] font-medium text-muted">Choose a region</span>
-        </button>
-        <button onClick={() => navigate("/arcade?mode=progressive&tab=results")} className="rounded-[18px] border border-line bg-paper p-3.5 text-left shadow-card">
-          <Icon name="stats" size={22} className="text-primary" />
-          <span className="mt-2 block font-semibold text-ink">Learning results</span>
-          <span className="block text-[13px] font-medium text-muted">Progress by difficulty</span>
-        </button>
-      </div>
+      <button
+        onClick={() => navigate("/arcade?mode=progressive&start=1")}
+        className="mb-4 flex w-full items-center gap-3 rounded-[20px] border border-line bg-surface p-4 text-left shadow-card"
+      >
+        <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-primary/10 text-primary">
+          <Icon name="learn" size={22} />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block font-display text-lg font-semibold text-ink">Progressive learning</span>
+          <span className="block text-[13px] font-medium text-muted">
+            Easy flags first · mistakes repeat · {learning.mastered} mastered
+          </span>
+        </span>
+        <Icon name="chevron" size={18} className="shrink-0 text-muted" />
+      </button>
 
       <button
         onClick={() => navigate("/daily")}
@@ -109,6 +105,21 @@ export default function HomeScreen() {
       </button>
 
       <h2 className="mb-2.5 font-display text-xl font-semibold text-ink">More ways to play</h2>
+      <button
+        onClick={() => navigate("/learn?view=topics")}
+        className="relative mb-3 flex w-full items-center gap-4 overflow-hidden rounded-[22px] bg-primary p-4 text-left text-white shadow-card-lg"
+      >
+        <span className="wl-dots pointer-events-none absolute inset-0 opacity-60" />
+        <span className="relative grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-white/15">
+          <Icon name="globe" size={27} />
+        </span>
+        <span className="relative min-w-0 flex-1">
+          <span className="block text-[11px] font-black uppercase tracking-[0.12em] text-white/70">Beyond flags</span>
+          <span className="block font-display text-xl font-semibold">Learn the whole world</span>
+          <span className="mt-0.5 block text-[12.5px] font-semibold text-white/80">Capitals · currencies · locations · languages</span>
+        </span>
+        <Icon name="chevron" size={18} className="relative shrink-0 text-white/75" />
+      </button>
       <div className="grid grid-cols-2 gap-3">
         {moreModes.map((item, index) => (
           <Tile key={item.label} {...item} wide={index === moreModes.length - 1} />

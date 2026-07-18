@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import Icon from "../components/Icon";
 import StatCard from "../components/StatCard";
 import { parseReviewKey, reviewKey } from "@flaggo/core/types/topic";
 import { lessonsForTopic } from "@flaggo/core/utils/lessonGenerator";
 import { getMasteredCountries, getWeakCountries } from "@flaggo/core/utils/spacedRepetition";
+import { useAppBack } from "../navigation/useAppBack";
 import { useGame } from "../state/GameProvider";
 
 export default function StatsScreen() {
-  const navigate = useNavigate();
+  const goBack = useAppBack("/profile");
   const { progress, countries, lessons } = useGame();
   const total = progress.totalCorrect + progress.totalWrong;
   const topic = progress.selectedTopic;
@@ -38,7 +38,7 @@ export default function StatsScreen() {
 
   return (
     <main className="p-5">
-      <button onClick={() => navigate(-1)} className="icon-btn mb-4" aria-label="Back">
+      <button onClick={goBack} className="icon-btn mb-4" aria-label="Back">
         <Icon name="chevron" size={20} className="rotate-180" />
       </button>
       <h1 className="screen-title">Stats</h1>

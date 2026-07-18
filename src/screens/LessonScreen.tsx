@@ -6,15 +6,15 @@ import ProgressBar from "../components/ProgressBar";
 import QuestionCard from "../components/QuestionCard";
 import RoundResults, { type RoundResultItem } from "../components/RoundResults";
 import { useConfirm } from "../components/ConfirmDialog";
-import type { Topic } from "@flaggo/core/types/topic";
 import { updateStreak } from "@flaggo/core/utils/date";
 import { generateLessonQuestions, generateReviewQuestions, type Question } from "@flaggo/core/utils/quiz";
 import { updateReviewState } from "@flaggo/core/utils/spacedRepetition";
-import { answerLabel } from "@flaggo/core/game/answerLabel";
+import { answerDetail, answerLabel } from "@flaggo/core/game/answerLabel";
 import { awardBadges, evaluateBadges } from "@flaggo/core/game/badges";
 import { useGame } from "../state/GameProvider";
 import { trackEvent } from "../lib/analytics";
 import { earnedBadgeResults } from "../lib/badges";
+import { parseLessonRoute } from "../navigation/routes";
 
 export const TOPIC_LABEL: Record<string, string> = {
   flag: "Flags",
@@ -25,17 +25,12 @@ export const TOPIC_LABEL: Record<string, string> = {
   neighbor: "Neighbors"
 };
 
-type LessonRouteState =
-  | { lessonId: string }
-  | { mode: "review"; countryCodes: string[]; topic: Topic }
-  | null;
-
 export default function LessonScreen() {
   const navigate = useNavigate();
   const confirm = useConfirm();
-  const { state } = useLocation();
+  const location = useLocation();
   const { countries, lessons, progress, setProgress, nextLearningLesson, openLesson } = useGame();
-  const routeState = state as LessonRouteState;
+  const routeState = useMemo(() => parseLessonRoute(location.search, location.state), [location.search, location.state]);
   const lesson = routeState && "lessonId" in routeState ? lessons.find((item) => item.id === routeState.lessonId) : undefined;
   const mode = routeState && "mode" in routeState ? routeState.mode : "lesson";
   // Keyed memo: a fresh array here each render would retrigger the questions
@@ -197,6 +192,7 @@ export default function LessonScreen() {
           country={feedback.question.correctCountry}
           xp={10}
           answerLabel={answerLabel(feedback.question)}
+          answerDetail={answerDetail(feedback.question)}
           selectedLabel={feedback.selectedLabel}
           revealCorrectFlag={feedback.question.type === "pick-flag"}
           onContinue={continueNext}

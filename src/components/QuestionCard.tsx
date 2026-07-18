@@ -14,6 +14,12 @@ function Eyebrow({ icon, children }: { icon: IconName; children: string }) {
   );
 }
 
+function revealedState(disabled: boolean, selectedLabel: string | undefined, label: string, correct: boolean) {
+  if (!disabled) return "idle" as const;
+  if (correct) return "correct" as const;
+  return selectedLabel === label ? "wrong" as const : "idle" as const;
+}
+
 export default function QuestionCard({
   question,
   disabled,
@@ -160,8 +166,8 @@ export default function QuestionCard({
           <h1 className="font-display text-2xl font-black">Is {question.shownCapital} the capital of {question.correctCountry.name}?</h1>
         </div>
         <div className="grid grid-cols-2 gap-3">
-          <AnswerOption label="Yes" disabled={disabled} onClick={() => onAnswer(question.answer, "Yes")} />
-          <AnswerOption label="No" disabled={disabled} onClick={() => onAnswer(!question.answer, "No")} />
+          <AnswerOption label="Yes" disabled={disabled} state={revealedState(disabled, selectedLabel, "Yes", question.answer)} onClick={() => onAnswer(question.answer, "Yes")} />
+          <AnswerOption label="No" disabled={disabled} state={revealedState(disabled, selectedLabel, "No", !question.answer)} onClick={() => onAnswer(!question.answer, "No")} />
         </div>
       </div>
     );
@@ -267,8 +273,8 @@ export default function QuestionCard({
           <h1 className="font-display text-2xl font-black">Is this the flag of {question.shownCountry.name}?</h1>
         </div>
         <div className="grid grid-cols-2 gap-3">
-          <AnswerOption label="Yes" disabled={disabled} onClick={() => onAnswer(question.answer, "Yes")} />
-          <AnswerOption label="No" disabled={disabled} onClick={() => onAnswer(!question.answer, "No")} />
+          <AnswerOption label="Yes" disabled={disabled} state={revealedState(disabled, selectedLabel, "Yes", question.answer)} onClick={() => onAnswer(question.answer, "Yes")} />
+          <AnswerOption label="No" disabled={disabled} state={revealedState(disabled, selectedLabel, "No", !question.answer)} onClick={() => onAnswer(!question.answer, "No")} />
         </div>
       </div>
     );
@@ -299,10 +305,12 @@ function formatMetric(value: number, metric: "population" | "area") {
 export function TriviaCard({
   round,
   disabled,
+  selectedLabel,
   onAnswer
 }: {
   round: TriviaRound;
   disabled: boolean;
+  selectedLabel?: string;
   onAnswer: (wasCorrect: boolean, selectedLabel?: string) => void;
 }) {
   useEffect(() => {
@@ -379,8 +387,8 @@ export function TriviaCard({
         <h1 className="font-display text-2xl font-black">Is this statement correct?</h1>
       </div>
       <div className="grid grid-cols-2 gap-3">
-        <AnswerOption label="True" disabled={disabled} onClick={() => onAnswer(round.answer, "True")} />
-        <AnswerOption label="False" disabled={disabled} onClick={() => onAnswer(!round.answer, "False")} />
+        <AnswerOption label="True" disabled={disabled} state={revealedState(disabled, selectedLabel, "True", round.answer)} onClick={() => onAnswer(round.answer, "True")} />
+        <AnswerOption label="False" disabled={disabled} state={revealedState(disabled, selectedLabel, "False", !round.answer)} onClick={() => onAnswer(!round.answer, "False")} />
       </div>
     </div>
   );

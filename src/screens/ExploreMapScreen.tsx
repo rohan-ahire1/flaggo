@@ -1,13 +1,13 @@
 import { lazy, Suspense, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import FlagImage from "../components/FlagImage";
 import Icon from "../components/Icon";
+import { useAppBack } from "../navigation/useAppBack";
 import { useGame } from "../state/GameProvider";
 
 const WorldMap = lazy(() => import("../components/WorldMap"));
 
 export default function ExploreMapScreen() {
-  const navigate = useNavigate();
+  const goBack = useAppBack("/library");
   const { countries } = useGame();
   const countryByCode = useMemo(() => new Map(countries.map((country) => [country.code, country])), [countries]);
   const [selectedCode, setSelectedCode] = useState<string | undefined>();
@@ -15,7 +15,7 @@ export default function ExploreMapScreen() {
 
   return (
     <main className="p-5">
-      <button onClick={() => navigate(-1)} className="icon-btn mb-4" aria-label="Back">
+      <button onClick={goBack} className="icon-btn mb-4" aria-label="Back">
         <Icon name="chevron" size={20} className="rotate-180" />
       </button>
       <h1 className="screen-title">Explore</h1>

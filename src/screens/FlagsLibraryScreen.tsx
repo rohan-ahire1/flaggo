@@ -35,9 +35,6 @@ export default function FlagsLibraryScreen() {
 
   return (
     <main className="p-5">
-      <button onClick={() => navigate(-1)} className="icon-btn mb-4" aria-label="Back">
-        <Icon name="chevron" size={20} className="rotate-180" />
-      </button>
       <h1 className="screen-title">Flag library</h1>
       <div className="mt-4 grid grid-cols-2 gap-2">
         <button className="chip chip-on w-full">Flags</button>

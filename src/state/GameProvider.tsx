@@ -14,9 +14,9 @@ import { BRAND } from "../config/brand";
 import { useConfirm } from "../components/ConfirmDialog";
 import { useSyncedProgress } from "../hooks/useSyncedProgress";
 import { trackEvent } from "../lib/analytics";
+import { lessonPath, mapPlayPath, testPath, type TestMode } from "../navigation/routes";
 import { supabase } from "../lib/supabase";
 import { preloadFlags } from "../utils/preloadFlags";
-import type { TestMode } from "../screens/TestSetupScreen";
 
 type GameContextValue = {
   progress: AppProgress;
@@ -77,10 +77,10 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
   function openLesson(lesson: Lesson) {
     if (lesson.topic === "location") {
-      navigate("/map/play", { state: { mode: "locate", countryCodes: lesson.countryCodes, lessonId: lesson.id } });
+      navigate(mapPlayPath({ mode: "locate", countryCodes: lesson.countryCodes, lessonId: lesson.id }));
       return;
     }
-    navigate("/lesson", { state: { lessonId: lesson.id } });
+    navigate(lessonPath({ lessonId: lesson.id }));
   }
 
   function firstOpenLesson(topic: Topic): Lesson | undefined {
@@ -104,7 +104,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   }
 
   function startReview(group: Country[], topic = progress.selectedTopic) {
-    navigate("/lesson", { state: { mode: "review", countryCodes: countryCodes(group), topic } });
+    navigate(lessonPath({ mode: "review", countryCodes: countryCodes(group), topic }));
   }
 
   function startDeckPractice(deck: AppProgress["decks"][number]) {
@@ -115,12 +115,12 @@ export function GameProvider({ children }: { children: ReactNode }) {
   }
 
   function startFlagTest(group: PopularityGroup, mode: TestMode, topic: Topic) {
-    navigate("/test", { state: { countryCodes: countryCodes(group.countries), mode, topic } });
+    navigate(testPath({ countryCodes: countryCodes(group.countries), mode, topic }));
   }
 
   function startMapPractice(mode: MapMode, group: Country[]) {
     trackEvent("map-play", { mode });
-    navigate("/map/play", { state: { mode, countryCodes: countryCodes(group) } });
+    navigate(mapPlayPath({ mode, countryCodes: countryCodes(group) }));
   }
 
   async function startMapReview() {
