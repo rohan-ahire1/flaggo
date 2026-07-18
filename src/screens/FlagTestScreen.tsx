@@ -5,22 +5,19 @@ import Icon from "../components/Icon";
 import ProgressBar from "../components/ProgressBar";
 import RoundResults, { type RoundResultItem } from "../components/RoundResults";
 import { useConfirm } from "../components/ConfirmDialog";
-import type { Topic } from "@flaggo/core/types/topic";
 import { getCapitalDistractors, getDistractors, shuffleArray } from "@flaggo/core/utils/quiz";
 import { updateReviewState } from "@flaggo/core/utils/spacedRepetition";
 import { awardBadges, evaluateBadges } from "@flaggo/core/game/badges";
 import { useGame } from "../state/GameProvider";
 import { earnedBadgeResults } from "../lib/badges";
-import type { TestMode } from "./TestSetupScreen";
-
-type TestRouteState = { countryCodes: string[]; mode: TestMode; topic: Topic } | null;
+import { parseTestRoute } from "../navigation/routes";
 
 export default function FlagTestScreen() {
   const navigate = useNavigate();
   const confirm = useConfirm();
-  const { state } = useLocation();
+  const location = useLocation();
   const { countries: allCountries, lessons, progress, setProgress, startReview } = useGame();
-  const routeState = state as TestRouteState;
+  const routeState = useMemo(() => parseTestRoute(location.search, location.state), [location.search, location.state]);
   // Keyed memo: a fresh array each render would reshuffle the test mid-round.
   const codesKey = routeState?.countryCodes.join(",") ?? "";
   const countries = useMemo(

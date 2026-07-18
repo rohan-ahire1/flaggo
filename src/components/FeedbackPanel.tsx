@@ -9,16 +9,20 @@ export default function FeedbackPanel({
   country,
   xp,
   answerLabel,
+  answerDetail,
   selectedLabel,
   revealCorrectFlag = false,
+  showFlag = true,
   onContinue
 }: {
   correct: boolean;
   country: Country;
   xp: number;
   answerLabel?: string;
+  answerDetail?: string;
   selectedLabel?: string;
   revealCorrectFlag?: boolean;
+  showFlag?: boolean;
   onContinue: () => void;
 }) {
   const buttonRef = useRef<HTMLButtonElement | null>(null);
@@ -44,40 +48,59 @@ export default function FeedbackPanel({
         correct ? "bg-success" : "bg-error"
       }`}
     >
-      <div className="mb-4 flex items-center gap-4">
-        <div className="relative shrink-0">
-          <FlagImage code={country.code} name={country.name} src={country.flagUrl} fit="natural" className="w-28 rounded-[18px]" />
-          {(correct || revealCorrectFlag) && (
-            <span className="absolute -bottom-2 -right-2 grid h-9 w-9 place-items-center rounded-full bg-paper shadow-md">
-              <Icon name="check" size={20} className="text-success" />
-            </span>
-          )}
-        </div>
-        <div>
-          <h2 className="font-display text-2xl font-black">{correct ? "Nice!" : "Not quite"}</h2>
-          {correct ? (
-            <p className="flex items-center gap-1 font-bold">
-              <Icon name="bolt" size={16} /> +{xp} XP
-            </p>
-          ) : (
-            <div className="text-sm font-semibold leading-tight text-white/95">
-              {selectedLabel && (
-                <p>
-                  You picked <span className="font-black">{selectedLabel}</span>
-                </p>
-              )}
-              {revealCorrectFlag ? (
-                <p className="mt-1">
-                  Correct flag <span className="font-black">{country.name}</span>
-                </p>
-              ) : (
-                <p>
-                  Correct answer <span className="font-black">{answerLabel ?? country.name}</span>
-                </p>
-              )}
+      <div className="mb-4">
+        {correct ? (
+          <div className="flex items-center gap-4">
+            {showFlag ? (
+              <div className="relative shrink-0">
+                <FlagImage code={country.code} name={country.name} src={country.flagUrl} fit="natural" className="w-28 rounded-[18px]" />
+                <span className="absolute -bottom-2 -right-2 grid h-9 w-9 place-items-center rounded-full bg-paper shadow-md">
+                  <Icon name="check" size={20} className="text-success" />
+                </span>
+              </div>
+            ) : (
+              <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-white/15">
+                <Icon name="check" size={24} />
+              </span>
+            )}
+            <div>
+              <h2 className="font-display text-2xl font-black">Nice!</h2>
+              <p className="flex items-center gap-1 font-bold">
+                <Icon name="bolt" size={16} /> +{xp} XP
+              </p>
             </div>
-          )}
-        </div>
+          </div>
+        ) : (
+          <div className="flex items-start gap-3">
+            <span className="mt-0.5 grid h-11 w-11 shrink-0 place-items-center rounded-full bg-white/15">
+              <Icon name="x" size={22} />
+            </span>
+            <div className="min-w-0 flex-1">
+              <h2 className="font-display text-2xl font-black">Not quite</h2>
+              {revealCorrectFlag ? (
+                <div className="mt-2 flex items-center gap-3 rounded-2xl bg-white/15 p-2.5">
+                  <FlagImage
+                    code={country.code}
+                    name={country.name}
+                    src={country.flagUrl}
+                    fit="natural"
+                    framed={false}
+                    className="w-20 shrink-0"
+                    imgClassName="max-h-12"
+                  />
+                  <p className="text-[15px] font-semibold text-white/95">
+                    Correct flag: <span className="font-black">{country.name}</span>
+                  </p>
+                </div>
+              ) : (
+                <p className="mt-0.5 text-[15px] font-semibold text-white/95">
+                  The correct answer is <span className="font-black">{answerLabel ?? country.name}</span>.
+                </p>
+              )}
+              {answerDetail && <p className="mt-1 text-sm font-semibold text-white/90">{answerDetail}</p>}
+            </div>
+          </div>
+        )}
       </div>
       <button
         ref={buttonRef}

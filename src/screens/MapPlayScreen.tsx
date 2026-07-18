@@ -8,23 +8,22 @@ import RoundResults, { type RoundResultItem } from "../components/RoundResults";
 import { useConfirm } from "../components/ConfirmDialog";
 import type { Country } from "@flaggo/core/types/country";
 import { updateStreak } from "@flaggo/core/utils/date";
-import { generateMapQuestions, type MapMode, type MapQuestion } from "@flaggo/core/utils/quiz";
+import { generateMapQuestions } from "@flaggo/core/utils/quiz";
 import { updateReviewState } from "@flaggo/core/utils/spacedRepetition";
 import { awardBadges, evaluateBadges } from "@flaggo/core/game/badges";
 import { useGame } from "../state/GameProvider";
 import { trackEvent } from "../lib/analytics";
 import { earnedBadgeResults } from "../lib/badges";
+import { parseMapPlayRoute } from "../navigation/routes";
 
 const WorldMap = lazy(() => import("../components/WorldMap"));
-
-type MapRouteState = { mode: MapMode; countryCodes: string[]; lessonId?: string } | null;
 
 export default function MapPlayScreen() {
   const navigate = useNavigate();
   const confirm = useConfirm();
-  const { state } = useLocation();
+  const location = useLocation();
   const { countries: allCountries, lessons, progress, setProgress, startMapPractice, nextLearningLesson, openLesson } = useGame();
-  const routeState = state as MapRouteState;
+  const routeState = useMemo(() => parseMapPlayRoute(location.search, location.state), [location.search, location.state]);
   // Keyed memo: a fresh array each render would regenerate questions mid-round.
   const codesKey = routeState?.countryCodes.join(",") ?? "";
   const countries = useMemo(

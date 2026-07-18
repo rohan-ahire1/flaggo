@@ -72,6 +72,7 @@ export default function QuizScreen() {
   const draft = useRef<AppProgress>(progress);
   const finishing = useRef(false);
   const scoreRef = useRef(0);
+  const [round, setRound] = useState(0);
 
   const items: QuizItem[] = useMemo(() => {
     const requestedCodes = typeof params.codes === "string" ? params.codes.split(",").map((code) => code.trim()).filter(Boolean) : [];
@@ -96,7 +97,7 @@ export default function QuizScreen() {
     const qs = isArcade ? buildArcadeQuestions(topic, arcadeMode) : buildLessonQuestions(topic);
     return qs.map((question) => ({ question, topic }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isDaily, isArcade, topic, arcadeMode, params.deckId, params.codes, lesson]);
+  }, [isDaily, isArcade, topic, arcadeMode, params.deckId, params.codes, lesson, round]);
 
   const [index, setIndex] = useState(0);
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
@@ -106,7 +107,7 @@ export default function QuizScreen() {
   const [finished, setFinished] = useState(false);
   const [earnedBadgeIds, setEarnedBadgeIds] = useState<string[]>([]);
   const [notice, setNotice] = useState<string | null>(null);
-  const [startedAt] = useState(() => Date.now());
+  const [startedAt, setStartedAt] = useState(() => Date.now());
   const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
@@ -223,6 +224,23 @@ export default function QuizScreen() {
     if (isDaily) void syncStreakReminder(done).catch(() => undefined);
   }
 
+  function playAgain() {
+    finishing.current = false;
+    scoreRef.current = 0;
+    setIndex(0);
+    setSelectedKey(null);
+    setRevealed(false);
+    setScore(0);
+    setResults([]);
+    setFinished(false);
+    setEarnedBadgeIds([]);
+    setNotice(null);
+    setRound((value) => value + 1);
+    const started = Date.now();
+    setStartedAt(started);
+    setNow(started);
+  }
+
   if (finished) {
     const finalScore = Math.max(score, scoreRef.current);
     const streak = isDaily ? draft.current.daily.streak : isArcade ? undefined : draft.current.streak;
@@ -246,11 +264,7 @@ export default function QuizScreen() {
             label: "Play again",
             variant: missed ? "secondary" as const : "primary" as const,
             icon: "swap" as const,
-            onPress: () =>
-              router.replace({
-                pathname: "/quiz",
-                params: { mode: params.mode ?? "lesson", topic, amode: arcadeMode }
-              })
+            onPress: playAgain
           },
           { label: "Done", variant: "secondary" as const, onPress: () => dismiss() }
         ];

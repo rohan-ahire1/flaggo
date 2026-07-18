@@ -1,7 +1,6 @@
-import { useEffect } from "react";
+import { Fragment, lazy, useEffect, type ReactNode } from "react";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
-import { lazy } from "react";
 import AppLayout from "./AppLayout";
 import { ThemeProvider } from "./theme/ThemeProvider";
 import { AuthProvider } from "./auth/AuthProvider";
@@ -32,6 +31,11 @@ const ArcadeScreen = lazy(() => import("./screens/ArcadeScreen"));
 const DecksScreen = lazy(() => import("./screens/DecksScreen"));
 const TriviaScreen = lazy(() => import("./screens/TriviaScreen"));
 
+function RoundRoute({ children }: { children: ReactNode }) {
+  const location = useLocation();
+  return <Fragment key={location.key}>{children}</Fragment>;
+}
+
 function PageTracker() {
   const location = useLocation();
   useEffect(() => {
@@ -59,15 +63,15 @@ export default function AppShell() {
               <Route path="/welcome" element={<WelcomeScreen />} />
               <Route path="/learn" element={<PathsScreen />} />
               <Route path="/learn/:region" element={<PathsScreen />} />
-              <Route path="/lesson" element={<LessonScreen />} />
+              <Route path="/lesson" element={<RoundRoute><LessonScreen /></RoundRoute>} />
               <Route path="/review" element={<ReviewScreen />} />
               <Route path="/test-setup" element={<TestSetupScreen />} />
-              <Route path="/test" element={<FlagTestScreen />} />
+              <Route path="/test" element={<RoundRoute><FlagTestScreen /></RoundRoute>} />
               <Route path="/daily" element={<DailyChallengeScreen />} />
               <Route path="/arcade" element={<ArcadeScreen />} />
               <Route path="/trivia" element={<TriviaScreen />} />
               <Route path="/map" element={<MapMenuScreen />} />
-              <Route path="/map/play" element={<MapPlayScreen />} />
+              <Route path="/map/play" element={<RoundRoute><MapPlayScreen /></RoundRoute>} />
               <Route path="/map/explore" element={<ExploreMapScreen />} />
               <Route path="/decks" element={<DecksScreen />} />
               <Route path="/library" element={<FlagsLibraryScreen />} />

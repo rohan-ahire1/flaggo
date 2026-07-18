@@ -5,12 +5,14 @@ import world110m from "@flaggo/core/data/world-110m.json";
 import type { MapMode } from "@flaggo/core/utils/quiz";
 import { mapPresentCountries } from "@flaggo/core/utils/geo";
 import { getPopularityGroups } from "@flaggo/core/utils/popularity";
+import { useAppBack } from "../navigation/useAppBack";
 import { useGame } from "../state/GameProvider";
 
 type PickerMode = "tier" | "region";
 
 export default function MapMenuScreen() {
   const navigate = useNavigate();
+  const goBack = useAppBack("/review");
   const { countries, startMapPractice } = useGame();
   const mapCountries = useMemo(() => mapPresentCountries(countries, world110m), [countries]);
   const groups = useMemo(() => getPopularityGroups(mapCountries), [mapCountries]);
@@ -29,7 +31,7 @@ export default function MapMenuScreen() {
 
   return (
     <main className="p-5">
-      <button onClick={() => navigate(-1)} className="icon-btn mb-4" aria-label="Back">
+      <button onClick={goBack} className="icon-btn mb-4" aria-label="Back">
         <Icon name="chevron" size={20} className="rotate-180" />
       </button>
       <h1 className="screen-title">World Map</h1>

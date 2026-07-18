@@ -9,7 +9,7 @@ import { useConfirm } from "../components/ConfirmDialog";
 import { useAuth } from "../auth/AuthProvider";
 import { applyDailyResult, buildDailyQuiz, dateKey, type DailyQuestion } from "@flaggo/core/utils/dailyChallenge";
 import { updateReviewState } from "@flaggo/core/utils/spacedRepetition";
-import { answerLabelForWrapper } from "@flaggo/core/game/answerLabel";
+import { answerDetailForWrapper, answerLabelForWrapper } from "@flaggo/core/game/answerLabel";
 import { awardBadges, evaluateBadges } from "@flaggo/core/game/badges";
 import { trackEvent } from "../lib/analytics";
 import { earnedBadgeResults } from "../lib/badges";
@@ -125,6 +125,7 @@ export default function DailyChallengeScreen() {
           country={feedback.question.country}
           xp={feedback.ok ? 10 : 0}
           answerLabel={answerLabelForWrapper(feedback.question)}
+          answerDetail={answerDetailForWrapper(feedback.question)}
           selectedLabel={feedback.selectedLabel}
           revealCorrectFlag={feedback.question.question.type === "pick-flag"}
           onContinue={continueNext}

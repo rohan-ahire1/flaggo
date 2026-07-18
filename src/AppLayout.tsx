@@ -1,4 +1,4 @@
-import { Suspense, useEffect, useRef } from "react";
+import { Suspense, useEffect, useLayoutEffect, useRef } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import AdConsentBanner from "./ads/AdConsentBanner";
 import SignInModal from "./auth/SignInModal";
@@ -21,6 +21,7 @@ export default function AppLayout() {
   const location = useLocation();
   const navigate = useNavigate();
   const welcomeChecked = useRef(false);
+  const scrollContainer = useRef<HTMLElement>(null);
   const { progress, loading, toast, signInOpen, setSignInOpen } = useGame();
   const hideChrome = HIDE_CHROME_PREFIXES.some((path) => location.pathname === path || location.pathname.startsWith(`${path}/`));
 
@@ -31,13 +32,17 @@ export default function AppLayout() {
     if (!hasProgress) navigate("/welcome", { replace: true });
   }, [loading, location.pathname, navigate, progress]);
 
+  useLayoutEffect(() => {
+    if (scrollContainer.current) scrollContainer.current.scrollTop = 0;
+  }, [location.key]);
+
   return (
     <div className="min-h-screen bg-paper md:grid md:place-items-start">
       <Toast message={toast} />
       <SignInModal open={signInOpen} onClose={() => setSignInOpen(false)} />
       <AdConsentBanner />
       <div className="mx-auto flex h-[100dvh] max-w-md flex-col bg-paper md:my-6 md:h-[calc(100dvh-3rem)] md:w-full md:max-w-2xl md:overflow-hidden md:rounded-[30px] md:border md:border-line md:shadow-soft lg:max-w-3xl">
-        <main className="no-scrollbar flex-1 overflow-y-auto">
+        <main ref={scrollContainer} className="no-scrollbar flex-1 overflow-y-auto">
           {loading ? (
             <div className="px-5 pt-4">
               <div className="h-3 w-32 animate-pulse rounded-full bg-surface2" />
@@ -47,9 +52,9 @@ export default function AppLayout() {
               <Outlet />
             </Suspense>
           )}
-          {!hideChrome && <AppFooter />}
+          {!loading && !hideChrome && <AppFooter />}
         </main>
-        {!hideChrome && <BottomNav />}
+        {!loading && !hideChrome && <BottomNav />}
       </div>
     </div>
   );

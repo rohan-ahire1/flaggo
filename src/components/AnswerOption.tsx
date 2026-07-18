@@ -6,19 +6,28 @@ export default function AnswerOption({
   label,
   showFlag,
   disabled,
+  state = "idle",
   onClick
 }: {
   country?: Country;
   label?: string;
   showFlag?: boolean;
   disabled?: boolean;
+  state?: "idle" | "correct" | "wrong";
   onClick: () => void;
 }) {
+  const stateClass =
+    state === "correct"
+      ? "border-success bg-success/10 text-success"
+      : state === "wrong"
+        ? "border-error bg-error/10 text-error"
+        : "border-line bg-paper text-ink hover:border-primary/40";
+
   return (
     <button
       disabled={disabled}
       onClick={onClick}
-      className="min-h-16 rounded-2xl border-2 border-b-[5px] border-line bg-paper p-4 text-left font-display text-[17px] font-semibold text-ink transition-all duration-150 hover:border-primary/40 active:translate-y-[3px] active:border-b-2"
+      className={`min-h-16 rounded-2xl border-2 border-b-[5px] p-4 text-left font-display text-[17px] font-semibold transition-all duration-150 active:translate-y-[3px] active:border-b-2 ${stateClass}`}
     >
       {showFlag && country ? (
         <span className="flex items-center gap-3">
