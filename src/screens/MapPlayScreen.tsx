@@ -26,7 +26,10 @@ export default function MapPlayScreen() {
   const routeState = useMemo(() => parseMapPlayRoute(location.search, location.state), [location.search, location.state]);
   // Keyed memo: a fresh array each render would regenerate questions mid-round.
   const codesKey = routeState?.countryCodes.join(",") ?? "";
-  const countries = useMemo(
+  // The lesson controls which countries can be targets, not which countries
+  // exist on the interactive map. Tapping any other mapped country must still
+  // be possible so it can be recorded as a wrong answer.
+  const targetCountries = useMemo(
     () =>
       codesKey
         ? codesKey
@@ -39,8 +42,8 @@ export default function MapPlayScreen() {
   const mode = routeState?.mode ?? "locate";
   const lessonId = routeState?.lessonId;
   const onExit = () => navigate(lessonId ? "/learn" : "/map");
-  const questions = useMemo(() => generateMapQuestions(countries, mode), [countries, mode]);
-  const countryByCode = useMemo(() => new Map(countries.map((country) => [country.code, country])), [countries]);
+  const questions = useMemo(() => generateMapQuestions(targetCountries, mode), [targetCountries, mode]);
+  const countryByCode = useMemo(() => new Map(allCountries.map((country) => [country.code, country])), [allCountries]);
   const [currentProgress, setCurrentProgress] = useState(progress);
   const [index, setIndex] = useState(0);
   const [correct, setCorrect] = useState(0);
@@ -143,7 +146,7 @@ export default function MapPlayScreen() {
                 { label: "Back to Learn", variant: nextLesson ? ("secondary" as const) : ("primary" as const), icon: "learn" as const, onPress: onExit }
               ]
             : [
-                { label: "Play again", variant: "primary", icon: "play", onPress: () => startMapPractice(mode, countries) },
+                { label: "Play again", variant: "primary", icon: "play", onPress: () => startMapPractice(mode, targetCountries) },
                 { label: "Back to map menu", variant: "secondary", icon: "globe", onPress: onExit }
               ]
         }
@@ -190,7 +193,7 @@ export default function MapPlayScreen() {
 
       <Suspense fallback={<div className={mode === "locate" ? "min-h-0 flex-1 animate-pulse rounded-[24px] bg-paper shadow-card" : "h-[360px] animate-pulse rounded-[24px] bg-paper shadow-card"} />}>
         <WorldMap
-          countries={countries}
+          countries={allCountries}
           highlightCode={isIdentify ? question.targetCode : undefined}
           correctCode={feedback?.country.code}
           wrongCode={feedback?.wrongCode}
