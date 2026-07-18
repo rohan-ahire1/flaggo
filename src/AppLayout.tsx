@@ -5,6 +5,7 @@ import SignInModal from "./auth/SignInModal";
 import AppFooter from "./components/AppFooter";
 import BottomNav from "./components/BottomNav";
 import Toast from "./components/Toast";
+import { hasCompletedOnboarding } from "./lib/onboarding";
 import { useGame } from "./state/GameProvider";
 
 const HIDE_CHROME_PREFIXES = [
@@ -29,7 +30,7 @@ export default function AppLayout() {
     if (welcomeChecked.current || loading || location.pathname !== "/") return;
     welcomeChecked.current = true;
     const hasProgress = progress.xp || progress.completedLessonIds.length || Object.keys(progress.review).length;
-    if (!hasProgress) navigate("/welcome", { replace: true });
+    if (!hasProgress && !hasCompletedOnboarding()) navigate("/welcome", { replace: true });
   }, [loading, location.pathname, navigate, progress]);
 
   useLayoutEffect(() => {

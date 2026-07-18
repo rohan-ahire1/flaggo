@@ -13,6 +13,7 @@ import { useAuth } from "../auth/AuthProvider";
 import { BRAND } from "../config/brand";
 import { useConfirm } from "../components/ConfirmDialog";
 import { useSyncedProgress } from "../hooks/useSyncedProgress";
+import { resetOnboarding } from "../lib/onboarding";
 import { trackEvent } from "../lib/analytics";
 import { lessonPath, mapPlayPath, testPath, type TestMode } from "../navigation/routes";
 import { supabase } from "../lib/supabase";
@@ -137,6 +138,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
   async function resetAll() {
     await resetAllProgress();
+    resetOnboarding();
     navigate("/welcome", { replace: true });
   }
 
