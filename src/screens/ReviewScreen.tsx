@@ -1,8 +1,8 @@
 import { useNavigate } from "react-router-dom";
-import FlagCard from "../components/FlagCard";
 import Icon from "../components/Icon";
-import { reviewKey } from "@flaggo/core/types/topic";
+import ProgressiveResults from "../components/ProgressiveResults";
 import { getDueCountries, getWeakCountries } from "@flaggo/core/utils/spacedRepetition";
+import { flashcardsPath } from "../navigation/routes";
 import { useGame } from "../state/GameProvider";
 
 export default function ReviewScreen() {
@@ -14,50 +14,58 @@ export default function ReviewScreen() {
   const due = getDueCountries(progress, topicCountries, topic).slice(0, 12);
   const weak = getWeakCountries(progress, topicCountries, topic).slice(0, 6);
   const practice = due.length ? due : weak.length ? weak : topicCountries.slice(0, 8);
+
   return (
     <main className="p-5">
-      <h1 className="screen-title">Practice</h1>
-      <p className="mt-1 font-bold text-muted">Spaced repetition brings back {label} right before you'd forget them.</p>
-      <section className="mt-5 overflow-hidden rounded-[24px] border border-line bg-paper p-5 shadow-card-lg">
-        <div className="flex items-center gap-3">
-          <span className="grid h-14 w-14 place-items-center rounded-2xl bg-primary/10 text-primary">
-            <Icon name="review" size={28} />
-          </span>
-          <div>
-            <div className="font-display text-5xl font-black leading-none text-primary">{due.length}</div>
-            <p className="mt-1 font-bold text-muted">{due.length ? `${label} due for review` : "No reviews due today."}</p>
-          </div>
-        </div>
-        <button onClick={() => startReview(practice, topic)} className="btn-primary mt-5 w-full">
-          <Icon name="bolt" size={20} /> {due.length ? "Review due flags" : "Practice flags"}
-        </button>
-      </section>
-      <h2 className="mt-7 font-display text-xl font-semibold text-ink">More practice</h2>
-      <section className="mt-3 rounded-[24px] border border-line bg-paper p-5 shadow-card-lg">
-        <h2 className="font-display text-2xl font-black">Map practice</h2>
-        <p className="mt-1 font-bold text-muted">Review country locations with the same spaced-repetition schedule.</p>
-        <button onClick={() => void startMapReview()} className="btn-secondary mt-5 w-full">
-          <Icon name="globe" size={18} /> Start map practice
-        </button>
-      </section>
-      <section className="mt-5 rounded-[24px] border border-line bg-paper p-5 shadow-card-lg">
-        <p className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-display font-semibold uppercase tracking-wide text-primaryDark">
-          <Icon name="sparkle" size={13} /> New
-        </p>
-        <h2 className="mt-2 font-display text-2xl font-black">50-country test</h2>
-        <p className="mt-1 font-bold text-muted">Choose Top 50, 51-100, and beyond. Practice with typed recall or answer choices.</p>
-        <button onClick={() => navigate("/test-setup")} className="btn-secondary mt-5 w-full">
-          <Icon name="target" size={18} /> Configure test
-        </button>
-      </section>
-      <h2 className="mt-6 flex items-center gap-2 font-display text-xl font-black">
-        <Icon name="heart" size={18} className="text-error" /> Weakest {label}
-      </h2>
-      {weak.length ? (
-        <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-          {weak.map((country) => <FlagCard key={country.code} country={country} review={progress.review[reviewKey(country.code, topic)]} onClick={() => startReview([country], topic)} />)}
-        </div>
-      ) : <p className="mt-3 font-bold text-muted">Practice will include new {label} until weak {label} appear.</p>}
+      <h1 className="screen-title">Review</h1>
+      <p className="mt-1 font-bold text-muted">See what is sticking, then revisit each flag right before you forget it.</p>
+
+      <ProgressiveResults
+        progress={progress}
+        countries={topicCountries}
+        hero={{
+          eyebrow: "Review queue",
+          title: due.length ? `${due.length} ${due.length === 1 ? "flag" : "flags"} ready` : "You're caught up",
+          badge: "Spaced repetition",
+          description: due.length
+            ? "These flags are due now. A quick round will strengthen them before they fade."
+            : "Nothing is due right now. Practice anyway to keep your recall sharp."
+        }}
+        actionLabel={due.length ? `Review ${due.length} due ${due.length === 1 ? "flag" : "flags"}` : "Practice flags"}
+        actionIcon="review"
+        onAction={() => startReview(practice, topic)}
+        onWeakPractice={(countries) =>
+          navigate(flashcardsPath({ countryCodes: countries.map((country) => country.code) }))
+        }
+      />
+
+      <h2 className="mt-6 font-display text-xl font-semibold text-ink">More practice</h2>
+      <div className="mt-3 grid grid-cols-2 gap-3">
+        <PracticeCard
+          icon="globe"
+          title="Map practice"
+          description="Recall country locations"
+          onClick={() => void startMapReview()}
+        />
+        <PracticeCard
+          icon="target"
+          title="Custom test"
+          description="Choose your own challenge"
+          onClick={() => navigate("/test-setup")}
+        />
+      </div>
     </main>
+  );
+}
+
+function PracticeCard({ icon, title, description, onClick }: { icon: "globe" | "target"; title: string; description: string; onClick: () => void }) {
+  return (
+    <button onClick={onClick} className="rounded-[20px] border border-line bg-paper p-4 text-left shadow-card transition-all hover:-translate-y-0.5 active:translate-y-1 active:shadow-none">
+      <span className="grid h-11 w-11 place-items-center rounded-2xl bg-primary/10 text-primary">
+        <Icon name={icon} size={21} />
+      </span>
+      <span className="mt-3 block font-display text-lg font-semibold text-ink">{title}</span>
+      <span className="mt-0.5 block text-xs font-semibold leading-snug text-muted">{description}</span>
+    </button>
   );
 }

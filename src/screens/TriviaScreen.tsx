@@ -1,6 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "../auth/AuthProvider";
 import Icon, { type IconName } from "../components/Icon";
 import FeedbackPanel from "../components/FeedbackPanel";
 import { TriviaCard } from "../components/QuestionCard";
@@ -42,11 +40,9 @@ function roundCountry(round: TriviaRound) {
 }
 
 export default function TriviaScreen() {
-  const navigate = useNavigate();
   const goBack = useAppBack("/");
   const confirm = useConfirm();
-  const { user } = useAuth();
-  const { countries, lessons, progress, setProgress } = useGame();
+  const { countries, progress, setProgress } = useGame();
   const [mode, setMode] = useState<TriviaMode>("higher-lower");
   const [runMode, setRunMode] = useState<RunMode>("timed");
   const [running, setRunning] = useState(false);
@@ -122,7 +118,7 @@ export default function TriviaScreen() {
         [key]: Math.max(progress.arcade[key] ?? 0, finalScore)
       }
     };
-    const newIds = evaluateBadges(next, countries, lessons, { kind: "trivia", score: finalScore, total: finalAnswers.length });
+    const newIds = evaluateBadges(next, countries, { kind: "trivia", score: finalScore, total: finalAnswers.length });
     if (newIds.length) next = awardBadges(next, newIds);
     setEarnedBadgeIds(newIds);
     setProgress(next);
@@ -139,6 +135,11 @@ export default function TriviaScreen() {
   }
 
   async function closeRound() {
+    if (!answers.length) {
+      setRunning(false);
+      setFeedback(null);
+      return;
+    }
     if (answers.length > 0 && !done) {
       const ok = await confirm({
         title: "End this round?",
@@ -161,7 +162,7 @@ export default function TriviaScreen() {
         earnedBadges={earnedBadgeResults(earnedBadgeIds)}
         actions={[
           { label: "Play again", variant: "primary", icon: "play", onPress: start },
-          { label: "Done", variant: "secondary", icon: "today", onPress: () => navigate("/") }
+          { label: "Done", variant: "secondary", icon: "today", onPress: goBack }
         ]}
       />
     );

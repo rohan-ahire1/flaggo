@@ -7,7 +7,7 @@ export default function NotFoundPage() {
       <section className="rounded-[24px] border border-line bg-paper shadow-card max-w-sm p-6 text-center">
         <h1 className="font-display text-3xl font-black">Page not found</h1>
         <p className="mt-2 font-bold text-muted">That route is not part of {BRAND.name}.</p>
-        <Link to="/" className="btn-primary mt-5">Go home</Link>
+        <Link to="/" replace className="btn-primary mt-5">Go home</Link>
       </section>
     </main>
   );

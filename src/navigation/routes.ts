@@ -3,12 +3,11 @@ import type { MapMode } from "@flaggo/core/utils/quiz";
 
 export type TestMode = "recall" | "options";
 
-export type LessonRoute =
-  | { lessonId: string }
-  | { mode: "review"; countryCodes: string[]; topic: Topic };
+export type ReviewRoute = { countryCodes: string[]; topic: Topic };
+export type FlashcardsRoute = { countryCodes: string[] };
 
 export type TestRoute = { countryCodes: string[]; mode: TestMode; topic: Topic };
-export type MapPlayRoute = { mode: MapMode; countryCodes: string[]; lessonId?: string };
+export type MapPlayRoute = { mode: MapMode; countryCodes: string[] };
 
 function pathWithParams(pathname: string, values: Record<string, string | undefined>) {
   const params = new URLSearchParams();
@@ -32,26 +31,34 @@ function legacyState<T>(state: unknown, valid: (value: Record<string, unknown>) 
   return state as T;
 }
 
-export function lessonPath(route: LessonRoute) {
-  if ("lessonId" in route) return pathWithParams("/lesson", { lesson: route.lessonId });
-  return pathWithParams("/lesson", {
-    mode: "review",
+export function reviewPath(route: ReviewRoute) {
+  return pathWithParams("/review/play", {
     topic: route.topic,
     countries: route.countryCodes.join(",")
   });
 }
 
-export function parseLessonRoute(search: string, state?: unknown): LessonRoute | null {
+export function parseReviewRoute(search: string, state?: unknown): ReviewRoute | null {
   const params = new URLSearchParams(search);
-  const lessonId = params.get("lesson")?.trim();
-  if (lessonId) return { lessonId };
-  if (params.get("mode") === "review") {
-    const codes = countryCodes(params.get("countries"));
-    if (codes.length) return { mode: "review", countryCodes: codes, topic: topic(params.get("topic")) };
-  }
-  return legacyState<LessonRoute>(state, (value) =>
-    (typeof value.lessonId === "string" && Boolean(value.lessonId)) ||
-    (value.mode === "review" && Array.isArray(value.countryCodes) && value.countryCodes.length > 0)
+  const codes = countryCodes(params.get("countries"));
+  if (codes.length) return { countryCodes: codes, topic: topic(params.get("topic")) };
+  return legacyState<ReviewRoute>(state, (value) =>
+    Array.isArray(value.countryCodes) && value.countryCodes.length > 0
+  );
+}
+
+export function flashcardsPath(route: FlashcardsRoute) {
+  return pathWithParams("/review/flashcards", {
+    countries: route.countryCodes.join(",")
+  });
+}
+
+export function parseFlashcardsRoute(search: string, state?: unknown): FlashcardsRoute | null {
+  const params = new URLSearchParams(search);
+  const codes = countryCodes(params.get("countries"));
+  if (codes.length) return { countryCodes: codes };
+  return legacyState<FlashcardsRoute>(state, (value) =>
+    Array.isArray(value.countryCodes) && value.countryCodes.length > 0
   );
 }
 
@@ -83,8 +90,7 @@ export function parseTestRoute(search: string, state?: unknown): TestRoute | nul
 export function mapPlayPath(route: MapPlayRoute) {
   return pathWithParams("/map/play", {
     mode: route.mode,
-    countries: route.countryCodes.join(","),
-    lesson: route.lessonId
+    countries: route.countryCodes.join(",")
   });
 }
 
@@ -94,8 +100,7 @@ export function parseMapPlayRoute(search: string, state?: unknown): MapPlayRoute
   if (codes.length) {
     return {
       mode: params.get("mode") === "identify" ? "identify" : "locate",
-      countryCodes: codes,
-      lessonId: params.get("lesson")?.trim() || undefined
+      countryCodes: codes
     };
   }
   return legacyState<MapPlayRoute>(state, (value) =>

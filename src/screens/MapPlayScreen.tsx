@@ -1,5 +1,5 @@
 import { lazy, Suspense, useMemo, useState } from "react";
-import { Navigate, useLocation, useNavigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import FeedbackPanel from "../components/FeedbackPanel";
 import FlagImage from "../components/FlagImage";
 import Icon from "../components/Icon";
@@ -7,7 +7,6 @@ import ProgressBar from "../components/ProgressBar";
 import RoundResults, { type RoundResultItem } from "../components/RoundResults";
 import { useConfirm } from "../components/ConfirmDialog";
 import type { Country } from "@flaggo/core/types/country";
-import { updateStreak } from "@flaggo/core/utils/date";
 import { generateMapQuestions } from "@flaggo/core/utils/quiz";
 import { updateReviewState } from "@flaggo/core/utils/spacedRepetition";
 import { awardBadges, evaluateBadges } from "@flaggo/core/game/badges";
@@ -15,20 +14,21 @@ import { useGame } from "../state/GameProvider";
 import { trackEvent } from "../lib/analytics";
 import { earnedBadgeResults } from "../lib/badges";
 import { parseMapPlayRoute } from "../navigation/routes";
+import { useAppBack } from "../navigation/useAppBack";
 
 const WorldMap = lazy(() => import("../components/WorldMap"));
 
 export default function MapPlayScreen() {
-  const navigate = useNavigate();
+  const goBack = useAppBack("/map");
   const confirm = useConfirm();
   const location = useLocation();
-  const { countries: allCountries, lessons, progress, setProgress, startMapPractice, nextLearningLesson, openLesson } = useGame();
+  const { countries: allCountries, progress, setProgress, startMapPractice } = useGame();
   const routeState = useMemo(() => parseMapPlayRoute(location.search, location.state), [location.search, location.state]);
   // Keyed memo: a fresh array each render would regenerate questions mid-round.
   const codesKey = routeState?.countryCodes.join(",") ?? "";
-  // The lesson controls which countries can be targets, not which countries
-  // exist on the interactive map. Tapping any other mapped country must still
-  // be possible so it can be recorded as a wrong answer.
+  // The selected practice set controls which countries can be targets, not
+  // which countries exist on the interactive map. Tapping any other mapped
+  // country must still be possible so it can be recorded as a wrong answer.
   const targetCountries = useMemo(
     () =>
       codesKey
@@ -40,8 +40,7 @@ export default function MapPlayScreen() {
     [allCountries, codesKey]
   );
   const mode = routeState?.mode ?? "locate";
-  const lessonId = routeState?.lessonId;
-  const onExit = () => navigate(lessonId ? "/learn" : "/map");
+  const onExit = goBack;
   const questions = useMemo(() => generateMapQuestions(targetCountries, mode), [targetCountries, mode]);
   const countryByCode = useMemo(() => new Map(allCountries.map((country) => [country.code, country])), [allCountries]);
   const [currentProgress, setCurrentProgress] = useState(progress);
@@ -81,17 +80,13 @@ export default function MapPlayScreen() {
 
   function finishRound() {
     const total = questions.length || 1;
-    const perfect = correct === total;
-    const bonusXp = lessonId ? 25 + (perfect ? 20 : 0) : 10;
-    const coinsEarned = lessonId ? 5 + (perfect ? 10 : 0) : 0;
-    let next = updateStreak({ ...currentProgress, xp: currentProgress.xp + bonusXp, coins: currentProgress.coins + coinsEarned });
-    if (lessonId) next = { ...next, completedLessonIds: Array.from(new Set([...next.completedLessonIds, lessonId])) };
-    const newIds = evaluateBadges(next, allCountries, lessons, { kind: lessonId ? "lesson" : "map", score: correct, total });
+    let next = { ...currentProgress, xp: currentProgress.xp + 10 };
+    const newIds = evaluateBadges(next, allCountries, { kind: "map", score: correct, total });
     if (newIds.length) next = awardBadges(next, newIds);
     setEarnedBadgeIds(newIds);
     setCurrentProgress(next);
     setProgress(next);
-    if (lessonId) trackEvent("lesson-complete", { accuracy: Math.round((correct / total) * 100), topic: "location" });
+    trackEvent("map-practice-complete", { accuracy: Math.round((correct / total) * 100), mode });
     setFinished(true);
   }
 
@@ -116,40 +111,18 @@ export default function MapPlayScreen() {
     onExit();
   }
 
-  function startNextLesson(nextLesson: (typeof lessons)[number]) {
-    setIndex(0);
-    setCorrect(0);
-    setXp(0);
-    setFeedback(null);
-    setItems([]);
-    setFinished(false);
-    setEarnedBadgeIds([]);
-    openLesson(nextLesson);
-  }
-
   if (finished) {
-    const perfect = correct === (questions.length || 1);
-    const bonusXp = lessonId ? 25 + (perfect ? 20 : 0) : 10;
-    const nextLesson = lessonId ? nextLearningLesson("location") : undefined;
     return (
       <RoundResults
         score={correct}
         total={questions.length || 1}
         items={items}
-        streak={lessonId ? currentProgress.streak : undefined}
-        caption={`+${xp + bonusXp} XP`}
+        caption={`+${xp + 10} XP`}
         earnedBadges={earnedBadgeResults(earnedBadgeIds)}
-        actions={
-          lessonId
-            ? [
-                ...(nextLesson ? [{ label: "Continue learning", variant: "primary" as const, icon: "learn" as const, onPress: () => startNextLesson(nextLesson) }] : []),
-                { label: "Back to Learn", variant: nextLesson ? ("secondary" as const) : ("primary" as const), icon: "learn" as const, onPress: onExit }
-              ]
-            : [
-                { label: "Play again", variant: "primary", icon: "play", onPress: () => startMapPractice(mode, targetCountries) },
-                { label: "Back to map menu", variant: "secondary", icon: "globe", onPress: onExit }
-              ]
-        }
+        actions={[
+          { label: "Play again", variant: "primary", icon: "play", onPress: () => startMapPractice(mode, targetCountries, { replace: true }) },
+          { label: "Done", variant: "secondary", icon: "globe", onPress: onExit }
+        ]}
       />
     );
   }

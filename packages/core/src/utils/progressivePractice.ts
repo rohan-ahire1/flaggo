@@ -1,19 +1,26 @@
 import type { Country } from "../types/country";
 import type { AppProgress, ReviewState } from "../types/progress";
 import { reviewKey } from "../types/topic";
+import { getPopularityRankedCountries } from "./popularity";
 import { seededShuffle } from "./seededRandom";
 
-export type ProgressiveStage = Country["difficulty"];
+export const PROGRESSIVE_TIER_SIZE = 50;
+export const PROGRESSIVE_STAGES = ["tier-1", "tier-2", "tier-3", "tier-4"] as const;
+export type ProgressiveStage = (typeof PROGRESSIVE_STAGES)[number];
+export const PROGRESSIVE_STAGE_LABELS: Record<ProgressiveStage, string> = {
+  "tier-1": "Flag Scout",
+  "tier-2": "World Explorer",
+  "tier-3": "Global Navigator",
+  "tier-4": "Atlas Master"
+};
 
 export type ProgressiveTierResult = {
-  difficulty: ProgressiveStage;
+  stage: ProgressiveStage;
   total: number;
   seen: number;
   mastered: number;
   needsRepetition: number;
 };
-
-const STAGES: ProgressiveStage[] = ["easy", "medium", "hard"];
 
 function flagState(progress: AppProgress, country: Country): ReviewState | undefined {
   return progress.review[reviewKey(country.code, "flag")];
@@ -23,8 +30,19 @@ function isMastered(state: ReviewState | undefined) {
   return Boolean(state && state.box >= 5 && state.correctCount >= 5 && state.correctCount >= state.wrongCount * 2);
 }
 
+export function progressiveTierGroups(countries: Country[]): Record<ProgressiveStage, Country[]> {
+  const ranked = getPopularityRankedCountries(countries).slice(0, PROGRESSIVE_TIER_SIZE * PROGRESSIVE_STAGES.length);
+  return Object.fromEntries(
+    PROGRESSIVE_STAGES.map((stage, index) => [
+      stage,
+      ranked.slice(index * PROGRESSIVE_TIER_SIZE, (index + 1) * PROGRESSIVE_TIER_SIZE)
+    ])
+  ) as Record<ProgressiveStage, Country[]>;
+}
+
 export function progressiveStage(progress: AppProgress, countries: Country[]): ProgressiveStage {
-  return STAGES.find((difficulty) => countries.some((country) => country.difficulty === difficulty && !flagState(progress, country))) ?? "hard";
+  const groups = progressiveTierGroups(countries);
+  return PROGRESSIVE_STAGES.find((stage) => groups[stage].some((country) => !flagState(progress, country))) ?? "tier-4";
 }
 
 export function progressivePracticeBatch(
@@ -35,10 +53,12 @@ export function progressivePracticeBatch(
   now = Date.now()
 ): { stage: ProgressiveStage; countries: Country[] } {
   const stage = progressiveStage(progress, countries);
-  const unlocked = new Set(STAGES.slice(0, STAGES.indexOf(stage) + 1));
-  const available = countries.filter((country) => unlocked.has(country.difficulty));
+  const groups = progressiveTierGroups(countries);
+  const available = PROGRESSIVE_STAGES
+    .slice(0, PROGRESSIVE_STAGES.indexOf(stage) + 1)
+    .flatMap((unlockedStage) => groups[unlockedStage]);
   const fresh = seededShuffle(
-    available.filter((country) => country.difficulty === stage && !flagState(progress, country)),
+    groups[stage].filter((country) => !flagState(progress, country)),
     rng
   );
   const repeat = available
@@ -83,10 +103,11 @@ export function progressivePracticeBatch(
 }
 
 export function progressiveResults(progress: AppProgress, countries: Country[], now = Date.now()) {
-  const tiers: ProgressiveTierResult[] = STAGES.map((difficulty) => {
-    const group = countries.filter((country) => country.difficulty === difficulty);
+  const groups = progressiveTierGroups(countries);
+  const tiers: ProgressiveTierResult[] = PROGRESSIVE_STAGES.map((stage) => {
+    const group = groups[stage];
     return {
-      difficulty,
+      stage,
       total: group.length,
       seen: group.filter((country) => flagState(progress, country)).length,
       mastered: group.filter((country) => isMastered(flagState(progress, country))).length,

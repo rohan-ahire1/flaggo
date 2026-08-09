@@ -95,13 +95,19 @@ describe("attribute quiz generation", () => {
     expect(getCurrencyClue(country("BA", "Bosnia and Herzegovina", "Europe", "Sarajevo", "070", {
       currencyCode: "BAM",
       currencyName: "Bosnia and Herzegovina convertible mark"
-    }))).toBe("Convertible mark (BAM)");
+    }))).toBe("Convertible mark");
 
     expect(getCurrencyClue(country("IN", "India", "Asia", "New Delhi", "356", {
       currencyCode: "INR",
       currencyName: "Indian rupee",
       demonym: "Indian"
-    }))).toBe("Rupee (INR)");
+    }))).toBe("Rupee");
+
+    expect(getCurrencyClue(country("JP", "Japan", "Asia", "Tokyo", "392", {
+      currencyCode: "JPY",
+      currencyName: "Japanese yen",
+      demonym: "Japanese"
+    }))).toBe("Yen");
   });
 
   it("generates language questions with distractors outside the country's actual languages", () => {

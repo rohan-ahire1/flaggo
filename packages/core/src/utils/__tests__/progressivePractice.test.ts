@@ -2,7 +2,13 @@ import { describe, expect, it } from "vitest";
 import { countries } from "../../data/countries";
 import { defaultProgress, type AppProgress } from "../../types/progress";
 import { reviewKey } from "../../types/topic";
-import { progressivePracticeBatch, progressiveResults } from "../progressivePractice";
+import {
+  PROGRESSIVE_STAGES,
+  PROGRESSIVE_TIER_SIZE,
+  progressivePracticeBatch,
+  progressiveResults,
+  progressiveTierGroups
+} from "../progressivePractice";
 
 function seenState(countryCode: string, wrongCount = 0) {
   return {
@@ -17,38 +23,51 @@ function seenState(countryCode: string, wrongCount = 0) {
 }
 
 describe("progressivePractice", () => {
-  it("introduces only easy flags for a new learner", () => {
-    const batch = progressivePracticeBatch(defaultProgress, countries, 8, () => 0.5);
+  it("builds four tiers of 50 popularity-ranked flags", () => {
+    const groups = progressiveTierGroups(countries);
 
-    expect(batch.stage).toBe("easy");
-    expect(batch.countries).toHaveLength(8);
-    expect(batch.countries.every((country) => country.difficulty === "easy")).toBe(true);
+    expect(PROGRESSIVE_STAGES).toHaveLength(4);
+    expect(PROGRESSIVE_STAGES.map((stage) => groups[stage].length)).toEqual([50, 50, 50, 50]);
+    expect(new Set(PROGRESSIVE_STAGES.flatMap((stage) => groups[stage].map((country) => country.code))).size).toBe(200);
   });
 
-  it("unlocks medium flags while repeating missed easy flags", () => {
-    const easy = countries.filter((country) => country.difficulty === "easy");
-    const missed = easy[0];
+  it("introduces only tier 1 flags for a new learner", () => {
+    const groups = progressiveTierGroups(countries);
+    const tierOneCodes = new Set(groups["tier-1"].map((country) => country.code));
+    const batch = progressivePracticeBatch(defaultProgress, countries, 8, () => 0.5);
+
+    expect(batch.stage).toBe("tier-1");
+    expect(batch.countries).toHaveLength(8);
+    expect(batch.countries.every((country) => tierOneCodes.has(country.code))).toBe(true);
+  });
+
+  it("unlocks tier 2 while repeating missed tier 1 flags", () => {
+    const groups = progressiveTierGroups(countries);
+    const tierOne = groups["tier-1"];
+    const tierTwoCodes = new Set(groups["tier-2"].map((country) => country.code));
+    const missed = tierOne[0];
     const review = Object.fromEntries(
-      easy.map((country) => [reviewKey(country.code, "flag"), seenState(country.code, country.code === missed.code ? 3 : 0)])
+      tierOne.map((country) => [reviewKey(country.code, "flag"), seenState(country.code, country.code === missed.code ? 3 : 0)])
     );
     const progress: AppProgress = { ...defaultProgress, review };
     const batch = progressivePracticeBatch(progress, countries, 8, () => 0.5, new Date("2026-07-18T12:00:00.000Z").getTime());
 
-    expect(batch.stage).toBe("medium");
+    expect(batch.stage).toBe("tier-2");
     expect(batch.countries.map((country) => country.code)).toContain(missed.code);
-    expect(batch.countries.some((country) => country.difficulty === "medium")).toBe(true);
+    expect(batch.countries.some((country) => tierTwoCodes.has(country.code))).toBe(true);
   });
 
-  it("summarizes persistent results by difficulty", () => {
-    const easy = countries.find((country) => country.difficulty === "easy")!;
+  it("summarizes persistent results by tier", () => {
+    const tierOneCountry = progressiveTierGroups(countries)["tier-1"][0];
     const progress: AppProgress = {
       ...defaultProgress,
-      review: { [reviewKey(easy.code, "flag")]: seenState(easy.code, 1) }
+      review: { [reviewKey(tierOneCountry.code, "flag")]: seenState(tierOneCountry.code, 1) }
     };
     const results = progressiveResults(progress, countries, new Date("2026-07-18T12:00:00.000Z").getTime());
 
     expect(results.seen).toBe(1);
     expect(results.needsRepetition).toBe(1);
-    expect(results.tiers.find((tier) => tier.difficulty === "easy")?.seen).toBe(1);
+    expect(results.tiers.find((tier) => tier.stage === "tier-1")?.seen).toBe(1);
+    expect(results.tiers.every((tier) => tier.total === PROGRESSIVE_TIER_SIZE)).toBe(true);
   });
 });

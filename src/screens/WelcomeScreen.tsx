@@ -10,7 +10,7 @@ export default function WelcomeScreen() {
 
   function enterApp() {
     completeOnboarding();
-    navigate("/", { replace: true });
+    navigate("/arcade?mode=progressive&start=1", { replace: true });
   }
 
   return (
@@ -29,7 +29,7 @@ export default function WelcomeScreen() {
         </div>
 
         <p className="text-balance text-[19px] font-medium leading-snug text-ink">
-          Short guided lessons introduce the world&apos;s flags, then smart reviews bring them back before you forget.
+          Four focused stages introduce 50 flags at a time, while smart repetition brings mistakes back until they stick.
         </p>
 
         <button
@@ -38,7 +38,7 @@ export default function WelcomeScreen() {
         >
           <Icon name="flag" size={20} /> Start learning flags
         </button>
-        <p className="text-[15px] font-medium text-muted">no sign-up · two-minute lessons</p>
+        <p className="text-[15px] font-medium text-muted">no sign-up · short focused rounds</p>
         <button onClick={() => navigate("/daily")} className="btn-ghost">
           Try today&apos;s challenge
         </button>

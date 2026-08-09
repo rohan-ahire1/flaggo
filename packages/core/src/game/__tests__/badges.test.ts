@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import type { Country } from "../../types/country";
-import type { Lesson } from "../../types/lesson";
 import { defaultProgress, type AppProgress } from "../../types/progress";
 import { reviewKey } from "../../types/topic";
 import { mergeProgress, normalizeProgress } from "../../utils/progressMerge";
@@ -25,29 +24,26 @@ function country(code: string, continent: Country["continent"]): Country {
 const countries: Country[] = [
   country("FR", "Europe"),
   country("DE", "Europe"),
-  ...Array.from({ length: 20 }, (_, index) => country(`A${index}`, "Africa"))
-];
-
-const lessons: Lesson[] = [
-  { id: "europe-1", topic: "flag", title: "Europe 1", region: "Europe", countryCodes: ["FR"], difficulty: "easy", isTerritoryLesson: false },
-  { id: "europe-2", topic: "flag", title: "Europe 2", region: "Europe", countryCodes: ["DE"], difficulty: "easy", isTerritoryLesson: false },
-  { id: "cap-world-1", topic: "capital", title: "World Capitals 1", region: "World", countryCodes: ["FR"], difficulty: "easy", isTerritoryLesson: false }
+  ...Array.from({ length: 20 }, (_, index) => country(`A${index}`, "Africa")),
+  ...Array.from({ length: 28 }, (_, index) => country(`Z${index}`, "Asia"))
 ];
 
 describe("badges", () => {
-  it("earns Europe Explorer only after every Europe flag lesson is complete", () => {
-    expect(evaluateBadges(progress({ completedLessonIds: ["europe-1"] }), countries, lessons)).not.toContain("europe-explorer");
-    expect(evaluateBadges(progress({ completedLessonIds: ["europe-1", "europe-2"] }), countries, lessons)).toContain("europe-explorer");
-  });
+  it("earns Flag Scout after all 50 flags in the first stage are introduced", () => {
+    const review = Object.fromEntries(countries.map((item) => [
+      reviewKey(item.code, "flag"),
+      { countryCode: item.code, topic: "flag", box: 1, correctCount: 1, wrongCount: 0, lastSeenAt: null, nextReviewAt: new Date(0).toISOString() }
+    ])) as AppProgress["review"];
+    const oneMissing = { ...review };
+    delete oneMissing[reviewKey(countries[0].code, "flag")];
 
-  it("earns Capital Rookie after the first capital lesson is complete", () => {
-    expect(evaluateBadges(progress({ completedLessonIds: ["europe-1"] }), countries, lessons)).not.toContain("capital-rookie");
-    expect(evaluateBadges(progress({ completedLessonIds: ["cap-world-1"] }), countries, lessons)).toContain("capital-rookie");
+    expect(evaluateBadges(progress({ review: oneMissing }), countries)).not.toContain("flag-scout");
+    expect(evaluateBadges(progress({ review }), countries)).toContain("flag-scout");
   });
 
   it("earns Flag Streak 7 at a seven-day daily streak", () => {
-    expect(evaluateBadges(progress({ daily: { ...defaultProgress.daily, streak: 6 } }), countries, lessons)).not.toContain("flag-streak-7");
-    expect(evaluateBadges(progress({ daily: { ...defaultProgress.daily, streak: 7 } }), countries, lessons)).toContain("flag-streak-7");
+    expect(evaluateBadges(progress({ daily: { ...defaultProgress.daily, streak: 6 } }), countries)).not.toContain("flag-streak-7");
+    expect(evaluateBadges(progress({ daily: { ...defaultProgress.daily, streak: 7 } }), countries)).toContain("flag-streak-7");
   });
 
   it("earns Africa Master after 20 African flag countries reach SRS box 5", () => {
@@ -60,19 +56,19 @@ describe("badges", () => {
       [reviewKey("A19", "flag")]: { countryCode: "A19", topic: "flag", box: 5, correctCount: 5, wrongCount: 0, lastSeenAt: null, nextReviewAt: new Date(0).toISOString() }
     } as AppProgress["review"];
 
-    expect(evaluateBadges(progress({ review: nineteen as AppProgress["review"] }), countries, lessons)).not.toContain("africa-master");
-    expect(evaluateBadges(progress({ review: twenty }), countries, lessons)).toContain("africa-master");
+    expect(evaluateBadges(progress({ review: nineteen as AppProgress["review"] }), countries)).not.toContain("africa-master");
+    expect(evaluateBadges(progress({ review: twenty }), countries)).toContain("africa-master");
   });
 
   it("earns Perfect Round only for a 100% round of at least five questions", () => {
-    expect(evaluateBadges(progress(), countries, lessons, { kind: "daily", score: 4, total: 4 })).not.toContain("perfect-round");
-    expect(evaluateBadges(progress(), countries, lessons, { kind: "daily", score: 4, total: 5 })).not.toContain("perfect-round");
-    expect(evaluateBadges(progress(), countries, lessons, { kind: "daily", score: 5, total: 5 })).toContain("perfect-round");
+    expect(evaluateBadges(progress(), countries, { kind: "daily", score: 4, total: 4 })).not.toContain("perfect-round");
+    expect(evaluateBadges(progress(), countries, { kind: "daily", score: 4, total: 5 })).not.toContain("perfect-round");
+    expect(evaluateBadges(progress(), countries, { kind: "daily", score: 5, total: 5 })).toContain("perfect-round");
   });
 
   it("does not return already-earned badges again", () => {
     const already = progress({ badges: [{ id: "perfect-round", earnedAt: "2026-07-01T00:00:00.000Z" }] });
-    expect(evaluateBadges(already, countries, lessons, { kind: "daily", score: 5, total: 5 })).not.toContain("perfect-round");
+    expect(evaluateBadges(already, countries, { kind: "daily", score: 5, total: 5 })).not.toContain("perfect-round");
   });
 
   it("awards badges with timestamps and merge keeps earliest earnedAt", () => {

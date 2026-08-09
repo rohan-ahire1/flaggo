@@ -2,14 +2,14 @@ import { useEffect, useState } from "react";
 import Icon from "../components/Icon";
 import StatCard from "../components/StatCard";
 import { parseReviewKey, reviewKey } from "@flaggo/core/types/topic";
-import { lessonsForTopic } from "@flaggo/core/utils/lessonGenerator";
+import { progressiveResults } from "@flaggo/core/utils/progressivePractice";
 import { getMasteredCountries, getWeakCountries } from "@flaggo/core/utils/spacedRepetition";
 import { useAppBack } from "../navigation/useAppBack";
 import { useGame } from "../state/GameProvider";
 
 export default function StatsScreen() {
   const goBack = useAppBack("/profile");
-  const { progress, countries, lessons } = useGame();
+  const { progress, countries } = useGame();
   const total = progress.totalCorrect + progress.totalWrong;
   const topic = progress.selectedTopic;
   const topicCountries = topic === "capital" ? countries.filter((country) => country.capital?.trim()) : countries;
@@ -19,7 +19,8 @@ export default function StatsScreen() {
   const [mapCountryCount, setMapCountryCount] = useState(0);
   const [mapMasteredCount, setMapMasteredCount] = useState(0);
   const seen = Object.keys(progress.review).filter((key) => parseReviewKey(key).topic === topic).length;
-  const completedCount = lessonsForTopic(lessons, topic).filter((lesson) => progress.completedLessonIds.includes(lesson.id)).length;
+  const learning = progressiveResults(progress, countries);
+  const completedStages = learning.tiers.filter((stage) => stage.seen === stage.total).length;
   const topicLabel = topic === "capital" ? "Capitals" : "Flags";
   const regions = Array.from(new Set(countries.map((country) => country.continent)));
 
@@ -45,7 +46,7 @@ export default function StatsScreen() {
       <div className="mt-5 grid grid-cols-2 gap-3 md:grid-cols-4">
         <StatCard label="Total XP" value={progress.xp} tone="blue" icon="bolt" />
         <StatCard label="Current streak" value={progress.streak} tone="orange" icon="flame" />
-        <StatCard label="Lessons completed" value={completedCount} tone="green" icon="check" />
+        <StatCard label="Stages completed" value={completedStages} tone="green" icon="check" />
         <StatCard label={`${topicLabel} seen`} value={seen} tone="blue" icon="globe" />
         <StatCard label="Flags mastered" value={flagMastered.length} tone="green" icon="star" />
         <StatCard label="Capitals mastered" value={capitalMastered.length} tone="green" icon="star" />
