@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from "react";
-import { Navigate, useLocation, useNavigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import FlagImage from "../components/FlagImage";
 import Icon from "../components/Icon";
 import ProgressBar from "../components/ProgressBar";
@@ -11,12 +11,13 @@ import { awardBadges, evaluateBadges } from "@flaggo/core/game/badges";
 import { useGame } from "../state/GameProvider";
 import { earnedBadgeResults } from "../lib/badges";
 import { parseTestRoute } from "../navigation/routes";
+import { useAppBack } from "../navigation/useAppBack";
 
 export default function FlagTestScreen() {
-  const navigate = useNavigate();
+  const goBack = useAppBack("/test-setup");
   const confirm = useConfirm();
   const location = useLocation();
-  const { countries: allCountries, lessons, progress, setProgress, startReview } = useGame();
+  const { countries: allCountries, progress, setProgress, startReview } = useGame();
   const routeState = useMemo(() => parseTestRoute(location.search, location.state), [location.search, location.state]);
   // Keyed memo: a fresh array each render would reshuffle the test mid-round.
   const codesKey = routeState?.countryCodes.join(",") ?? "";
@@ -32,7 +33,7 @@ export default function FlagTestScreen() {
   );
   const mode = routeState?.mode ?? "recall";
   const topic = routeState?.topic ?? "flag";
-  const onDone = () => navigate("/review");
+  const onDone = goBack;
   const questions = useMemo(() => shuffleArray(countries), [countries]);
   const [index, setIndex] = useState(0);
   const progressRef = useRef(progress);
@@ -90,7 +91,7 @@ export default function FlagTestScreen() {
   function next() {
     if (index >= questions.length - 1) {
       let finalProgress = progressRef.current;
-      const newIds = evaluateBadges(finalProgress, allCountries, lessons, { kind: "test", score: correctRef.current, total: questions.length });
+      const newIds = evaluateBadges(finalProgress, allCountries, { kind: "test", score: correctRef.current, total: questions.length });
       if (newIds.length) finalProgress = awardBadges(finalProgress, newIds);
       progressRef.current = finalProgress;
       setEarnedBadgeIds(newIds);
@@ -128,8 +129,8 @@ export default function FlagTestScreen() {
         caption={`+${correctCount * 5} XP`}
         earnedBadges={earnedBadgeResults(earnedBadgeIds)}
         actions={[
-          ...(missed.length ? [{ label: "Practice missed", variant: "primary" as const, icon: "review" as const, onPress: () => startReview(missed, topic) }] : []),
-          { label: "Back to Practice", variant: missed.length ? "secondary" as const : "primary" as const, icon: "target" as const, onPress: onDone }
+          ...(missed.length ? [{ label: "Practice missed", variant: "primary" as const, icon: "review" as const, onPress: () => startReview(missed, topic, { replace: true }) }] : []),
+          { label: "Back to custom test", variant: missed.length ? "secondary" as const : "primary" as const, icon: "target" as const, onPress: onDone }
         ]}
       />
     );

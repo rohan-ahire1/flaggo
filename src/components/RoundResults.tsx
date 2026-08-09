@@ -18,7 +18,7 @@ export type RoundResultItem = {
 export type ResultAction = {
   label: string;
   onPress: () => void;
-  variant?: "primary" | "secondary" | "ghost";
+  variant?: "primary" | "secondary" | "ghost" | "compact";
   icon?: IconName;
 };
 
@@ -61,8 +61,10 @@ export default function RoundResults({
   actions: ResultAction[];
 }) {
   const missed = items.filter((item) => !item.correct);
-  const primaryAction = actions.find((action) => action.variant === "primary") ?? actions[0];
-  const secondaryActions = actions.filter((action) => action !== primaryAction);
+  const standardActions = actions.filter((action) => action.variant !== "compact");
+  const compactActions = actions.filter((action) => action.variant === "compact");
+  const primaryAction = standardActions.find((action) => action.variant === "primary") ?? standardActions[0];
+  const secondaryActions = standardActions.filter((action) => action !== primaryAction);
   useEffect(() => {
     playComplete();
   }, []);
@@ -90,6 +92,21 @@ export default function RoundResults({
         <h1 className="screen-title">{title(score, total)}</h1>
         <ScoreRing score={score} total={total} caption={caption} />
       </section>
+
+      {compactActions.length ? (
+        <div className="mt-2 flex flex-wrap justify-center gap-2">
+          {compactActions.map((action, index) => (
+            <button
+              key={`${action.label}-${index}`}
+              onClick={action.onPress}
+              className="inline-flex min-h-9 items-center justify-center gap-1.5 rounded-full border border-line bg-paper px-3 py-1.5 font-display text-sm font-semibold text-primary shadow-card transition-all active:scale-95"
+            >
+              {action.icon ? <Icon name={action.icon} size={15} /> : null}
+              {action.label}
+            </button>
+          ))}
+        </div>
+      ) : null}
 
       {typeof streak === "number" ? (
         <section className="mt-4 flex items-center gap-3 rounded-[22px] border border-line bg-paper p-4 shadow-card">

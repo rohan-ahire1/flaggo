@@ -25,7 +25,8 @@ import {
   TrophyIcon,
   UserCircleIcon,
   UserIcon,
-  XIcon
+  XIcon,
+  type IconWeight
 } from "@phosphor-icons/react";
 
 export type IconName =
@@ -59,6 +60,7 @@ export type IconName =
 type Props = SVGProps<SVGSVGElement> & {
   name: IconName;
   size?: number;
+  weight?: IconWeight;
 };
 
 /**
@@ -101,7 +103,7 @@ const GLYPH: Record<IconName, PhosphorIcon> = {
 
 const ICON_SCALE = 1.15;
 
-export default function Icon({ name, size = 24, className = "", ...rest }: Props) {
+export default function Icon({ name, size = 24, weight = "duotone", className = "", ...rest }: Props) {
   const Glyph = GLYPH[name];
-  return <Glyph size={Math.round(size * ICON_SCALE)} weight="duotone" className={className} aria-hidden {...rest} />;
+  return <Glyph size={Math.round(size * ICON_SCALE)} weight={weight} className={className} aria-hidden {...rest} />;
 }

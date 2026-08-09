@@ -1,10 +1,8 @@
-import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { countries } from "@flaggo/core/data/countries";
 import { deckCountries } from "@flaggo/core/utils/decks";
-import { generateLessons, lessonsForTopic } from "@flaggo/core/utils/lessonGenerator";
 import type { Country } from "@flaggo/core/types/country";
-import type { Lesson } from "@flaggo/core/types/lesson";
 import type { AppProgress } from "@flaggo/core/types/progress";
 import type { Topic } from "@flaggo/core/types/topic";
 import type { MapMode } from "@flaggo/core/utils/quiz";
@@ -15,7 +13,7 @@ import { useConfirm } from "../components/ConfirmDialog";
 import { useSyncedProgress } from "../hooks/useSyncedProgress";
 import { resetOnboarding } from "../lib/onboarding";
 import { trackEvent } from "../lib/analytics";
-import { lessonPath, mapPlayPath, testPath, type TestMode } from "../navigation/routes";
+import { mapPlayPath, reviewPath, testPath, type TestMode } from "../navigation/routes";
 import { supabase } from "../lib/supabase";
 import { preloadFlags } from "../utils/preloadFlags";
 
@@ -26,25 +24,20 @@ type GameContextValue = {
   syncState: ReturnType<typeof useSyncedProgress>["syncState"];
   syncError: ReturnType<typeof useSyncedProgress>["syncError"];
   loading: boolean;
-  lessons: Lesson[];
   countries: Country[];
   signInOpen: boolean;
   setSignInOpen: (open: boolean) => void;
   toast: string | null;
   setToast: (message: string | null) => void;
-  openLesson: (lesson: Lesson) => void;
-  startLearning: (topic?: Topic) => void;
-  switchTopic: (topic: Topic) => void;
-  startReview: (group: Country[], topic?: Topic) => void;
+  startReview: (group: Country[], topic?: Topic, options?: { replace?: boolean }) => void;
   startDeckPractice: (deck: AppProgress["decks"][number]) => void;
   startFlagTest: (group: PopularityGroup, mode: TestMode, topic: Topic) => void;
-  startMapPractice: (mode: MapMode, group: Country[]) => void;
+  startMapPractice: (mode: MapMode, group: Country[], options?: { replace?: boolean }) => void;
   startMapReview: () => Promise<void>;
   deleteAccount: () => Promise<void>;
   signOutUser: () => Promise<void>;
   openSignIn: () => void;
   resetAll: () => Promise<void>;
-  nextLearningLesson: (topic: Topic) => Lesson | undefined;
 };
 
 const GameContext = createContext<GameContextValue | null>(null);
@@ -60,7 +53,6 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const { progress, setProgress, resetAllProgress, syncState, syncError, loading: progressLoading } = useSyncedProgress();
   const [signInOpen, setSignInOpen] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
-  const lessons = useMemo(() => generateLessons(countries), []);
 
   useEffect(() => preloadFlags(countries), []);
 
@@ -76,36 +68,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
     }
   }, [syncError, syncState]);
 
-  function openLesson(lesson: Lesson) {
-    if (lesson.topic === "location") {
-      navigate(mapPlayPath({ mode: "locate", countryCodes: lesson.countryCodes, lessonId: lesson.id }));
-      return;
-    }
-    navigate(lessonPath({ lessonId: lesson.id }));
-  }
-
-  function firstOpenLesson(topic: Topic): Lesson | undefined {
-    const completed = new Set(progress.completedLessonIds);
-    return lessonsForTopic(lessons, topic).find((item) => !completed.has(item.id));
-  }
-
-  function nextLearningLesson(topic: Topic): Lesson | undefined {
-    return firstOpenLesson(topic) ?? firstOpenLesson("flag") ?? firstOpenLesson("capital");
-  }
-
-  function startLearning(topic: Topic = progress.selectedTopic) {
-    const next = nextLearningLesson(topic);
-    if (next) openLesson(next);
-    else navigate("/learn");
-  }
-
-  function switchTopic(topic: Topic) {
-    setProgress({ ...progress, selectedTopic: topic });
-    trackEvent("topic-switch", { topic });
-  }
-
-  function startReview(group: Country[], topic = progress.selectedTopic) {
-    navigate(lessonPath({ mode: "review", countryCodes: countryCodes(group), topic }));
+  function startReview(group: Country[], topic = progress.selectedTopic, options?: { replace?: boolean }) {
+    navigate(reviewPath({ countryCodes: countryCodes(group), topic }), { replace: options?.replace });
   }
 
   function startDeckPractice(deck: AppProgress["decks"][number]) {
@@ -119,9 +83,9 @@ export function GameProvider({ children }: { children: ReactNode }) {
     navigate(testPath({ countryCodes: countryCodes(group.countries), mode, topic }));
   }
 
-  function startMapPractice(mode: MapMode, group: Country[]) {
+  function startMapPractice(mode: MapMode, group: Country[], options?: { replace?: boolean }) {
     trackEvent("map-play", { mode });
-    navigate(mapPlayPath({ mode, countryCodes: countryCodes(group) }));
+    navigate(mapPlayPath({ mode, countryCodes: countryCodes(group) }), { replace: options?.replace });
   }
 
   async function startMapReview() {
@@ -176,15 +140,11 @@ export function GameProvider({ children }: { children: ReactNode }) {
     syncState,
     syncError,
     loading: authLoading || progressLoading,
-    lessons,
     countries,
     signInOpen,
     setSignInOpen,
     toast,
     setToast,
-    openLesson,
-    startLearning,
-    switchTopic,
     startReview,
     startDeckPractice,
     startFlagTest,
@@ -194,7 +154,6 @@ export function GameProvider({ children }: { children: ReactNode }) {
     signOutUser,
     openSignIn: () => setSignInOpen(true),
     resetAll,
-    nextLearningLesson,
   };
 
   return <GameContext.Provider value={value}>{children}</GameContext.Provider>;

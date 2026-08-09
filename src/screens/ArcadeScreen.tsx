@@ -1,16 +1,22 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import FeedbackPanel from "../components/FeedbackPanel";
-import FlagImage from "../components/FlagImage";
 import Icon, { type IconName } from "../components/Icon";
 import ProgressBar from "../components/ProgressBar";
+import ProgressiveResults from "../components/ProgressiveResults";
 import QuestionCard from "../components/QuestionCard";
 import RoundResults, { type RoundResultItem } from "../components/RoundResults";
+import { useConfirm } from "../components/ConfirmDialog";
 import type { Country } from "@flaggo/core/types/country";
-import type { AppProgress } from "@flaggo/core/types/progress";
-import { reviewKey } from "@flaggo/core/types/topic";
 import { generateReviewQuestions, type Question } from "@flaggo/core/utils/quiz";
-import { progressivePracticeBatch, progressiveResults, type ProgressiveStage } from "@flaggo/core/utils/progressivePractice";
+import {
+  PROGRESSIVE_STAGE_LABELS,
+  PROGRESSIVE_STAGES,
+  PROGRESSIVE_TIER_SIZE,
+  progressivePracticeBatch,
+  progressiveResults,
+  type ProgressiveStage
+} from "@flaggo/core/utils/progressivePractice";
 import { updateReviewState } from "@flaggo/core/utils/spacedRepetition";
 import { seededShuffle, hashStringToSeed, mulberry32 } from "@flaggo/core/utils/seededRandom";
 import { answerDetail, answerLabel } from "@flaggo/core/game/answerLabel";
@@ -42,17 +48,11 @@ const MODE_META: Record<PracticeMode, { label: string; desc: string; detail: str
     icon: "heart"
   },
   progressive: {
-    label: "Progressive learning",
-    desc: "Learn easier flags first and repeat mistakes.",
-    detail: "Untimed and built for recall: weak flags return until they start to stick.",
+    label: "Learning",
+    desc: "Learn 50 flags at a time and repeat mistakes.",
+    detail: "Four 50-flag stages keep progress clear while weak flags return until they stick.",
     icon: "learn"
   }
-};
-
-const STAGE_LABEL: Record<ProgressiveStage, string> = {
-  easy: "Easy",
-  medium: "Medium",
-  hard: "Hard"
 };
 
 function questionSet(countries: Country[], count: number, rng: () => number, optionCountries: Country[]) {
@@ -67,8 +67,9 @@ function questionSet(countries: Country[], count: number, rng: () => number, opt
 export default function ArcadeScreen() {
   const navigate = useNavigate();
   const goBack = useAppBack("/");
+  const confirm = useConfirm();
   const [searchParams] = useSearchParams();
-  const { countries, lessons, progress, setProgress } = useGame();
+  const { countries, progress, setProgress } = useGame();
   const requestedMode = searchParams.get("mode");
   const shouldAutoStart = searchParams.get("start") === "1";
   const autoStartHandled = useRef(false);
@@ -84,13 +85,17 @@ export default function ArcadeScreen() {
   const [feedback, setFeedback] = useState<{ ok: boolean; question: Question; selectedLabel?: string } | null>(null);
   const [remaining, setRemaining] = useState(TIMED_SECONDS);
   const [startedAt, setStartedAt] = useState(0);
-  const [stage, setStage] = useState<ProgressiveStage>("easy");
+  const [stage, setStage] = useState<ProgressiveStage>("tier-1");
   const [items, setItems] = useState<RoundResultItem[]>([]);
   const [earnedBadgeIds, setEarnedBadgeIds] = useState<string[]>([]);
+  const [canReturnToRound, setCanReturnToRound] = useState(false);
 
   const question = questions[index];
   const score = answers.filter(Boolean).length;
   const mistakes = answers.length - score;
+  const learning = progressiveResults(progress, countries);
+  const learningStageIndex = PROGRESSIVE_STAGES.indexOf(learning.stage);
+  const viewingLearningResults = mode === "progressive" && setupTab === "results";
 
   useEffect(() => {
     if (!running || done || mode !== "timed") return;
@@ -131,6 +136,7 @@ export default function ArcadeScreen() {
     setAnswers([]);
     setItems([]);
     setEarnedBadgeIds([]);
+    setCanReturnToRound(false);
     setFeedback(null);
     setCurrentProgress(progress);
     setStartedAt(Date.now());
@@ -173,7 +179,7 @@ export default function ArcadeScreen() {
     if (done) return;
     const finalScore = finalAnswers.filter(Boolean).length;
     let next = currentProgress;
-    const newIds = evaluateBadges(next, countries, lessons, { kind: "review", score: finalScore, total: finalAnswers.length });
+    const newIds = evaluateBadges(next, countries, { kind: "review", score: finalScore, total: finalAnswers.length });
     if (newIds.length) next = awardBadges(next, newIds);
     setEarnedBadgeIds(newIds);
     setCurrentProgress(next);
@@ -193,12 +199,20 @@ export default function ArcadeScreen() {
     else setIndex((value) => value + 1);
   }
 
-  function closeRound() {
-    if (answers.length) finish(answers);
-    else {
-      setRunning(false);
-      setQuestions([]);
+  async function closeRound() {
+    if (answers.length) {
+      const ok = await confirm({
+        title: "End this round?",
+        body: "Answered questions are already counted.",
+        confirmLabel: "End round",
+        destructive: true
+      });
+      if (!ok) return;
     }
+    setRunning(false);
+    setQuestions([]);
+    setFeedback(null);
+    if (shouldAutoStart) goBack();
   }
 
   function returnToSetup(tab: SetupTab = "practice") {
@@ -206,6 +220,32 @@ export default function ArcadeScreen() {
     setRunning(false);
     setFeedback(null);
     setSetupTab(tab);
+    setCanReturnToRound(false);
+  }
+
+  function viewLearningResults() {
+    setDone(false);
+    setRunning(false);
+    setFeedback(null);
+    setSetupTab("results");
+    setCanReturnToRound(true);
+  }
+
+  function returnToCompletedRound() {
+    setCanReturnToRound(false);
+    setDone(true);
+  }
+
+  function leaveSetupView() {
+    if (canReturnToRound) {
+      returnToCompletedRound();
+      return;
+    }
+    if (viewingLearningResults) {
+      setSetupTab("practice");
+      return;
+    }
+    goBack();
   }
 
   if (done) {
@@ -213,7 +253,7 @@ export default function ArcadeScreen() {
       ? `${items.length} flags attempted in 120 seconds`
       : mode === "strikes"
         ? `${Math.min(mistakes, STRIKE_LIMIT)} of ${STRIKE_LIMIT} strikes used`
-        : `${STAGE_LABEL[stage]} stage · missed flags were repeated`;
+        : `${PROGRESSIVE_STAGE_LABELS[stage]} · missed flags were repeated`;
     return (
       <RoundResults
         score={score}
@@ -222,13 +262,13 @@ export default function ArcadeScreen() {
         caption={caption}
         earnedBadges={earnedBadgeResults(earnedBadgeIds)}
         actions={mode === "progressive" ? [
-          { label: "View learning results", variant: "primary", icon: "stats", onPress: () => returnToSetup("results") },
-          { label: "Continue learning", variant: "secondary", icon: "learn", onPress: () => start("progressive") },
-          { label: "Done", variant: "secondary", icon: "today", onPress: () => navigate("/") }
+          { label: "Continue learning", variant: "primary", icon: "learn", onPress: () => start("progressive") },
+          { label: "Back to home", variant: "secondary", icon: "flag", onPress: goBack },
+          { label: "View learning results", variant: "compact", icon: "stats", onPress: viewLearningResults }
         ] : [
           { label: "Play again", variant: "primary", icon: "play", onPress: () => start(mode) },
           { label: "Choose another mode", variant: "secondary", icon: "review", onPress: () => returnToSetup() },
-          { label: "Done", variant: "secondary", icon: "today", onPress: () => navigate("/") }
+          { label: "Done", variant: "secondary", icon: "today", onPress: goBack }
         ]}
       />
     );
@@ -238,13 +278,21 @@ export default function ArcadeScreen() {
     return (
       <main className="flex min-h-full flex-col p-5">
         <div className="flex items-center gap-3">
-          <button onClick={goBack} className="icon-btn shrink-0" aria-label="Back">
+          <button
+            onClick={leaveSetupView}
+            className="icon-btn shrink-0"
+            aria-label={canReturnToRound ? "Back to round results" : viewingLearningResults ? "Back to learning" : "Back"}
+          >
             <Icon name="chevron" className="rotate-180" />
           </button>
           <div>
-            <h1 className="screen-title">{mode === "progressive" ? "Progressive learning" : "Practice flags"}</h1>
+            <h1 className="screen-title">{viewingLearningResults ? "Learning results" : mode === "progressive" ? "Learn flags" : "Practice flags"}</h1>
             <p className="mt-1 text-sm font-semibold text-muted">
-              {mode === "progressive" ? "Learn gradually with repetition that targets mistakes." : "Choose the kind of session you need today."}
+              {viewingLearningResults
+                ? "See what you have introduced, mastered, and need to repeat."
+                : mode === "progressive"
+                  ? "Learn 50 flags at a time with repetition that targets mistakes."
+                  : "Choose the kind of session you need today."}
             </p>
           </div>
         </div>
@@ -278,50 +326,92 @@ export default function ArcadeScreen() {
           })}
         </section>}
 
-        {mode === "progressive" && (
-          <div className="mt-5 grid grid-cols-2 rounded-2xl bg-surface p-1" role="tablist" aria-label="Progressive learning views">
-            <button
-              role="tab"
-              aria-selected={setupTab === "practice"}
-              onClick={() => setSetupTab("practice")}
-              className={`rounded-xl px-3 py-2.5 font-display text-sm font-semibold ${setupTab === "practice" ? "bg-paper text-primary shadow-card" : "text-muted"}`}
-            >
-              Practice
-            </button>
-            <button
-              role="tab"
-              aria-selected={setupTab === "results"}
-              onClick={() => setSetupTab("results")}
-              className={`rounded-xl px-3 py-2.5 font-display text-sm font-semibold ${setupTab === "results" ? "bg-paper text-primary shadow-card" : "text-muted"}`}
-            >
-              Results
-            </button>
-          </div>
-        )}
+        {viewingLearningResults ? (
+          <ProgressiveResults
+            progress={progress}
+            countries={countries}
+            actionLabel="Continue learning"
+            actionIcon="learn"
+            onAction={() => start("progressive")}
+          />
+        ) : mode === "progressive" ? (
+          <>
+            <section className="mt-5 rounded-[24px] border border-line bg-surface p-4 shadow-card">
+              <div className="flex items-end justify-between gap-3">
+                <div>
+                  <p className="section-label">Your learning path</p>
+                  <h2 className="mt-1 font-display text-2xl font-semibold text-ink">
+                    {PROGRESSIVE_STAGE_LABELS[learning.stage]}
+                  </h2>
+                </div>
+                <span className="shrink-0 text-sm font-bold text-muted">
+                  {learning.seen}/{PROGRESSIVE_STAGES.length * PROGRESSIVE_TIER_SIZE} introduced
+                </span>
+              </div>
 
-        {mode === "progressive" && setupTab === "results" ? (
-          <ProgressiveResults progress={progress} countries={countries} onContinue={() => start("progressive")} />
+              <div className="mt-4 grid gap-2">
+                {PROGRESSIVE_STAGES.map((tier, position) => {
+                  const result = learning.tiers[position];
+                  const complete = result.seen === result.total;
+                  const current = position === learningStageIndex && !complete;
+                  const locked = position > learningStageIndex;
+                  return (
+                    <div
+                      key={tier}
+                      className={`flex items-center gap-3 rounded-[18px] border-2 p-3 ${
+                        current
+                          ? "border-primary bg-primary text-white shadow-card"
+                          : complete
+                            ? "border-success/30 bg-success/10 text-ink"
+                            : "border-line bg-paper text-muted"
+                      }`}
+                    >
+                      <span
+                        className={`grid h-9 w-9 shrink-0 place-items-center rounded-full font-display text-sm font-semibold ${
+                          current ? "bg-white/15 text-white" : complete ? "bg-success/15 text-success" : "bg-surface"
+                        }`}
+                      >
+                        {complete ? <Icon name="check" size={16} /> : locked ? <Icon name="lock" size={15} /> : position + 1}
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block font-display text-[17px] font-semibold">{PROGRESSIVE_STAGE_LABELS[tier]}</span>
+                        <span className={`block text-xs font-bold ${current ? "text-white/75" : "text-muted"}`}>
+                          Flags {position * PROGRESSIVE_TIER_SIZE + 1}–{(position + 1) * PROGRESSIVE_TIER_SIZE}
+                        </span>
+                      </span>
+                      <span className={`shrink-0 text-xs font-bold ${current ? "text-white/85" : complete ? "text-success" : "text-muted"}`}>
+                        {complete ? "Complete" : locked ? "Locked" : `${result.seen}/${result.total}`}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </section>
+
+            <button onClick={() => start("progressive")} className="btn-primary mt-4 w-full">
+              <Icon name="learn" size={19} /> {learning.seen ? `Continue ${PROGRESSIVE_STAGE_LABELS[learning.stage]}` : "Start learning"}
+            </button>
+            <button
+              onClick={() => {
+                setSetupTab("results");
+                setCanReturnToRound(false);
+              }}
+              className="mx-auto mt-2 inline-flex items-center gap-1.5 rounded-full px-3 py-2 font-display text-sm font-semibold text-primary transition-colors hover:bg-primary/10"
+            >
+              <Icon name="stats" size={15} /> View learning results
+            </button>
+            <p className="mt-1 text-center text-xs font-bold text-muted">Untimed · quit anytime · mistakes return</p>
+          </>
         ) : (
           <>
             <section className="mt-5 rounded-[22px] border border-line bg-surface p-4">
               <p className="section-label">How it works</p>
               <p className="mt-1 font-semibold leading-relaxed text-ink">{MODE_META[mode].detail}</p>
-              {mode === "progressive" && (
-                <div className="mt-4 grid grid-cols-3 gap-2 text-center text-xs font-bold">
-                  {(["easy", "medium", "hard"] as ProgressiveStage[]).map((difficulty, position) => (
-                    <div key={difficulty} className={`rounded-2xl p-2.5 ${difficulty === progressiveResults(progress, countries).stage ? "bg-primary text-white" : "bg-paper text-muted"}`}>
-                      <span className="block text-[10px] uppercase tracking-wide">Stage {position + 1}</span>
-                      <span className="mt-0.5 block font-display text-sm font-semibold">{STAGE_LABEL[difficulty]}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
             </section>
             <div className="mt-auto pt-6">
               <button onClick={() => start(mode)} className="btn-primary w-full">
                 <Icon name={MODE_META[mode].icon} size={19} /> Start {MODE_META[mode].label.toLowerCase()}
               </button>
-              {mode === "progressive" && <p className="mt-2 text-center text-xs font-bold text-muted">Untimed · quit anytime · mistakes return</p>}
             </div>
           </>
         )}
@@ -345,7 +435,7 @@ export default function ArcadeScreen() {
       <header className="sticky top-0 z-20 bg-paper/85 p-4 backdrop-blur-md">
         <p className="mb-2.5 text-center font-display text-[13px] font-bold uppercase tracking-wide text-muted">{MODE_META[mode].label}</p>
         <div className="flex items-center gap-3">
-          <button onClick={closeRound} className="icon-btn shrink-0" aria-label="End practice">
+          <button onClick={() => void closeRound()} className="icon-btn shrink-0" aria-label="End practice">
             <Icon name="close" size={20} />
           </button>
           <div className="flex-1"><ProgressBar value={headerValue} /></div>
@@ -370,83 +460,5 @@ export default function ArcadeScreen() {
         />
       )}
     </main>
-  );
-}
-
-function ProgressiveResults({ progress, countries, onContinue }: { progress: AppProgress; countries: Country[]; onContinue: () => void }) {
-  const results = progressiveResults(progress, countries);
-  const weak = countries
-    .filter((country) => {
-      const state = progress.review[reviewKey(country.code, "flag")];
-      return Boolean(state && state.wrongCount > 0 && state.box < 5);
-    })
-    .sort((a, b) => (progress.review[reviewKey(b.code, "flag")]?.wrongCount ?? 0) - (progress.review[reviewKey(a.code, "flag")]?.wrongCount ?? 0))
-    .slice(0, 5);
-
-  return (
-    <div className="pb-2">
-      <section className="mt-5 rounded-[22px] bg-primary p-5 text-white shadow-card-lg">
-        <p className="text-xs font-bold uppercase tracking-[0.12em] text-white/75">Current stage</p>
-        <div className="mt-1 flex items-end justify-between gap-3">
-          <h2 className="font-display text-3xl font-semibold">{STAGE_LABEL[results.stage]} flags</h2>
-          <span className="rounded-full bg-white/15 px-3 py-1 text-xs font-bold">Stage {(["easy", "medium", "hard"] as ProgressiveStage[]).indexOf(results.stage) + 1} of 3</span>
-        </div>
-        <p className="mt-2 text-sm font-semibold text-white/80">New flags come from this stage while earlier mistakes keep returning.</p>
-      </section>
-
-      <div className="mt-3 grid grid-cols-3 gap-2">
-        <ResultStat value={results.seen} label="Introduced" />
-        <ResultStat value={results.mastered} label="Mastered" />
-        <ResultStat value={results.needsRepetition} label="To repeat" />
-      </div>
-
-      <section className="mt-5 rounded-[22px] border border-line bg-paper p-4 shadow-card">
-        <h2 className="font-display text-lg font-semibold">Results by difficulty</h2>
-        <div className="mt-4 space-y-4">
-          {results.tiers.map((tier) => {
-            const pct = tier.total ? Math.round((tier.seen / tier.total) * 100) : 0;
-            return (
-              <div key={tier.difficulty}>
-                <div className="flex items-center justify-between gap-3 text-sm font-bold">
-                  <span>{STAGE_LABEL[tier.difficulty]}</span>
-                  <span className="text-muted">{tier.seen}/{tier.total} introduced · {tier.mastered} mastered</span>
-                </div>
-                <div className="mt-1.5 h-2.5 overflow-hidden rounded-full bg-surface">
-                  <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${pct}%` }} />
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </section>
-
-      {weak.length > 0 && (
-        <section className="mt-5 rounded-[22px] border border-line bg-paper p-4 shadow-card">
-          <h2 className="font-display text-lg font-semibold">Needs repetition</h2>
-          <div className="mt-3 grid gap-2">
-            {weak.map((country) => (
-              <div key={country.code} className="flex items-center gap-3 rounded-2xl bg-surface p-2.5">
-                <FlagImage code={country.code} name={country.name} src={country.flagUrl} fit="natural" framed={false} className="w-12" imgClassName="max-h-9" />
-                <span className="flex-1 font-display font-semibold">{country.name}</span>
-                <span className="text-xs font-bold text-error">{progress.review[reviewKey(country.code, "flag")]?.wrongCount ?? 0} misses</span>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
-
-      <button onClick={onContinue} className="btn-primary mt-5 w-full">
-        <Icon name="learn" size={19} /> Continue progressive learning
-      </button>
-    </div>
-  );
-}
-
-function ResultStat({ value, label }: { value: number; label: string }) {
-  return (
-    <div className="rounded-[18px] border border-line bg-paper p-3 text-center shadow-card">
-      <div className="font-display text-2xl font-semibold text-primary">{value}</div>
-      <div className="mt-0.5 text-[11px] font-bold text-muted">{label}</div>
-    </div>
   );
 }

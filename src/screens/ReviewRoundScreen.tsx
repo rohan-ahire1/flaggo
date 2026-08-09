@@ -1,20 +1,20 @@
 import { useMemo, useState } from "react";
-import { Navigate, useLocation, useNavigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import FeedbackPanel from "../components/FeedbackPanel";
 import Icon from "../components/Icon";
 import ProgressBar from "../components/ProgressBar";
 import QuestionCard from "../components/QuestionCard";
 import RoundResults, { type RoundResultItem } from "../components/RoundResults";
 import { useConfirm } from "../components/ConfirmDialog";
-import { updateStreak } from "@flaggo/core/utils/date";
-import { generateLessonQuestions, generateReviewQuestions, type Question } from "@flaggo/core/utils/quiz";
+import { generateReviewQuestions, type Question } from "@flaggo/core/utils/quiz";
 import { updateReviewState } from "@flaggo/core/utils/spacedRepetition";
 import { answerDetail, answerLabel } from "@flaggo/core/game/answerLabel";
 import { awardBadges, evaluateBadges } from "@flaggo/core/game/badges";
 import { useGame } from "../state/GameProvider";
 import { trackEvent } from "../lib/analytics";
 import { earnedBadgeResults } from "../lib/badges";
-import { parseLessonRoute } from "../navigation/routes";
+import { parseReviewRoute } from "../navigation/routes";
+import { useAppBack } from "../navigation/useAppBack";
 
 export const TOPIC_LABEL: Record<string, string> = {
   flag: "Flags",
@@ -25,17 +25,16 @@ export const TOPIC_LABEL: Record<string, string> = {
   neighbor: "Neighbors"
 };
 
-export default function LessonScreen() {
-  const navigate = useNavigate();
+export default function ReviewRoundScreen() {
+  const goBack = useAppBack("/review");
   const confirm = useConfirm();
   const location = useLocation();
-  const { countries, lessons, progress, setProgress, nextLearningLesson, openLesson } = useGame();
-  const routeState = useMemo(() => parseLessonRoute(location.search, location.state), [location.search, location.state]);
-  const lesson = routeState && "lessonId" in routeState ? lessons.find((item) => item.id === routeState.lessonId) : undefined;
-  const mode = routeState && "mode" in routeState ? routeState.mode : "lesson";
+  const { countries, progress, setProgress } = useGame();
+  const routeState = useMemo(() => parseReviewRoute(location.search, location.state), [location.search, location.state]);
+  const reviewRoute = routeState;
   // Keyed memo: a fresh array here each render would retrigger the questions
   // memo below, regenerating (unseeded) questions mid-round on every answer.
-  const reviewCodesKey = routeState && "countryCodes" in routeState ? routeState.countryCodes.join(",") : "";
+  const reviewCodesKey = reviewRoute?.countryCodes.join(",") ?? "";
   const reviewCountries = useMemo(
     () =>
       reviewCodesKey
@@ -46,25 +45,24 @@ export default function LessonScreen() {
         : [],
     [countries, reviewCodesKey]
   );
-  const reviewTopic = routeState && "topic" in routeState ? routeState.topic : "flag";
+  const activeTopic = reviewRoute?.topic ?? "flag";
 
-  const invalidRoute = !routeState || (mode === "lesson" && !lesson);
-  const activeTopic = mode === "review" ? reviewTopic : lesson?.topic ?? "flag";
-  const questions = useMemo<Question[]>(() => {
-    if (mode === "review") return generateReviewQuestions(reviewCountries.length ? reviewCountries : countries, activeTopic, Math.random, countries);
-    return lesson ? generateLessonQuestions(lesson, countries) : [];
-  }, [activeTopic, countries, lesson, mode, reviewCountries]);
+  const invalidRoute = !reviewRoute || reviewCountries.length === 0;
+  const questions = useMemo<Question[]>(
+    () => generateReviewQuestions(reviewCountries, activeTopic, Math.random, countries),
+    [activeTopic, countries, reviewCountries]
+  );
   const [index, setIndex] = useState(0);
   const [correct, setCorrect] = useState(0);
   const [xp, setXp] = useState(0);
   const [feedback, setFeedback] = useState<{ ok: boolean; question: Question; selectedLabel?: string } | null>(null);
   const [items, setItems] = useState<RoundResultItem[]>([]);
-  const [result, setResult] = useState<{ xpEarned: number; correct: number; total: number; streak: number; earnedBadgeIds: string[] } | null>(null);
+  const [result, setResult] = useState<{ xpEarned: number; correct: number; total: number; earnedBadgeIds: string[] } | null>(null);
   const question = questions[index];
   const topicLabel = TOPIC_LABEL[activeTopic] ?? activeTopic;
-  const contextTitle = mode === "review" ? `Review · ${topicLabel}` : `${lesson?.title ?? "Lesson"} · ${topicLabel}`;
+  const contextTitle = `Review · ${topicLabel}`;
 
-  if (invalidRoute) return <Navigate to="/learn" replace />;
+  if (invalidRoute) return <Navigate to="/review" replace />;
   function resultItem(question: Question, wasCorrect: boolean, selectedLabel?: string): RoundResultItem {
     const country = question.correctCountry;
     return {
@@ -93,21 +91,13 @@ export default function LessonScreen() {
 
   function complete() {
     const total = questions.length || 1;
-    const perfect = correct === total;
-    const bonusXp = mode === "lesson" ? 25 + (perfect ? 20 : 0) : 10;
-    const coinsEarned = mode === "lesson" ? 5 + (perfect ? 10 : 0) : 0;
-    let next = { ...progress, xp: progress.xp + bonusXp, coins: progress.coins + coinsEarned };
-    if (mode === "lesson" && lesson) {
-      next = updateStreak({
-        ...next,
-        completedLessonIds: Array.from(new Set([...next.completedLessonIds, lesson.id]))
-      });
-    }
-    const newIds = evaluateBadges(next, countries, lessons, { kind: mode === "review" ? "review" : "lesson", score: correct, total });
+    const bonusXp = 10;
+    let next = { ...progress, xp: progress.xp + bonusXp };
+    const newIds = evaluateBadges(next, countries, { kind: "review", score: correct, total });
     if (newIds.length) next = awardBadges(next, newIds);
     setProgress(next);
-    trackEvent("lesson-complete", { accuracy: Math.round((correct / total) * 100), topic: activeTopic });
-    setResult({ xpEarned: xp + bonusXp, correct, total, streak: next.streak, earnedBadgeIds: newIds });
+    trackEvent("review-complete", { accuracy: Math.round((correct / total) * 100), topic: activeTopic });
+    setResult({ xpEarned: xp + bonusXp, correct, total, earnedBadgeIds: newIds });
   }
 
   function continueNext() {
@@ -126,32 +116,19 @@ export default function LessonScreen() {
       });
       if (!ok) return;
     }
-    navigate(mode === "review" ? "/review" : "/");
-  }
-
-  function startNextLesson(nextLesson: (typeof lessons)[number]) {
-    setIndex(0);
-    setCorrect(0);
-    setXp(0);
-    setFeedback(null);
-    setItems([]);
-    setResult(null);
-    openLesson(nextLesson);
+    goBack();
   }
 
   if (result) {
-    const next = nextLearningLesson(activeTopic);
     return (
       <RoundResults
         score={result.correct}
         total={result.total}
         items={items}
-        streak={result.streak}
         caption={`+${result.xpEarned} XP`}
         earnedBadges={earnedBadgeResults(result.earnedBadgeIds)}
         actions={[
-          ...(next ? [{ label: "Continue learning", variant: "primary" as const, icon: "learn" as const, onPress: () => startNextLesson(next) }] : []),
-          { label: "Back to Today", variant: next ? "secondary" as const : "primary" as const, icon: "today" as const, onPress: () => navigate("/") }
+          { label: "Done", variant: "primary", icon: "review", onPress: goBack }
         ]}
       />
     );
@@ -160,7 +137,7 @@ export default function LessonScreen() {
   if (!question) {
     return (
       <main className="grid min-h-screen place-items-center p-5">
-        <button onClick={() => navigate("/")} className="btn-primary">Go Home</button>
+        <button onClick={goBack} className="btn-primary">Back to review</button>
       </main>
     );
   }
@@ -172,7 +149,7 @@ export default function LessonScreen() {
         <div className="flex items-center gap-3">
           <button
             onClick={() => void closeRound()}
-            aria-label="Close lesson"
+            aria-label="Close review"
             className="icon-btn shrink-0 hover:text-ink"
           >
             <Icon name="close" size={20} />

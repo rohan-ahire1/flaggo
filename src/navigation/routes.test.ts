@@ -1,24 +1,26 @@
 import { describe, expect, it } from "vitest";
 import {
-  lessonPath,
+  flashcardsPath,
   mapPlayPath,
-  parseLessonRoute,
+  parseFlashcardsRoute,
   parseMapPlayRoute,
+  parseReviewRoute,
   parseTestRoute,
+  reviewPath,
   testPath
 } from "./routes";
 
 describe("navigation routes", () => {
-  it("round-trips lesson and review URLs", () => {
-    const lesson = lessonPath({ lessonId: "asia-flag-1" });
-    expect(lesson).toBe("/lesson?lesson=asia-flag-1");
-    expect(parseLessonRoute(new URL(lesson, "https://flaggo.test").search)).toEqual({ lessonId: "asia-flag-1" });
-
-    const review = lessonPath({ mode: "review", topic: "capital", countryCodes: ["JP", "IN"] });
-    expect(parseLessonRoute(new URL(review, "https://flaggo.test").search)).toEqual({
-      mode: "review",
+  it("round-trips review URLs", () => {
+    const review = reviewPath({ topic: "capital", countryCodes: ["JP", "IN"] });
+    expect(parseReviewRoute(new URL(review, "https://flaggo.test").search)).toEqual({
       topic: "capital",
       countryCodes: ["JP", "IN"]
+    });
+
+    const flashcards = flashcardsPath({ countryCodes: ["CN", "FR", "US"] });
+    expect(parseFlashcardsRoute(new URL(flashcards, "https://flaggo.test").search)).toEqual({
+      countryCodes: ["CN", "FR", "US"]
     });
   });
 
@@ -30,24 +32,23 @@ describe("navigation routes", () => {
       countryCodes: ["BR", "AR"]
     });
 
-    const map = mapPlayPath({ mode: "identify", countryCodes: ["FR", "DE"], lessonId: "europe-location-1" });
+    const map = mapPlayPath({ mode: "identify", countryCodes: ["FR", "DE"] });
     expect(parseMapPlayRoute(new URL(map, "https://flaggo.test").search)).toEqual({
       mode: "identify",
-      countryCodes: ["FR", "DE"],
-      lessonId: "europe-location-1"
+      countryCodes: ["FR", "DE"]
     });
   });
 
   it("keeps legacy router state working during the URL migration", () => {
-    expect(parseLessonRoute("", { mode: "review", topic: "flag", countryCodes: ["US"] })).toEqual({
-      mode: "review",
+    expect(parseReviewRoute("", { topic: "flag", countryCodes: ["US"] })).toEqual({
       topic: "flag",
       countryCodes: ["US"]
     });
   });
 
   it("rejects incomplete round URLs", () => {
-    expect(parseLessonRoute("?mode=review&topic=flag")).toBeNull();
+    expect(parseReviewRoute("?topic=flag")).toBeNull();
+    expect(parseFlashcardsRoute("")).toBeNull();
     expect(parseTestRoute("?mode=options&topic=flag")).toBeNull();
     expect(parseMapPlayRoute("?mode=locate")).toBeNull();
   });

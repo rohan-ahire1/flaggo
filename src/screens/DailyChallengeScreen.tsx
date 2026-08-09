@@ -1,25 +1,23 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import FeedbackPanel from "../components/FeedbackPanel";
 import Icon from "../components/Icon";
 import ProgressBar from "../components/ProgressBar";
 import QuestionCard from "../components/QuestionCard";
 import RoundResults, { type RoundResultItem } from "../components/RoundResults";
 import { useConfirm } from "../components/ConfirmDialog";
-import { useAuth } from "../auth/AuthProvider";
 import { applyDailyResult, buildDailyQuiz, dateKey, type DailyQuestion } from "@flaggo/core/utils/dailyChallenge";
 import { updateReviewState } from "@flaggo/core/utils/spacedRepetition";
 import { answerDetailForWrapper, answerLabelForWrapper } from "@flaggo/core/game/answerLabel";
 import { awardBadges, evaluateBadges } from "@flaggo/core/game/badges";
 import { trackEvent } from "../lib/analytics";
 import { earnedBadgeResults } from "../lib/badges";
+import { useAppBack } from "../navigation/useAppBack";
 import { useGame } from "../state/GameProvider";
 
 export default function DailyChallengeScreen() {
-  const navigate = useNavigate();
+  const goBack = useAppBack("/");
   const confirm = useConfirm();
-  const { user } = useAuth();
-  const { countries, lessons, progress, setProgress } = useGame();
+  const { countries, progress, setProgress } = useGame();
   const today = dateKey();
   const questions = useMemo(() => buildDailyQuiz(today, countries), [countries, today]);
   const [index, setIndex] = useState(0);
@@ -58,7 +56,7 @@ export default function DailyChallengeScreen() {
   async function finish() {
     const result = { score: correct, total: questions.length };
     let next = applyDailyResult(currentProgress, today, result);
-    const newIds = evaluateBadges(next, countries, lessons, { kind: "daily", score: result.score, total: result.total });
+    const newIds = evaluateBadges(next, countries, { kind: "daily", score: result.score, total: result.total });
     if (newIds.length) next = awardBadges(next, newIds);
     setEarnedBadgeIds(newIds);
     setCurrentProgress(next);
@@ -83,7 +81,7 @@ export default function DailyChallengeScreen() {
       });
       if (!ok) return;
     }
-    navigate("/");
+    goBack();
   }
 
   if (complete) {
@@ -96,13 +94,13 @@ export default function DailyChallengeScreen() {
         caption={`+${correct * 10} XP · streak ${currentProgress.daily.streak}`}
         earnedBadges={earnedBadgeResults(earnedBadgeIds)}
         actions={[
-          { label: "Done", variant: "primary", icon: "today", onPress: () => navigate("/") }
+          { label: "Done", variant: "primary", icon: "today", onPress: goBack }
         ]}
       />
     );
   }
 
-  if (!question) return <main className="grid min-h-screen place-items-center p-5"><button onClick={() => navigate("/")} className="btn-primary">Go Home</button></main>;
+  if (!question) return <main className="grid min-h-screen place-items-center p-5"><button onClick={goBack} className="btn-primary">Go back</button></main>;
 
   return (
     <main className="min-h-screen bg-paper">

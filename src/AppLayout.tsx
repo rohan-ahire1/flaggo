@@ -6,17 +6,8 @@ import AppFooter from "./components/AppFooter";
 import BottomNav from "./components/BottomNav";
 import Toast from "./components/Toast";
 import { hasCompletedOnboarding } from "./lib/onboarding";
+import { hasAppChrome } from "./navigation/appNavigation";
 import { useGame } from "./state/GameProvider";
-
-const HIDE_CHROME_PREFIXES = [
-  "/welcome",
-  "/lesson",
-  "/test",
-  "/map/play",
-  "/daily",
-  "/arcade",
-  "/trivia"
-];
 
 export default function AppLayout() {
   const location = useLocation();
@@ -24,7 +15,7 @@ export default function AppLayout() {
   const welcomeChecked = useRef(false);
   const scrollContainer = useRef<HTMLElement>(null);
   const { progress, loading, toast, signInOpen, setSignInOpen } = useGame();
-  const hideChrome = HIDE_CHROME_PREFIXES.some((path) => location.pathname === path || location.pathname.startsWith(`${path}/`));
+  const showChrome = hasAppChrome(location.pathname);
 
   useEffect(() => {
     if (welcomeChecked.current || loading || location.pathname !== "/") return;
@@ -53,9 +44,9 @@ export default function AppLayout() {
               <Outlet />
             </Suspense>
           )}
-          {!loading && !hideChrome && <AppFooter />}
+          {!loading && showChrome && <AppFooter />}
         </main>
-        {!loading && !hideChrome && <BottomNav />}
+        {!loading && showChrome && <BottomNav />}
       </div>
     </div>
   );

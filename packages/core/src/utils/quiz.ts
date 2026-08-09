@@ -109,7 +109,7 @@ function escapeRegex(value: string) {
 
 export function getCurrencyClue(country: Country) {
   const currencyName = country.currencyName?.trim() ?? "";
-  if (!currencyName) return country.currencyCode?.trim() ?? "";
+  if (!currencyName) return "";
 
   const countryDescriptors = [
     country.name,
@@ -126,7 +126,7 @@ export function getCurrencyClue(country: Country) {
     ? sentenceCase(stripped)
     : currencyName;
 
-  return country.currencyCode ? `${label} (${country.currencyCode})` : label;
+  return label;
 }
 
 function makeLanguageOptions(correctCountry: Country, allCountries: Country[], rng: () => number = Math.random) {

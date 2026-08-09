@@ -8,7 +8,7 @@ import { useGame } from "../state/GameProvider";
 
 export default function FlagsLibraryScreen() {
   const navigate = useNavigate();
-  const { countries, progress, setProgress, startReview } = useGame();
+  const { countries, progress, setProgress } = useGame();
   const [query, setQuery] = useState("");
   const [continent, setContinent] = useState("All");
   const [difficulty, setDifficulty] = useState("All");
@@ -71,21 +71,25 @@ export default function FlagsLibraryScreen() {
       </div>
       {filtered.length ? (
         <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-          {filtered.map((country) => (
-            <div key={country.code} className="relative h-full min-w-0">
-              <FlagCard country={country} review={progress.review[reviewKey(country.code, topic)]} onClick={() => startReview([country], topic)} />
-              <button
-                onClick={(event) => {
-                  event.stopPropagation();
-                  setProgress(toggleStarredDeck(progress, country.code, topic));
-                }}
-                className={`absolute right-2 top-2 z-20 grid h-8 w-8 place-items-center rounded-full shadow-md ${isStarred(progress, country.code, topic) ? "bg-accent text-white" : "bg-paper text-muted"}`}
-                aria-label={isStarred(progress, country.code, topic) ? "Remove from starred deck" : "Add to starred deck"}
-              >
-                <Icon name="star" size={15} />
-              </button>
-            </div>
-          ))}
+          {filtered.map((country) => {
+            const starred = isStarred(progress, country.code, topic);
+            return (
+              <div key={country.code} className="relative h-full min-w-0">
+                <FlagCard country={country} review={progress.review[reviewKey(country.code, topic)]} />
+                <button
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    setProgress(toggleStarredDeck(progress, country.code, topic));
+                  }}
+                  className={`absolute right-2 top-2 z-20 grid h-8 w-8 place-items-center rounded-full border border-line bg-paper shadow-md transition-colors ${starred ? "text-accent" : "text-muted"}`}
+                  aria-label={starred ? "Remove from starred deck" : "Add to starred deck"}
+                  aria-pressed={starred}
+                >
+                  <Icon name="star" size={16} weight={starred ? "fill" : "duotone"} />
+                </button>
+              </div>
+            );
+          })}
         </div>
       ) : (
         <div className="mt-8 rounded-[24px] border border-line bg-paper p-6 text-center shadow-card">
