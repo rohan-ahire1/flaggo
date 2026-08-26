@@ -189,6 +189,7 @@ export default function TriviaScreen({
   return (
     <main className="min-h-screen bg-flaggo-bg">
       <header className="sticky top-0 z-20 bg-flaggo-bg/85 p-4 backdrop-blur-md">
+        <p className="mb-2.5 text-center font-display text-[13px] font-extrabold uppercase tracking-wide text-flaggo-muted">Trivia</p>
         <div className="flex items-center gap-3">
           <button onClick={() => finish()} className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-white text-flaggo-muted shadow-card" aria-label="End run"><Icon name="close" size={20} /></button>
           <div className="flex-1 rounded-full bg-white px-4 py-2 font-display font-black shadow-card">Score {score}</div>

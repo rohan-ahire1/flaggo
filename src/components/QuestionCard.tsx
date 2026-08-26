@@ -42,7 +42,9 @@ export default function QuestionCard({
       code={question.correctCountry.code}
       name={question.correctCountry.name}
       src={question.correctCountry.flagUrl}
-      className={`${large ? "aspect-[4/3] w-full" : "h-20 w-28"} rounded-[24px] p-4 shadow-[0_8px_0_#e5e7eb]`}
+      fit="natural"
+      className={`${large ? "mx-auto w-full max-w-sm" : "w-28"} rounded-[24px] shadow-[0_8px_0_#e5e7eb]`}
+      imgClassName={large ? "max-h-[280px]" : "max-h-20"}
     />
   );
 

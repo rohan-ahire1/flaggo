@@ -12,6 +12,15 @@ import { generateLessonQuestions, generateReviewQuestions, type Question } from 
 import { updateReviewState } from "../utils/spacedRepetition";
 import type { LessonResult } from "./LessonCompleteScreen";
 
+export const TOPIC_LABEL: Record<string, string> = {
+  flag: "Flags",
+  capital: "Capitals",
+  location: "Map",
+  currency: "Currencies",
+  language: "Languages",
+  neighbor: "Neighbors"
+};
+
 export default function LessonScreen({
   lesson,
   countries,
@@ -43,6 +52,8 @@ export default function LessonScreen({
   const [xp, setXp] = useState(0);
   const [feedback, setFeedback] = useState<{ ok: boolean; question: Question } | null>(null);
   const question = questions[index];
+  const topicLabel = TOPIC_LABEL[activeTopic] ?? activeTopic;
+  const contextTitle = mode === "review" ? `Review · ${topicLabel}` : `${lesson?.title ?? "Lesson"} · ${topicLabel}`;
   const correctAnswerLabel = (q: Question) => {
     if (q.type === "guess-currency") return q.correctCurrency;
     if (q.type === "guess-language") return q.correctLanguage;
@@ -96,6 +107,7 @@ export default function LessonScreen({
   return (
     <main className="min-h-screen bg-flaggo-bg">
       <header className="sticky top-0 z-20 bg-flaggo-bg/85 p-4 backdrop-blur-md">
+        <p className="mb-2.5 text-center font-display text-[13px] font-extrabold uppercase tracking-wide text-flaggo-muted">{contextTitle}</p>
         <div className="flex items-center gap-3">
           <button
             onClick={onHome}

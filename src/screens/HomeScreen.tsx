@@ -90,7 +90,7 @@ export default function HomeScreen({
 
       {/* hero: continue learning */}
       <button
-        onClick={() => (nextLesson ? onOpenLesson(nextLesson) : onOpenPaths())}
+        onClick={onOpenPaths}
         className="relative mb-[18px] w-full overflow-hidden rounded-[26px] bg-primary p-5 text-left shadow-card-lg"
       >
         <span className="wl-dots absolute inset-0 opacity-90" />
@@ -104,7 +104,16 @@ export default function HomeScreen({
           <span className="mt-1 block text-[15px] text-white/80">
             {nextLesson ? `${nextLesson.region} · ${doneCount}/${topicLessons.length} lessons done` : "You've finished every lesson in this path"}
           </span>
-          <span className="mt-4 block rounded-2xl bg-white py-3.5 text-center font-display text-xl font-semibold text-primary shadow-[0_4px_12px_rgba(0,0,0,0.18)]">
+          <span
+            role="button"
+            tabIndex={0}
+            onClick={(e) => {
+              e.stopPropagation();
+              if (nextLesson) onOpenLesson(nextLesson);
+              else onOpenPaths();
+            }}
+            className="mt-4 block rounded-2xl bg-white py-3.5 text-center font-display text-xl font-semibold text-primary shadow-[0_4px_12px_rgba(0,0,0,0.18)]"
+          >
             {nextLesson ? "Start next lesson →" : "Browse learning paths →"}
           </span>
         </span>
