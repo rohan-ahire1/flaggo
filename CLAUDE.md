@@ -31,14 +31,17 @@ Stripe checkout and AdSense code in the repo but disabled behind feature flags.
 
 `src/`
 - `main.tsx` → renders `AppShell` inside a Sentry `ErrorBoundary`.
-- `AppShell.tsx` → `BrowserRouter` + `ThemeProvider` + `AuthProvider`; routes:
-  `/` (main app), `/privacy`, `/terms`, `/auth/callback`, `*` (404). Plausible pageview tracking.
-- `App.tsx` → the actual game. Single-page **screen state machine** (`screen` useState, type
-  `Screen`), NOT routed. ~22 screens in `src/screens/`; heavier ones are `React.lazy` loaded.
-  Reads a `?m=<matchId>` query param to deep-link into a multiplayer match.
-- `screens/` — one component per mode (Home, Welcome, Lesson, FlagTest, Trivia, Arcade,
-  Daily, Paths, Decks, Map menu/play/explore, Leaderboard, Friends, Match/MatchResult,
-  Review, Stats, Profile, TestSetup, LessonComplete).
+- `AppShell.tsx` → providers (React Query, `BrowserRouter`, `ThemeProvider`, `AuthProvider`,
+  `ConfirmProvider`, `InstallPromptProvider`, `GameProvider`) and the **route table**, the
+  source of truth for every screen. Game routes render inside `AppLayout` (nav chrome,
+  welcome redirect, sign-in modal); `/privacy`, `/terms`, `/auth/callback` and `*` sit outside it.
+  Heavier screens are `React.lazy` loaded. `RoundRoute` remounts round screens per navigation.
+- `state/GameProvider.tsx` → progress state and round launchers (`startReview`, `startFlagTest`, …).
+- `navigation/` → route param parsing (`routes.ts`), which paths hide chrome
+  (`appNavigation.ts`), and `useAppBack`.
+- `screens/` — one component per route (Home, Welcome, Review, ReviewRound, Flashcards,
+  TestSetup, FlagTest, Daily, Arcade, Trivia, Map menu/play/explore, Decks, FlagsLibrary,
+  Stats, Profile) plus `screens/kids/` (Kids Mode).
 - `components/` — shared UI (FlagCard, FlagImage, WorldMap, QuestionCard, BottomNav, etc.).
 - `pages/` — route-level pages (AuthCallback, Legal, NotFound, Pro).
 - `hooks/` — `useSyncedProgress` (local↔Supabase progress sync, debounced upserts, anon→user
@@ -116,11 +119,14 @@ requested. For manual testing, use `netlify deploy` for preview deploys and avoi
 ## Conventions
 
 - Caveman/terse prose is for chat only — write normal prose in docs and `.plan.md` files.
-- New screens are added to `App.tsx`'s `Screen` union + the render switch; lazy-load heavy ones.
+- New screens get a route in `src/AppShell.tsx`; lazy-load heavy ones. Round/immersive screens
+  must also be listed in `src/navigation/appNavigation.ts` so the nav chrome hides.
 - Keep monetization isolated and flag-gated; never surface paywall CTAs when
   `VITE_MONETIZATION_ENABLED` is false.
 - Public display names must never be emails — use `sanitizeDisplayName` / `isPublicSafeHandle`.
 - Matches and the daily challenge are **seeded** (deterministic) so all players get the same
   questions; preserve that when touching `packages/core/src/utils/seededRandom`, `dailyChallenge`.
 - Plans live in `plans/` (`*.plan.md`). See `plans/launch-free-mvp.plan.md` for launch intent.
+- **Active redesign:** `plans/redesign-expedition-atlas.plan.md` (branch `redesign`). Follow its
+  guardrails: progress data stays compatible, no feature loss, old URLs keep working.
 </content>

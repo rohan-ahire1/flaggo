@@ -1,5 +1,10 @@
 # Flaggo — Architecture
 
+> **Partly outdated (2026-09-26).** The client-architecture sections below describe the old
+> `App.tsx` screen state machine and social features, which no longer exist. Routing now lives in
+> `src/AppShell.tsx` (see `CLAUDE.md`). The data, Supabase and sync sections are still accurate.
+> This doc will be rewritten when the redesign (`plans/redesign-expedition-atlas.plan.md`) lands.
+
 Deeper architecture reference for the `flaggo` repo (brand "Flaggo"). For the quick
 orientation guide see `CLAUDE.md` at the repo root.
 
