@@ -1,0 +1,35 @@
+[Unit]
+Description=Flaggo API (username signup, account deletion, Stripe)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=flaggo-api
+Group=flaggo-api
+WorkingDirectory=/opt/flaggo-api
+EnvironmentFile=/etc/flaggo/api.env
+Environment=PORT=8796
+ExecStart=/opt/nodejs-26/bin/node /opt/flaggo-api/flaggo-api.mjs
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=20
+
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+RestrictNamespaces=true
+LockPersonality=true
+PrivateDevices=true
+ProtectClock=true
+ProtectHostname=true
+RestrictRealtime=true
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+
+[Install]
+WantedBy=multi-user.target
