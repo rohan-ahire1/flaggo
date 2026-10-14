@@ -120,7 +120,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
       destructive: true
     });
     if (!ok) return;
-    const response = await fetch("/.netlify/functions/delete-account", {
+    const response = await fetch("/api/delete-account", {
       method: "POST",
       headers: { Authorization: `Bearer ${session.access_token}` }
     });

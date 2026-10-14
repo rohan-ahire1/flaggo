@@ -1,0 +1,31 @@
+# Flaggo site block in /etc/caddy/Caddyfile (kept here for reference).
+flaggo.rohanahire.com {
+	encode zstd gzip
+
+	handle /api/* {
+		reverse_proxy 127.0.0.1:8796
+	}
+
+	# Stripe's dashboard points at /stripe-webhook.
+	handle /stripe-webhook {
+		rewrite * /api/stripe-webhook
+		reverse_proxy 127.0.0.1:8796
+	}
+
+	handle {
+		root * /var/www/flaggo.rohanahire.com
+		try_files {path} /index.html
+		file_server
+
+		@service_worker path /sw.js
+		header @service_worker Cache-Control "no-cache"
+	}
+
+	header {
+		Content-Security-Policy "frame-ancestors https://rohanahire.com http://localhost:3104 http://127.0.0.1:3104"
+		X-Content-Type-Options nosniff
+		Referrer-Policy strict-origin-when-cross-origin
+		Permissions-Policy "camera=(), microphone=(), geolocation=()"
+		-Server
+	}
+}

@@ -22,9 +22,10 @@ Stripe checkout and AdSense code in the repo but disabled behind feature flags.
   (TopoJSON in `packages/core/src/data/world-110m.json`).
 - **Backend:** `@supabase/supabase-js` (Auth + Postgres + RLS). No dedicated server-state
   lib — app state is plain React `useState`/context + a synced-progress hook.
-- **Payments (deferred):** `@stripe/stripe-js` (client), `stripe` (Netlify functions).
+- **Payments (deferred):** `@stripe/stripe-js` (client), `stripe` (Flaggo API in `server/`).
 - **Diagnostics/analytics:** `@sentry/react`, Plausible (script-loaded), both opt-in via env.
-- **Hosting:** Netlify static + Netlify Functions (`netlify.toml`).
+- **Hosting:** the VPS — Caddy serves `dist/` and proxies `/api/*` to the Flaggo API
+  (`server/`, a small Node service). Deploy files are in `deploy/`.
 - **Tests:** Vitest + Testing Library + jsdom (`*.test.ts(x)` colocated in `__tests__/`).
 
 ## Architecture (high level)
@@ -71,12 +72,15 @@ dropped by migration `202607120001_drop_social.sql`.)
 A signup trigger (`handle_new_user`) seeds profile/progress/entitlements rows. Display
 names never store email (PII fix in migration `…0004`). See `docs/ARCHITECTURE.md`.
 
-### Netlify Functions (`netlify/functions/`)
+### Flaggo API (`server/`)
 
-Server-only, use the Supabase **service role** key:
+`server/index.ts` is a small `node:http` server that routes `/api/<name>` to the handlers in
+`server/functions/`. It is bundled to one file (`npm run build:server`) and runs on the VPS as
+`flaggo-api.service`. Handlers are server-only and use the Supabase **service role** key:
+- `username-signup.ts` — wired/active; creates username-only accounts.
 - `delete-account.ts` — wired/active; verifies bearer token, admin-deletes the auth user.
 - `create-checkout-session.ts`, `stripe-webhook.ts` — Stripe, **deferred** (monetization off).
-  `stripe-webhook` is redirected from `/stripe-webhook` in `netlify.toml`.
+  Caddy also maps `/stripe-webhook` to `/api/stripe-webhook`.
 
 ## Env vars
 
@@ -86,7 +90,7 @@ Copy `.env.example` → `.env.local`. Client vars are `VITE_*` (browser-exposed,
 - **Flags:** `VITE_ADS_ENABLED` (default false), `VITE_MONETIZATION_ENABLED` (default false).
 - **Optional:** `VITE_PLAUSIBLE_DOMAIN`, `VITE_SENTRY_DSN`, `VITE_ADSENSE_CLIENT_ID`,
   `VITE_STRIPE_PUBLISHABLE_KEY`.
-- **Server-only (Netlify, never `VITE_`):** `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`,
+- **Server-only (Flaggo API, never `VITE_`):** `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`,
   `STRIPE_SECRET_KEY`, `STRIPE_PRICE_ID`, `STRIPE_WEBHOOK_SECRET`.
 
 Missing required keys throw in dev; in prod the app degrades (supabase client is `null`,
@@ -96,22 +100,20 @@ app runs local-only).
 
 ```bash
 npm install
-npm run dev                  # Vite dev server (localhost:5173)
+npm run dev                  # Vite dev server (localhost:5173); proxies /api to :8796
+npm run dev:api              # Flaggo API on :8796 (needs server-only env in the shell)
 npm run build                # tsc -b && vite build  -> dist/
+npm run build:server         # bundle the API -> server/dist/flaggo-api.mjs
 npm run preview              # preview the production build
 npm test                     # vitest run
 npm run generate:countries   # regenerate packages/core/src/data/countries.ts from countries.raw.json
 ```
 
-**Deploy (Netlify):** build `npm run build`, publish `dist`, functions `netlify/functions`.
-SPA + function redirects in `netlify.toml`. Set the required `VITE_*` env in Netlify; set
-server-only keys for `delete-account` (and Stripe if/when monetization is enabled).
-
-Do not deploy to Netlify production unless explicitly asked to do so. Git-based
-production builds are skipped by default through `scripts/netlify-ignore-build.cjs`;
-include `[deploy]` in the commit message only when an intentional production release is
-requested. For manual testing, use `netlify deploy` for preview deploys and avoid
-`netlify deploy --prod` unless production deployment was explicitly requested.
+**Deploy (VPS):** `flaggo-deploy.timer` on the VPS checks `origin/main` every 5 minutes and,
+when it moved, builds the web app and API and publishes them (`deploy/vps-deploy.sh`). So
+a push to `main` is a production deploy — don't push or merge to `main` unless asked.
+Build env is `/etc/flaggo/build.env`; API secrets are `/etc/flaggo/api.env`. See
+`docs/production-setup.md`. There is no Netlify dependency; don't add one.
 
 ## Conventions
 

@@ -3,7 +3,7 @@
 This project ships as two clients backed by one Supabase project:
 
 - Mobile app: Expo/React Native, released through Play Console.
-- Web app: root Vite app, deployed separately to a static host.
+- Web app: root Vite app, self-hosted on the VPS with its API (`server/`).
 
 ## 1. Supabase Project
 
@@ -22,7 +22,7 @@ Required redirect URLs before launch:
 
 ```text
 http://localhost:5173/auth/callback
-https://<web-host-subdomain>/auth/callback
+https://flaggo.rohanahire.com/auth/callback
 flaggo://auth/callback
 ```
 
@@ -34,43 +34,46 @@ https://playflaggo.com/auth/callback
 
 Google sign-in is intentionally hidden until a custom auth domain is available.
 
-## 2. Web App Deploy
+## 2. Web App Deploy (VPS)
 
-The root app is the web app.
+Production is https://flaggo.rohanahire.com on the VPS. The pieces live in `deploy/`:
 
-Build command:
+- `vps-deploy.sh` → installed as `/usr/local/sbin/flaggo-deploy`. Fetches `origin/main` and,
+  when it moved, builds as the unprivileged `flaggo-build` user (clone in
+  `/var/lib/flaggo-build/flaggo`, read-only GitHub deploy key), copies `dist/` to
+  `/var/www/flaggo.rohanahire.com`, installs the API bundle to `/opt/flaggo-api`, and restarts
+  the API. `flaggo-deploy --force` redeploys the current commit. Root runs the installed
+  copy, so re-install it by hand after changing the script.
+- `flaggo-deploy.service` + `.timer` → run the deploy every 5 minutes. Logs:
+  `journalctl -u flaggo-deploy`.
+- `flaggo-api.service` → the API on `127.0.0.1:8796`, as the `flaggo-api` user.
+- `setup-vps.sh` → one-time setup, run from the Mac after merging: `bash deploy/setup-vps.sh`.
+- `Caddyfile` → the site block: `/api/*` and `/stripe-webhook` go to the API, everything else
+  is the static app with SPA fallback.
 
-```bash
-npm run build
-```
-
-Publish directory:
-
-```text
-dist
-```
-
-Required web env vars:
+Build env, `/etc/flaggo/build.env` (public values only):
 
 ```text
 VITE_SUPABASE_URL=
 VITE_SUPABASE_ANON_KEY=
-VITE_SITE_URL=
+VITE_SITE_URL=https://flaggo.rohanahire.com
 VITE_ADS_ENABLED=false
 VITE_MONETIZATION_ENABLED=false
 ```
 
-If deploying with the included GitHub Actions workflow, create these repository secrets:
+API secrets, `/etc/flaggo/api.env` (root:flaggo-api, 0640):
 
 ```text
-NETLIFY_AUTH_TOKEN
-NETLIFY_SITE_ID
-VITE_SUPABASE_URL
-VITE_SUPABASE_ANON_KEY
-VITE_SITE_URL
+SUPABASE_URL=
+SUPABASE_SERVICE_ROLE_KEY=
+SITE_URL=https://flaggo.rohanahire.com
+# Only when monetization is on:
+STRIPE_SECRET_KEY=
+STRIPE_PRICE_ID=
+STRIPE_WEBHOOK_SECRET=
 ```
 
-Use Node 22 for local and CI builds.
+GitHub Actions only runs CI (tests and builds); it does not deploy. Use Node 22+.
 
 ## 3. Mobile App Setup
 

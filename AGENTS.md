@@ -2,7 +2,6 @@
 
 ## Deployment
 
-- Do not deploy to Netlify production unless the user explicitly asks for a production deploy.
-- For Git-based Netlify builds, production deploys are skipped by default via `scripts/netlify-ignore-build.cjs`.
-- To intentionally allow a production deploy from Git, include `[deploy]` in the commit message.
-- For manual CLI testing, use `netlify deploy` for preview deploys. Use `netlify deploy --prod` only after explicit user approval.
+- Production is the VPS (flaggo.rohanahire.com). Every push to `main` is deployed there within about 5 minutes by `flaggo-deploy.timer` (see `deploy/` and `docs/production-setup.md`).
+- Do not push or merge to `main` unless the user asked for it, because that is a production deploy.
+- Do not add Netlify (or any other hosted platform) config; the app has no Netlify dependency.

@@ -59,6 +59,9 @@ export default defineConfig({
     }
   },
   server: {
+    proxy: {
+      "/api": "http://127.0.0.1:8796"
+    },
     fs: {
       allow: [__dirname]
     }
@@ -67,6 +70,6 @@ export default defineConfig({
     environment: "jsdom",
     globals: true,
     setupFiles: ["./src/test/setup.ts"],
-    include: ["src/**/*.test.{ts,tsx}", "netlify/functions/**/*.test.{ts,tsx}", "packages/core/**/*.test.{ts,tsx}"]
+    include: ["src/**/*.test.{ts,tsx}", "server/**/*.test.{ts,tsx}", "packages/core/**/*.test.{ts,tsx}"]
   }
 });

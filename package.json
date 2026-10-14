@@ -11,7 +11,9 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "generate:countries": "tsx scripts/generateCountries.ts"
+    "generate:countries": "tsx scripts/generateCountries.ts",
+    "dev:api": "tsx watch server/index.ts",
+    "build:server": "esbuild server/index.ts --bundle --platform=node --format=esm --target=node22 --outfile=server/dist/flaggo-api.mjs --banner:js=\"import { createRequire } from 'node:module'; const require = createRequire(import.meta.url);\""
   },
   "dependencies": {
     "@phosphor-icons/react": "^2.1.10",
@@ -40,6 +42,7 @@
     "@types/react-simple-maps": "^3.0.6",
     "@types/topojson-client": "^3.1.5",
     "autoprefixer": "^10.4.20",
+    "esbuild": "^0.21.5",
     "jsdom": "^29.1.1",
     "postcss": "^8.5.1",
     "stripe": "^22.2.1",

@@ -10,5 +10,5 @@
     "noEmit": true,
     "skipLibCheck": true
   },
-  "include": ["vite.config.ts", "scripts", "netlify/functions/**/*.ts"]
+  "include": ["vite.config.ts", "scripts", "server/**/*.ts"]
 }

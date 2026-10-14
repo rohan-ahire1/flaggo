@@ -7,8 +7,8 @@ orientation guide see `CLAUDE.md` at the repo root.
 
 Flaggo is a client-heavy installable PWA. Almost all game logic runs in the browser
 from static data bundled at build time. Supabase provides auth, a per-user progress
-store, public leaderboards, and multiplayer match storage. Netlify serves the static
-site and hosts a few privileged serverless functions (account deletion, Stripe). The
+store, public leaderboards, and multiplayer match storage. The VPS serves the static
+site (Caddy) and runs a small Node API for privileged routes (signup, account deletion, Stripe). The
 app works fully offline/anonymous; signing in just adds cloud sync and social features.
 
 ```
@@ -22,11 +22,11 @@ app works fully offline/anonymous; signing in just adds cloud sync and social fe
    countries.ts, world-110m ────▶│         hooks/useSyncedProgress          │   │
                                   └───────┬───────────────────────┬─────────────┘
                                           │                       │
-                  fetch /.netlify/...     │                       │ supabase-js
+                  fetch /api/...          │                       │ supabase-js
                    (Authorization: Bearer)│                       │ (anon key, RLS)
                                           ▼                       ▼
                        ┌────────────────────────────┐   ┌──────────────────────────┐
-                       │  Netlify Functions         │   │  Supabase                │
+                       │  Flaggo API (server/)      │   │  Supabase                │
                        │  (service-role key)        │   │                          │
                        │  • delete-account  [live]  │──▶│  Auth (Google + magic    │
                        │  • create-checkout [defer] │   │       link)              │
@@ -142,13 +142,13 @@ Sign-in methods in `SignInModal`: **email/password** account creation and sign-i
 Callback handled at `/auth/callback`. `supabase` client is `null` when env is missing,
 in which case the whole app runs local-only and all cloud features no-op gracefully.
 
-## 5. Netlify functions vs Supabase
+## 5. Flaggo API vs Supabase
 
 Two different server surfaces, used for different reasons:
 
 - **Supabase (from the browser, anon key):** all normal reads/writes — progress, leaderboards,
   matches, friends, profiles. Protected by **RLS**, so the anon key is safe to ship.
-- **Netlify Functions (privileged, service-role key):** operations that must bypass RLS or
+- **Flaggo API (`server/`, privileged, service-role key):** operations that must bypass RLS or
   hold secrets:
   - `delete-account.ts` — **live**. Validates the caller's bearer token, then uses the admin
     client to delete the auth user (cascades remove all their rows). Reachable from Profile;
@@ -156,10 +156,10 @@ Two different server surfaces, used for different reasons:
   - `create-checkout-session.ts` / `stripe-webhook.ts` — **deferred** for the free MVP. Create
     a Stripe checkout and, on `checkout.session.completed`, upsert `purchases` + flip
     `entitlements.ads_removed`. Not invoked while `VITE_MONETIZATION_ENABLED=false`.
-    `/stripe-webhook` is redirected to the function in `netlify.toml`.
+    Caddy maps `/stripe-webhook` to `/api/stripe-webhook`.
 
 There are no Supabase **edge functions** in this repo — privileged server logic lives in
-Netlify functions instead. (`supabase/` contains only SQL migrations + `setup.sql`.)
+`server/functions/` instead. (`supabase/` contains only SQL migrations + `setup.sql`.)
 
 ## 6. Data pipeline (countries & flags)
 
@@ -184,8 +184,9 @@ Regenerate via `npm run generate:countries` whenever the raw data changes — do
   `flagcdn.com` flag assets, ~400 entries / 30 days).
 - **Env:** `config/env.ts` reads `import.meta.env.VITE_*`, asserts required keys in dev
   (throws), degrades gracefully in prod. `MONETIZATION_ENABLED` and ad-enabled are booleans.
-- **Deploy (Netlify):** build `npm run build`, publish `dist`, functions dir `netlify/functions`.
-  `netlify.toml` adds the `/stripe-webhook` redirect and the SPA fallback (`/* → /index.html`).
+- **Deploy (VPS):** `flaggo-deploy.timer` builds `origin/main` (`npm run build` +
+  `npm run build:server`) and publishes `dist/` plus the API bundle (`deploy/vps-deploy.sh`).
+  Caddy (`deploy/Caddyfile`) proxies `/api/*`, maps `/stripe-webhook`, and does the SPA fallback.
 - **DB:** apply the four migrations (or `setup.sql`) to the Supabase project; configure Auth
   for email/password accounts to match `SignInModal`.
 - **Tests:** `npm test` (Vitest/jsdom). Game-logic utils, leaderboard/match libs, ads, and the
@@ -206,6 +207,6 @@ Regenerate via `npm run generate:countries` whenever the raw data changes — do
   add a migration + RLS policies mirroring the existing owner-write/public-read patterns.
 - **Enable monetization:** set `VITE_MONETIZATION_ENABLED=true` / `VITE_ADS_ENABLED=true`,
   populate the Stripe + AdSense env, and unhide the gated CTAs.
-- **Privileged server op:** add a Netlify function using the service-role key and validating the
+- **Privileged server op:** add a handler in `server/functions/`, route it in `server/index.ts`, using the service-role key and validating the
   caller's Supabase bearer token (follow `delete-account.ts`).
 </content>

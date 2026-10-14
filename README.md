@@ -16,7 +16,7 @@ Flaggo — master world geography, one round at a time.
 
 - Vite, React, TypeScript, Tailwind CSS
 - Supabase Auth, Postgres, RLS, and realtime-friendly match tables
-- Netlify static hosting and functions
+- Self-hosted on a VPS: Caddy for the static app, a small Node API (`server/`) for privileged routes
 - Vitest and Testing Library
 - Optional Plausible analytics and Sentry diagnostics
 
@@ -58,12 +58,12 @@ npm test
 | `VITE_ADSENSE_CLIENT_ID` | No |  | Only used when ads are explicitly enabled. |
 | `VITE_STRIPE_PUBLISHABLE_KEY` | No |  | Reserved for future checkout UI. |
 
-Server-only Netlify function values are needed for username-only signup, account deletion, and monetization:
+Server-only Flaggo API values are needed for username-only signup, account deletion, and monetization:
 
 | Variable | Used by | Notes |
 | --- | --- | --- |
-| `SUPABASE_URL` | Netlify functions | Supabase project URL. |
-| `SUPABASE_SERVICE_ROLE_KEY` | Netlify functions | Required for username-only signup, account deletion, and Stripe webhook writes. |
+| `SUPABASE_URL` | Flaggo API | Supabase project URL. |
+| `SUPABASE_SERVICE_ROLE_KEY` | Flaggo API | Required for username-only signup, account deletion, and Stripe webhook writes. |
 | `STRIPE_SECRET_KEY` | Stripe functions | Deferred for the free MVP. |
 | `STRIPE_PRICE_ID` | Checkout function | Deferred for the free MVP. |
 | `STRIPE_WEBHOOK_SECRET` | Webhook function | Deferred for the free MVP. |
@@ -81,11 +81,7 @@ The migrations enable Row Level Security for profiles, progress, entitlements, p
 
 ## Deploy
 
-Netlify settings:
-
-- Build command: `npm run build`
-- Publish directory: `dist`
-- Functions directory: `netlify/functions`
+Production runs on the VPS at https://flaggo.rohanahire.com. Every push to `main` is built and published there within about 5 minutes. See `docs/production-setup.md` and `deploy/`.
 
 Set `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_SITE_URL`, `VITE_ADS_ENABLED=false`, and `VITE_MONETIZATION_ENABLED=false` for the free launch. Optional analytics and diagnostics env vars can be added without changing app behavior.
 

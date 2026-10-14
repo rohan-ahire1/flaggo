@@ -1,6 +1,5 @@
 node_modules
 dist
-.netlify
 .DS_Store
 countries.raw.json
 *.local
@@ -10,3 +9,4 @@ deploy-*.zip
 .env
 .env.*
 !.env.example
+server/dist
