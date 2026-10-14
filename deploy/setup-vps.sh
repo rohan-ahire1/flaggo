@@ -70,7 +70,9 @@ systemctl enable -q flaggo-api.service
 EOF
 
 echo "3/4 First deploy (builds main; takes a few minutes)"
-ssh "$HOST" 'sudo /usr/local/sbin/flaggo-deploy --force && curl -fsS http://127.0.0.1:8796/api/health && echo'
+ssh "$HOST" 'sudo /usr/local/sbin/flaggo-deploy --force'
+# The API was just restarted; give it a moment to bind its port.
+ssh "$HOST" 'for _ in $(seq 20); do curl -fsS http://127.0.0.1:8796/api/health && echo && exit 0; sleep 0.5; done; exit 1'
 
 echo "4/4 Caddy: proxy /api to the Flaggo API"
 ssh "$HOST" 'sudo bash -s' <<'EOF'
