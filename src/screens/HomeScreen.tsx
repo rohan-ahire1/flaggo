@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import Icon, { type IconName } from "../components/Icon";
-import { DAILY_QUESTION_COUNT } from "@flaggo/core/utils/dailyChallenge";
+import { DAILY_QUESTION_COUNT, dateKey } from "@flaggo/core/utils/dailyChallenge";
 import {
   PROGRESSIVE_STAGE_LABELS,
   PROGRESSIVE_STAGES,
@@ -12,7 +12,7 @@ import { useGame } from "../state/GameProvider";
 export default function HomeScreen() {
   const navigate = useNavigate();
   const { countries, progress } = useGame();
-  const todayKey = new Date().toISOString().slice(0, 10);
+  const todayKey = dateKey();
   const dailyResult = progress.daily.history[todayKey];
 
   const learning = progressiveResults(progress, countries);
