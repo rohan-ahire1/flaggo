@@ -101,6 +101,9 @@ export function useSyncedProgress() {
   );
 
   const resetAllProgress = useCallback(async () => {
+    // A queued save would otherwise push the old progress back over the reset.
+    if (saveTimer.current) window.clearTimeout(saveTimer.current);
+    saveTimer.current = null;
     resetProgress();
     setProgressState(defaultProgress);
     const client = supabase;

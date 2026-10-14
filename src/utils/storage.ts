@@ -20,10 +20,20 @@ export function loadProgress(): AppProgress {
   }
 }
 
+// Writes can throw when storage is full or blocked (e.g. some private modes).
+// Progress still lives in memory for the session, so don't crash the game over it.
+function write(key: string, value: string) {
+  try {
+    localStorage.setItem(key, value);
+  } catch {
+    // ignore
+  }
+}
+
 export function saveProgress(progress: AppProgress): void {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
-  localStorage.setItem(META_KEY, JSON.stringify({ updatedAt: new Date().toISOString(), userId: null }));
-  if (hasProgress(progress)) localStorage.setItem(NEEDS_MERGE_KEY, "true");
+  write(STORAGE_KEY, JSON.stringify(progress));
+  write(META_KEY, JSON.stringify({ updatedAt: new Date().toISOString(), userId: null }));
+  if (hasProgress(progress)) write(NEEDS_MERGE_KEY, "true");
 }
 
 export function resetProgress(): void {
@@ -33,8 +43,8 @@ export function resetProgress(): void {
 }
 
 export function saveSyncedProgress(progress: AppProgress, meta: ProgressMeta): void {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
-  localStorage.setItem(META_KEY, JSON.stringify(meta));
+  write(STORAGE_KEY, JSON.stringify(progress));
+  write(META_KEY, JSON.stringify(meta));
 }
 
 export function loadProgressMeta(): ProgressMeta {
