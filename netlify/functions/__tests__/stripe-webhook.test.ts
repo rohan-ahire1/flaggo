@@ -42,6 +42,17 @@ describe("stripe webhook", () => {
     expect(rows.entitlements[0]).toMatchObject({ user_id: "user_123", ads_removed: true, stripe_customer_id: "cus_123" });
   });
 
+  it("throws when the database write fails so Stripe retries", async () => {
+    const admin = {
+      from() {
+        return { upsert: async () => ({ error: { message: "db down" } }) };
+      }
+    };
+    const session = { id: "cs_test_456", payment_status: "paid", client_reference_id: "user_456" } as Stripe.Checkout.Session;
+
+    await expect(processCompletedCheckout(session, admin)).rejects.toThrow("db down");
+  });
+
   it("rejects invalid signatures", async () => {
     vi.stubEnv("STRIPE_SECRET_KEY", "sk_test_123");
     vi.stubEnv("STRIPE_WEBHOOK_SECRET", "whsec_123");

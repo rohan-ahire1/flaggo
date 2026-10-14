@@ -3,14 +3,14 @@ import Stripe from "stripe";
 
 type SupabaseAdminLike = {
   from: (table: string) => {
-    upsert: (row: Record<string, unknown>, options: { onConflict: string }) => Promise<unknown>;
+    upsert: (row: Record<string, unknown>, options: { onConflict: string }) => PromiseLike<{ error: { message: string } | null }>;
   };
 };
 
 export async function processCompletedCheckout(session: Stripe.Checkout.Session, admin: SupabaseAdminLike) {
   if (session.payment_status !== "paid" || !session.client_reference_id) return;
 
-  await admin.from("purchases").upsert(
+  const purchase = await admin.from("purchases").upsert(
     {
       user_id: session.client_reference_id,
       stripe_session_id: session.id,
@@ -20,8 +20,10 @@ export async function processCompletedCheckout(session: Stripe.Checkout.Session,
     },
     { onConflict: "stripe_session_id" }
   );
+  // Throw so the handler returns 500 and Stripe retries; a 200 here would lose a paid purchase.
+  if (purchase.error) throw new Error(`purchases upsert failed: ${purchase.error.message}`);
 
-  await admin.from("entitlements").upsert(
+  const entitlement = await admin.from("entitlements").upsert(
     {
       user_id: session.client_reference_id,
       ads_removed: true,
@@ -30,6 +32,7 @@ export async function processCompletedCheckout(session: Stripe.Checkout.Session,
     },
     { onConflict: "user_id" }
   );
+  if (entitlement.error) throw new Error(`entitlements upsert failed: ${entitlement.error.message}`);
 }
 
 export async function handler(event: { headers: Record<string, string | undefined>; body: string | null; isBase64Encoded?: boolean }) {
@@ -52,9 +55,15 @@ export async function handler(event: { headers: Record<string, string | undefine
     return json(400, { error: "Invalid Stripe signature" });
   }
 
-  if (stripeEvent.type === "checkout.session.completed") {
+  // Delayed payment methods report "paid" only in the async_payment_succeeded event.
+  if (stripeEvent.type === "checkout.session.completed" || stripeEvent.type === "checkout.session.async_payment_succeeded") {
     const admin = createClient(supabaseUrl, serviceKey) as unknown as SupabaseAdminLike;
-    await processCompletedCheckout(stripeEvent.data.object as Stripe.Checkout.Session, admin);
+    try {
+      await processCompletedCheckout(stripeEvent.data.object as Stripe.Checkout.Session, admin);
+    } catch (err) {
+      console.error(err);
+      return json(500, { error: "Could not record purchase" });
+    }
   }
 
   return json(200, { received: true });
