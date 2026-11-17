@@ -4,6 +4,7 @@ import StatCard from "../components/StatCard";
 import { parseReviewKey, reviewKey } from "@flaggo/core/types/topic";
 import { progressiveResults } from "@flaggo/core/utils/progressivePractice";
 import { getMasteredCountries, getWeakCountries } from "@flaggo/core/utils/spacedRepetition";
+import { currentStreak } from "@flaggo/core/utils/date";
 import { useAppBack } from "../navigation/useAppBack";
 import { useGame } from "../state/GameProvider";
 
@@ -45,7 +46,7 @@ export default function StatsScreen() {
       <h1 className="screen-title">Stats</h1>
       <div className="mt-5 grid grid-cols-2 gap-3 md:grid-cols-4">
         <StatCard label="Total XP" value={progress.xp} tone="blue" icon="bolt" />
-        <StatCard label="Current streak" value={progress.streak} tone="orange" icon="flame" />
+        <StatCard label="Current streak" value={currentStreak(progress)} tone="orange" icon="flame" />
         <StatCard label="Stages completed" value={completedStages} tone="green" icon="check" />
         <StatCard label={`${topicLabel} seen`} value={seen} tone="blue" icon="globe" />
         <StatCard label="Flags mastered" value={flagMastered.length} tone="green" icon="star" />

@@ -7,6 +7,7 @@ import {
   PROGRESSIVE_TIER_SIZE,
   progressiveResults
 } from "@flaggo/core/utils/progressivePractice";
+import { currentStreak } from "@flaggo/core/utils/date";
 import { useGame } from "../state/GameProvider";
 
 export default function HomeScreen() {
@@ -38,7 +39,7 @@ export default function HomeScreen() {
         </div>
         <div className="flex shrink-0 items-center gap-1.5 rounded-[22px] border border-line bg-surface px-3.5 py-1.5 text-[17px] font-bold text-accent">
           <Icon name="flame" size={17} />
-          {progress.streak}
+          {currentStreak(progress)}
         </div>
       </header>
 
