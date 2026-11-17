@@ -3,6 +3,7 @@ import { useAuth } from "../auth/AuthProvider";
 import { supabase } from "../lib/supabase";
 import { defaultProgress, type AppProgress } from "@flaggo/core/types/progress";
 import { clearAnonymousMergeMarker, loadProgress, resetProgress, saveProgress, saveSyncedProgress } from "../utils/storage";
+import { recordActivity } from "@flaggo/core/utils/date";
 import { mergeProgress, normalizeProgress } from "@flaggo/core/utils/progressMerge";
 
 type SyncState = "local" | "loading" | "saved" | "saving" | "error";
@@ -14,6 +15,7 @@ export function useSyncedProgress() {
   const [error, setError] = useState<string | null>(null);
   const saveTimer = useRef<number | null>(null);
   const hydratedUser = useRef<string | null>(null);
+  const progressRef = useRef<AppProgress>(progress);
 
   useEffect(() => {
     if (authLoading) return;
@@ -61,6 +63,7 @@ export function useSyncedProgress() {
         hydratedUser.current = user.id;
         clearAnonymousMergeMarker();
         saveSyncedProgress(next, { updatedAt, userId: user.id });
+        progressRef.current = next;
         setProgressState(next);
         setSyncState("saved");
       });
@@ -71,7 +74,9 @@ export function useSyncedProgress() {
   }, [authLoading, user]);
 
   const setProgress = useCallback(
-    (next: AppProgress) => {
+    (incoming: AppProgress) => {
+      const next = recordActivity(progressRef.current, incoming);
+      progressRef.current = next;
       setProgressState(next);
       if (!user || !supabase) {
         saveProgress(next);
@@ -105,6 +110,7 @@ export function useSyncedProgress() {
     if (saveTimer.current) window.clearTimeout(saveTimer.current);
     saveTimer.current = null;
     resetProgress();
+    progressRef.current = defaultProgress;
     setProgressState(defaultProgress);
     const client = supabase;
     if (user && client) {
