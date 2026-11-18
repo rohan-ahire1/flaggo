@@ -30,6 +30,14 @@ function write(key: string, value: string) {
   }
 }
 
+function remove(key: string) {
+  try {
+    localStorage.removeItem(key);
+  } catch {
+    // ignore
+  }
+}
+
 export function saveProgress(progress: AppProgress): void {
   write(STORAGE_KEY, JSON.stringify(progress));
   write(META_KEY, JSON.stringify({ updatedAt: new Date().toISOString(), userId: null }));
@@ -37,9 +45,9 @@ export function saveProgress(progress: AppProgress): void {
 }
 
 export function resetProgress(): void {
-  localStorage.removeItem(STORAGE_KEY);
-  localStorage.removeItem(META_KEY);
-  localStorage.removeItem(NEEDS_MERGE_KEY);
+  remove(STORAGE_KEY);
+  remove(META_KEY);
+  remove(NEEDS_MERGE_KEY);
 }
 
 export function saveSyncedProgress(progress: AppProgress, meta: ProgressMeta): void {
@@ -51,18 +59,24 @@ export function loadProgressMeta(): ProgressMeta {
   try {
     const saved = localStorage.getItem(META_KEY);
     if (!saved) return { updatedAt: null, userId: null };
-    return { updatedAt: null, userId: null, ...JSON.parse(saved) };
+    const parsed: unknown = JSON.parse(saved);
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return { updatedAt: null, userId: null };
+    return { updatedAt: null, userId: null, ...parsed };
   } catch {
     return { updatedAt: null, userId: null };
   }
 }
 
 export function needsAnonymousMerge(): boolean {
-  return localStorage.getItem(NEEDS_MERGE_KEY) === "true";
+  try {
+    return localStorage.getItem(NEEDS_MERGE_KEY) === "true";
+  } catch {
+    return false;
+  }
 }
 
 export function clearAnonymousMergeMarker(): void {
-  localStorage.removeItem(NEEDS_MERGE_KEY);
+  remove(NEEDS_MERGE_KEY);
 }
 
 function hasProgress(progress: AppProgress) {
