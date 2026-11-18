@@ -173,7 +173,7 @@ export default function FlagTestScreen() {
       </header>
 
       <section className="rounded-[28px] bg-paper p-5 shadow-card-lg">
-        <FlagImage code={country.code} name={country.name} src={country.flagUrl} className="aspect-[4/3] w-full rounded-[24px] p-4" />
+        <FlagImage code={country.code} name={country.name} src={country.flagUrl} hidden={!revealed} alt="Flag to identify" className="aspect-[4/3] w-full rounded-[24px] p-4" />
 
         {mode === "recall" ? (
           <div className="mt-5 rounded-[24px] bg-surface p-4 text-center">
