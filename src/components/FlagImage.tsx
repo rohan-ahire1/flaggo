@@ -11,10 +11,16 @@ type Props = {
   // "cover" fills a fixed box, cropping to fit. "natural" lets the card take the
   // flag's own aspect ratio — the whole flag shows, uncropped, with rounded corners.
   fit?: "contain" | "cover" | "natural";
+  // Quiz mode: never expose the country name or code (alt text, load-failure fallback).
+  hidden?: boolean;
+  // Alt text used while `hidden` is set.
+  alt?: string;
 };
 
-export default function FlagImage({ code, name, src, className = "", imgClassName = "", framed = true, fit = "contain" }: Props) {
+export default function FlagImage({ code, name, src, className = "", imgClassName = "", framed = true, fit = "contain", hidden = false, alt = "Flag" }: Props) {
   const [failed, setFailed] = useState(false);
+  const imgAlt = hidden ? alt : name;
+  const fallback = hidden ? "Flag unavailable" : code;
 
   if (fit === "natural") {
     // Card keeps the flag's real aspect (no crop) but the flag is bounded by a max
@@ -25,12 +31,12 @@ export default function FlagImage({ code, name, src, className = "", imgClassNam
       <div className={`flex items-center justify-center ${framed ? "rounded-2xl border border-line bg-paper p-2" : ""} ${className}`}>
         {failed ? (
           <div className="grid aspect-[3/2] w-full place-items-center rounded-[14px] bg-surface font-display text-lg font-black text-muted">
-            {code}
+            {fallback}
           </div>
         ) : (
           <img
             src={src}
-            alt={name}
+            alt={imgAlt}
             loading="lazy"
             decoding="async"
             onError={() => setFailed(true)}
@@ -46,12 +52,12 @@ export default function FlagImage({ code, name, src, className = "", imgClassNam
     <div className={`grid overflow-hidden ${framed ? `rounded-2xl border border-line bg-paper ${cover ? "" : "p-2"}` : ""} ${className}`}>
       {failed ? (
         <div className="grid h-full w-full place-items-center rounded-xl bg-surface font-display text-lg font-black text-muted">
-          {code}
+          {fallback}
         </div>
       ) : (
         <img
           src={src}
-          alt={name}
+          alt={imgAlt}
           loading="lazy"
           decoding="async"
           onError={() => setFailed(true)}

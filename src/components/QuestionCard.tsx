@@ -65,6 +65,8 @@ export default function QuestionCard({
       code={question.correctCountry.code}
       name={question.correctCountry.name}
       src={question.correctCountry.flagUrl}
+      hidden={!disabled}
+      alt="Flag to identify"
       fit="natural"
       className={`${large ? "mx-auto w-full max-w-sm" : "w-28"} rounded-[24px] shadow-card`}
       imgClassName={large ? "max-h-[280px]" : "max-h-20"}
@@ -79,7 +81,7 @@ export default function QuestionCard({
           <h1 className="font-display text-2xl font-black">Pick the flag of {question.correctCountry.name}.</h1>
         </div>
         <div className="grid grid-cols-2 gap-3">
-          {question.options.map((country) => {
+          {question.options.map((country, optionIndex) => {
             const correctOption = disabled && country.code === question.correctCountry.code;
             const selectedWrongOption = disabled && country.name === selectedLabel && !correctOption;
             return (
@@ -95,7 +97,7 @@ export default function QuestionCard({
                       : "border-line hover:border-primary/40"
                 }`}
               >
-                <FlagImage code={country.code} name={country.name} src={country.flagUrl} framed={false} className="aspect-[4/3] w-full rounded-xl" />
+                <FlagImage code={country.code} name={country.name} src={country.flagUrl} hidden={!disabled} alt={`Option ${optionIndex + 1}`} framed={false} className="aspect-[4/3] w-full rounded-xl" />
               </button>
             );
           })}
