@@ -6,6 +6,7 @@ import { clearAnonymousMergeMarker, loadProgress, resetProgress, saveProgress, s
 import { mergeProgress, normalizeProgress } from "@flaggo/core/utils/progressMerge";
 
 type SyncState = "local" | "loading" | "saved" | "saving" | "error";
+type PendingSave = { userId: string; data: AppProgress };
 
 export function useSyncedProgress() {
   const { user, loading: authLoading } = useAuth();
@@ -14,6 +15,55 @@ export function useSyncedProgress() {
   const [error, setError] = useState<string | null>(null);
   const saveTimer = useRef<number | null>(null);
   const hydratedUser = useRef<string | null>(null);
+  // Latest progress not yet confirmed uploaded. Kept after a failed upsert so it can be retried.
+  const pending = useRef<PendingSave | null>(null);
+  const inFlight = useRef<PendingSave | null>(null);
+
+  const flush = useCallback(async () => {
+    if (saveTimer.current) window.clearTimeout(saveTimer.current);
+    saveTimer.current = null;
+    const item = pending.current;
+    const client = supabase;
+    if (!item || !client || inFlight.current === item) return;
+    inFlight.current = item;
+    let upsertError: { message: string } | null = null;
+    try {
+      const result = await client
+        .from("progress")
+        .upsert({ user_id: item.userId, data: item.data, updated_at: new Date().toISOString() }, { onConflict: "user_id" });
+      upsertError = result.error;
+    } catch (e) {
+      upsertError = { message: e instanceof Error ? e.message : "Sync failed" };
+    }
+    if (inFlight.current === item) inFlight.current = null;
+    // Newer progress or a reset replaced this save; the newer path reports its own state.
+    if (pending.current !== item) return;
+    if (upsertError) {
+      setError(upsertError.message);
+      setSyncState("error");
+    } else {
+      pending.current = null;
+      setError(null);
+      setSyncState("saved");
+    }
+  }, []);
+
+  useEffect(() => {
+    const onVisibility = () => {
+      // Hidden: upload now. Visible: retry anything that failed earlier.
+      void flush();
+    };
+    const onPageHide = () => void flush();
+    const onOnline = () => void flush();
+    document.addEventListener("visibilitychange", onVisibility);
+    window.addEventListener("pagehide", onPageHide);
+    window.addEventListener("online", onOnline);
+    return () => {
+      document.removeEventListener("visibilitychange", onVisibility);
+      window.removeEventListener("pagehide", onPageHide);
+      window.removeEventListener("online", onOnline);
+    };
+  }, [flush]);
 
   useEffect(() => {
     if (authLoading) return;
@@ -81,29 +131,18 @@ export function useSyncedProgress() {
       const updatedAt = new Date().toISOString();
       saveSyncedProgress(next, { updatedAt, userId: user.id });
       setSyncState("saving");
+      pending.current = { userId: user.id, data: next };
       if (saveTimer.current) window.clearTimeout(saveTimer.current);
-      saveTimer.current = window.setTimeout(async () => {
-        const client = supabase;
-        if (!client) return;
-        const { error: upsertError } = await client
-          .from("progress")
-          .upsert({ user_id: user.id, data: next, updated_at: new Date().toISOString() }, { onConflict: "user_id" });
-        if (upsertError) {
-          setError(upsertError.message);
-          setSyncState("error");
-        } else {
-          setError(null);
-          setSyncState("saved");
-        }
-      }, 2000);
+      saveTimer.current = window.setTimeout(() => void flush(), 2000);
     },
-    [user]
+    [user, flush]
   );
 
   const resetAllProgress = useCallback(async () => {
     // A queued save would otherwise push the old progress back over the reset.
     if (saveTimer.current) window.clearTimeout(saveTimer.current);
     saveTimer.current = null;
+    pending.current = null;
     resetProgress();
     setProgressState(defaultProgress);
     const client = supabase;
