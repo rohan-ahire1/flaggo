@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { Country } from "../../types/country";
 import type { Lesson } from "../../types/lesson";
-import { generateCurrencyQuestions, generateLanguageQuestions, generateLessonQuestions, generateMapQuestions, generateNeighborQuestions, generateReviewQuestions, getCapitalDistractors, getCurrencyClue } from "../quiz";
+import { generateCurrencyQuestions, generateLanguageQuestions, generateLessonQuestions, generateMapQuestions, generateNeighborQuestions, generateReviewQuestions, getCapitalDistractors, getCurrencyClue, makeMapOptions } from "../quiz";
 import { hashStringToSeed, mulberry32 } from "../seededRandom";
 
 function country(code: string, name: string, continent: Country["continent"], capital?: string, ccn3?: string, extra: Partial<Country> = {}): Country {
@@ -199,5 +199,38 @@ describe("review quiz generation", () => {
     expect(question.options).toHaveLength(4);
     expect(new Set(question.options.map((option) => option.code)).size).toBe(4);
     expect(question.options.map((option) => option.code)).toContain("ID");
+  });
+});
+
+describe("map identify options", () => {
+  const europe = Array.from({ length: 12 }, (_, i) => country(`E${i}`, `Euro ${i}`, "Europe", undefined, String(100 + i)));
+  const pool = [...europe, country("J1", "Japan", "Asia", undefined, "392"), country("A1", "Egypt", "Africa", undefined, "818")];
+  const target = europe[0];
+
+  it("varies distractors across seeds and keeps them in the continent", () => {
+    const seen = new Set<string>();
+    for (let seed = 1; seed <= 20; seed++) {
+      const options = makeMapOptions(target, pool, mulberry32(seed));
+      options.filter((option) => option.code !== target.code).forEach((option) => {
+        expect(option.continent).toBe("Europe");
+        seen.add(option.code);
+      });
+    }
+    expect(seen.size).toBeGreaterThan(3);
+  });
+
+  it("is deterministic for a seed and returns 4 unique codes including the target", () => {
+    const a = makeMapOptions(target, pool, mulberry32(7)).map((option) => option.code);
+    const b = makeMapOptions(target, pool, mulberry32(7)).map((option) => option.code);
+    expect(a).toEqual(b);
+    expect(a).toHaveLength(4);
+    expect(new Set(a).size).toBe(4);
+    expect(a).toContain(target.code);
+  });
+
+  it("falls back to other continents when the continent has too few countries", () => {
+    const small = [europe[0], europe[1], pool[12], pool[13]];
+    const codes = makeMapOptions(europe[0], small, mulberry32(3)).map((option) => option.code);
+    expect(new Set(codes).size).toBe(4);
   });
 });

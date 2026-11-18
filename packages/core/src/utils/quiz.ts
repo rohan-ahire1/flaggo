@@ -66,9 +66,10 @@ function makeCapitalOptions(correctCountry: Country, allCountries: Country[], rn
   return shuffleArray([correctCountry.capital!.trim(), ...getCapitalDistractors(correctCountry, allCountries, 3, rng)], rng);
 }
 
-function makeMapOptions(correctCountry: Country, pool: Country[], rng: () => number = Math.random) {
-  const sameContinent = pool.filter((country) => country.continent === correctCountry.continent && country.code !== correctCountry.code);
-  const rest = pool.filter((country) => country.code !== correctCountry.code);
+export function makeMapOptions(correctCountry: Country, pool: Country[], rng: () => number = Math.random) {
+  const others = pool.filter((country) => country.code !== correctCountry.code);
+  const sameContinent = shuffleArray(others.filter((country) => country.continent === correctCountry.continent), rng);
+  const rest = shuffleArray(others.filter((country) => country.continent !== correctCountry.continent), rng);
   const distractors = Array.from(new Map([...sameContinent, ...rest].map((country) => [country.code, country])).values()).slice(0, 3);
   return shuffleArray([correctCountry, ...distractors], rng);
 }
