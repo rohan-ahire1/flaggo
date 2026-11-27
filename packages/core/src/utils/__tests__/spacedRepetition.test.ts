@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { countries } from "../../data/countries";
 import { defaultProgress, type ReviewState } from "../../types/progress";
-import { getDueCountries, getWeakCountries, isMasteredReview, isWeakReview, updateReviewState } from "../spacedRepetition";
+import { getDueCountries, getWeakCountries, isMasteredReview, isWeakReview, topicReviewQueue, updateReviewState } from "../spacedRepetition";
 
 describe("spaced repetition topics", () => {
   it("keeps flag, capital, and location state isolated for the same country", () => {
@@ -130,5 +130,45 @@ describe("spaced repetition topics", () => {
     };
 
     expect(getWeakCountries(progress, [france, germany], "flag").map((country) => country.code)).toEqual(["DE", "FR"]);
+  });
+});
+
+describe("topicReviewQueue", () => {
+  const state = (code: string, topic: ReviewState["topic"], patch: Partial<ReviewState> = {}): ReviewState => ({
+    countryCode: code,
+    topic,
+    box: 0,
+    correctCount: 0,
+    wrongCount: 0,
+    lastSeenAt: null,
+    nextReviewAt: new Date(Date.now() + 86_400_000).toISOString(),
+    ...patch
+  });
+  const withStates = (...states: ReviewState[]) => ({
+    ...defaultProgress,
+    review: Object.fromEntries(states.map((s) => [`${s.countryCode}:${s.topic}`, s]))
+  });
+
+  it("returns due capital countries when nextReviewAt is in the past", () => {
+    const progress = withStates(state("FR", "capital", { nextReviewAt: new Date(Date.now() - 1000).toISOString() }));
+    const queue = topicReviewQueue(progress, countries, "capital");
+    expect(queue.kind).toBe("due");
+    expect(queue.countries.map((c) => c.code)).toEqual(["FR"]);
+  });
+
+  it("returns weak countries when nothing is due but there are wrong answers", () => {
+    const progress = withStates(state("DE", "capital", { wrongCount: 2 }));
+    const queue = topicReviewQueue(progress, countries, "capital");
+    expect(queue.kind).toBe("weak");
+    expect(queue.countries.map((c) => c.code)).toEqual(["DE"]);
+  });
+
+  it("returns none with no states", () => {
+    expect(topicReviewQueue(defaultProgress, countries, "capital")).toEqual({ kind: "none", countries: [] });
+  });
+
+  it("never includes flag states in the capital queue", () => {
+    const progress = withStates(state("FR", "flag", { nextReviewAt: new Date(Date.now() - 1000).toISOString(), wrongCount: 3 }));
+    expect(topicReviewQueue(progress, countries, "capital").kind).toBe("none");
   });
 });

@@ -119,3 +119,13 @@ export function getMasteredCountries(progress: AppProgress, countries: Country[]
     return isMasteredReview(progress.review[reviewKey(country.code, topic)]);
   });
 }
+
+export type TopicReviewQueue = { kind: "due" | "weak" | "none"; countries: Country[] };
+
+export function topicReviewQueue(progress: AppProgress, countries: Country[], topic: Topic): TopicReviewQueue {
+  const due = getDueCountries(progress, countries, topic);
+  if (due.length) return { kind: "due", countries: due };
+  const weak = getWeakCountries(progress, countries, topic);
+  if (weak.length) return { kind: "weak", countries: weak };
+  return { kind: "none", countries: [] };
+}
