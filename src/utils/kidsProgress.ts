@@ -13,15 +13,26 @@ export type KidsProgress = {
   voice: boolean;
 };
 
-const empty: KidsProgress = { collected: [], plays: 0, voice: true };
+function defaults(): KidsProgress {
+  return { collected: [], plays: 0, voice: true };
+}
 
 export function loadKids(): KidsProgress {
   try {
     const raw = localStorage.getItem(KEY);
-    if (!raw) return empty;
-    return { ...empty, ...(JSON.parse(raw) as Partial<KidsProgress>) };
+    if (!raw) return defaults();
+    const data: unknown = JSON.parse(raw);
+    if (typeof data !== "object" || data === null || Array.isArray(data)) return defaults();
+    const { collected, plays, voice } = data as Record<string, unknown>;
+    return {
+      collected: Array.isArray(collected)
+        ? [...new Set(collected.filter((c): c is string => typeof c === "string"))]
+        : [],
+      plays: typeof plays === "number" && Number.isInteger(plays) && plays >= 0 ? plays : 0,
+      voice: typeof voice === "boolean" ? voice : true
+    };
   } catch {
-    return empty;
+    return defaults();
   }
 }
 
