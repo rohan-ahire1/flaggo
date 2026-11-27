@@ -18,8 +18,11 @@ export default function DailyChallengeScreen() {
   const goBack = useAppBack("/");
   const confirm = useConfirm();
   const { countries, progress, setProgress } = useGame();
-  const today = dateKey();
+  const [today] = useState(() => dateKey());
   const questions = useMemo(() => buildDailyQuiz(today, countries), [countries, today]);
+  const savedResult = progress.daily.history[today];
+  const [showDone, setShowDone] = useState(() => Boolean(progress.daily.history[today]));
+  const [practice, setPractice] = useState(false);
   const [index, setIndex] = useState(0);
   const [currentProgress, setCurrentProgress] = useState(progress);
   const [correct, setCorrect] = useState(0);
@@ -30,13 +33,13 @@ export default function DailyChallengeScreen() {
   const question = questions[index];
 
   useEffect(() => {
-    trackEvent("daily_start", { date: today });
-  }, [today]);
+    if (!showDone) trackEvent("daily_start", { date: today });
+  }, [today, showDone]);
 
   function answer(ok: boolean, selectedLabel?: string) {
     if (!question || feedback) return;
     const next = updateReviewState(question.country.code, question.topic, ok, currentProgress);
-    const withXp = { ...next, xp: next.xp + (ok ? 10 : 0) };
+    const withXp = practice ? next : { ...next, xp: next.xp + (ok ? 10 : 0) };
     setCurrentProgress(withXp);
     setProgress(withXp);
     setCorrect((value) => value + (ok ? 1 : 0));
@@ -55,6 +58,11 @@ export default function DailyChallengeScreen() {
 
   async function finish() {
     const result = { score: correct, total: questions.length };
+    if (practice) {
+      setComplete(true);
+      trackEvent("daily_practice_complete", { date: today, score: result.score });
+      return;
+    }
     let next = applyDailyResult(currentProgress, today, result);
     const newIds = evaluateBadges(next, countries, { kind: "daily", score: result.score, total: result.total });
     if (newIds.length) next = awardBadges(next, newIds);
@@ -84,14 +92,39 @@ export default function DailyChallengeScreen() {
     goBack();
   }
 
+  if (showDone && savedResult) {
+    return (
+      <main className="grid min-h-screen place-items-center bg-paper p-5">
+        <section className="grid w-full max-w-sm justify-items-center gap-3 text-center">
+          <p className="section-label">Daily Challenge</p>
+          <h1 className="screen-title">Done for today</h1>
+          <p className="font-display text-3xl font-black">{savedResult.score} / {savedResult.total}</p>
+          <p className="text-sm font-semibold text-muted">Daily streak {progress.daily.streak}</p>
+          <div className="mt-3 grid w-full gap-3">
+            <button onClick={goBack} className="btn-primary">Back home</button>
+            <button
+              onClick={() => {
+                setPractice(true);
+                setShowDone(false);
+              }}
+              className="btn-secondary"
+            >
+              Practice again
+            </button>
+          </div>
+        </section>
+      </main>
+    );
+  }
+
   if (complete) {
     return (
       <RoundResults
         score={correct}
         total={questions.length}
         items={items}
-        streak={currentProgress.daily.streak}
-        caption={`+${correct * 10} XP · streak ${currentProgress.daily.streak}`}
+        streak={practice ? undefined : currentProgress.daily.streak}
+        caption={practice ? "Practice · no XP" : `+${correct * 10} XP · streak ${currentProgress.daily.streak}`}
         earnedBadges={earnedBadgeResults(earnedBadgeIds)}
         actions={[
           { label: "Done", variant: "primary", icon: "today", onPress: goBack }
@@ -105,7 +138,7 @@ export default function DailyChallengeScreen() {
   return (
     <main className="min-h-screen bg-paper">
       <header className="sticky top-0 z-20 bg-paper/85 p-4 backdrop-blur-md">
-        <p className="mb-2.5 text-center font-display text-[13px] font-bold uppercase tracking-wide text-muted">Daily Challenge</p>
+        <p className="mb-2.5 text-center font-display text-[13px] font-bold uppercase tracking-wide text-muted">Daily Challenge{practice ? " · Practice · no XP" : ""}</p>
         <div className="flex items-center gap-3">
           <button onClick={() => void closeRound()} aria-label="Close daily" className="icon-btn shrink-0">
             <Icon name="close" size={20} />
@@ -121,7 +154,7 @@ export default function DailyChallengeScreen() {
         <FeedbackPanel
           correct={feedback.ok}
           country={feedback.question.country}
-          xp={feedback.ok ? 10 : 0}
+          xp={feedback.ok && !practice ? 10 : 0}
           answerLabel={answerLabelForWrapper(feedback.question)}
           answerDetail={answerDetailForWrapper(feedback.question)}
           selectedLabel={feedback.selectedLabel}
