@@ -1,9 +1,17 @@
 import { useNavigate } from "react-router-dom";
 import Icon from "../components/Icon";
 import ProgressiveResults from "../components/ProgressiveResults";
-import { getDueCountries, getWeakCountries } from "@flaggo/core/utils/spacedRepetition";
+import { getDueCountries, getWeakCountries, topicReviewQueue } from "@flaggo/core/utils/spacedRepetition";
 import { flashcardsPath } from "../navigation/routes";
 import { useGame } from "../state/GameProvider";
+import type { Topic } from "@flaggo/core/types/topic";
+
+const OTHER_TOPICS: { topic: Topic; singular: string; plural: string }[] = [
+  { topic: "capital", singular: "capital", plural: "capitals" },
+  { topic: "currency", singular: "currency", plural: "currencies" },
+  { topic: "language", singular: "language", plural: "languages" },
+  { topic: "neighbor", singular: "neighbor", plural: "neighbors" }
+];
 
 export default function ReviewScreen() {
   const navigate = useNavigate();
@@ -13,6 +21,9 @@ export default function ReviewScreen() {
   const label = "flags";
   const due = getDueCountries(progress, topicCountries, topic).slice(0, 12);
   const weak = getWeakCountries(progress, topicCountries, topic).slice(0, 6);
+  const otherTopics = OTHER_TOPICS.map((entry) => ({ ...entry, queue: topicReviewQueue(progress, countries, entry.topic) })).filter(
+    (entry) => entry.queue.kind !== "none"
+  );
   const practice = due.length ? due : weak.length ? weak : topicCountries.slice(0, 8);
 
   return (
@@ -39,6 +50,27 @@ export default function ReviewScreen() {
         }
       />
 
+      {otherTopics.length > 0 && (
+        <section aria-label="Other topics">
+          <h2 className="mt-6 font-display text-xl font-semibold text-ink">Other topics</h2>
+          <div className="mt-3 grid grid-cols-2 gap-3">
+            {otherTopics.map(({ topic: otherTopic, singular, plural, queue }) => {
+              const count = queue.countries.length;
+              const noun = count === 1 ? singular : plural;
+              return (
+                <PracticeCard
+                  key={otherTopic}
+                  icon="review"
+                  title={queue.kind === "due" ? `${count} ${noun} due` : `${count} weak ${noun}`}
+                  description={queue.kind === "due" ? "Review before you forget" : "Practice your trouble spots"}
+                  onClick={() => startReview(queue.countries.slice(0, 12), otherTopic)}
+                />
+              );
+            })}
+          </div>
+        </section>
+      )}
+
       <h2 className="mt-6 font-display text-xl font-semibold text-ink">More practice</h2>
       <div className="mt-3 grid grid-cols-2 gap-3">
         <PracticeCard
@@ -58,7 +90,7 @@ export default function ReviewScreen() {
   );
 }
 
-function PracticeCard({ icon, title, description, onClick }: { icon: "globe" | "target"; title: string; description: string; onClick: () => void }) {
+function PracticeCard({ icon, title, description, onClick }: { icon: "globe" | "target" | "review"; title: string; description: string; onClick: () => void }) {
   return (
     <button onClick={onClick} className="rounded-[20px] border border-line bg-paper p-4 text-left shadow-card transition-all hover:-translate-y-0.5 active:translate-y-1 active:shadow-none">
       <span className="grid h-11 w-11 place-items-center rounded-2xl bg-primary/10 text-primary">
